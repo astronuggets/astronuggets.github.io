@@ -23,6 +23,26 @@
       color: #f8fafc;
     }
 
+    /* Smooth Page Transition Curtain */
+    .page-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #020307;
+      opacity: 1;
+      pointer-events: none;
+      transition: opacity 0.7s ease-in-out;
+    }
+
+    .page-transition.loaded {
+      opacity: 0;
+    }
+
+    .page-transition.leaving {
+      opacity: 1;
+      pointer-events: all;
+    }
+
     /* Starfield & Approach Canvas */
     canvas#cutscene-canvas {
       position: fixed;
@@ -290,6 +310,7 @@
   </style>
 </head>
 <body>
+  <div class="page-transition" id="page-transition"></div>
   <canvas id="cutscene-canvas"></canvas>
   <div class="hud-grid"></div>
 
@@ -300,7 +321,7 @@
         <span class="pulse-dot"></span>
         <span>ASTRONUGGETS // TRANSMISSION</span>
       </div>
-      <a href="/" class="home-link">&#8592; Home</a>
+      <a href="/" class="home-link" id="home-link">&#8592; Home</a>
     </div>
 
     <!-- Center Cutscene Briefing Box -->
@@ -338,6 +359,8 @@
     // Replace '#your-game-url' with the URL to your actual game when ready:
     const GAME_DESTINATION_URL = '#your-game-url';
 
+    const transitionEl = document.getElementById('page-transition');
+    const homeLink = document.getElementById('home-link');
     const canvas = document.getElementById('cutscene-canvas');
     const ctx = canvas.getContext('2d');
 
@@ -350,6 +373,42 @@
 
     skipLink.href = GAME_DESTINATION_URL;
 
+    // Smooth fade-in on arrival
+    requestAnimationFrame(() => {
+      transitionEl.classList.add('loaded');
+    });
+
+    function navigateWithFade(url) {
+      if (!url || url.startsWith('#')) {
+        window.location.href = url;
+        return;
+      }
+      transitionEl.classList.remove('loaded');
+      transitionEl.classList.add('leaving');
+      setTimeout(() => {
+        window.location.href = url;
+      }, 650);
+    }
+
+    homeLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      navigateWithFade(homeLink.getAttribute('href'));
+    });
+
+    skipLink.addEventListener('click', (e) => {
+      if (!GAME_DESTINATION_URL.startsWith('#')) {
+        e.preventDefault();
+        navigateWithFade(GAME_DESTINATION_URL);
+      }
+    });
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) {
+        transitionEl.classList.remove('leaving');
+        transitionEl.classList.add('loaded');
+      }
+    });
+
     let width, height;
     function resize() {
       width = canvas.width = window.innerWidth;
@@ -358,7 +417,6 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Starfield + drifting background asteroids matching main homepage palette
     const stars = Array.from({ length: 160 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
@@ -368,7 +426,6 @@
       speed: Math.random() * 0.4 + 0.1
     }));
 
-    // Cutscene narrative slides
     const scenes = [
       {
         badge: 'TRANSMISSION 01 // ARRIVAL',
@@ -436,7 +493,6 @@
       }, 22);
     }
 
-    // Next button: finishes typing immediately if mid-sentence, or advances to next slide / game URL
     nextBtn.addEventListener('click', () => {
       const scene = scenes[currentScene];
 
@@ -450,11 +506,10 @@
       if (currentScene < scenes.length - 1) {
         loadScene(currentScene + 1);
       } else {
-        window.location.href = GAME_DESTINATION_URL;
+        navigateWithFade(GAME_DESTINATION_URL);
       }
     });
 
-    // Subtle atmospheric space & horizon animation matching main theme
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
@@ -470,7 +525,6 @@
         ctx.fill();
       }
 
-      // Smoothly approaching planet horizon at the bottom edge
       currentPlanetR += (targetPlanetR - currentPlanetR) * 0.03;
       const cx = width / 2;
       const cy = height + currentPlanetR * 0.62;
