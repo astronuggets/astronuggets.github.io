@@ -294,6 +294,27 @@
     #stats-table td.mean { text-align: left; color: #94a3b8; font-size: 0.72rem; }
     .stats-note { color: #94a3b8; font-size: 0.78rem; line-height: 1.5; margin: 0.4rem 0 0.2rem; }
     @media (max-width: 700px) { .set-row { flex-direction: column; align-items: flex-start; } }
+  
+    .rv-card, .mc-card { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; padding: 0.6rem 0.75rem; margin-bottom: 0.4rem; background: rgba(15,23,42,0.85); border: 1px solid #1e3a5f; border-radius: 10px; }
+    .rv-card b, .mc-card b { color: #fff; font-size: 0.9rem; display: block; } .rv-card small, .mc-card small { display: block; color: #94a3b8; font-size: 0.76rem; line-height: 1.4; margin-top: 2px; }
+    .rv-status { padding: 0.55rem 0.75rem; border: 1px solid #22d3ee; border-radius: 10px; background: rgba(8,47,73,0.5); color: #e0f2fe; font-size: 0.85rem; margin-bottom: 0.5rem; }
+    .rv-h { color: #7dd3fc; font-size: 0.85rem; margin: 0.9rem 0 0.4rem; } .rv-note { display: block; color: #94a3b8; font-size: 0.75rem; margin: 0.3rem 0; } .rv-lv { color: #fbbf24; font-weight: 400; font-size: 0.75rem; }
+    .rv-card .chip { flex-shrink: 0; } .rv-card .chip:disabled { opacity: 0.45; cursor: not-allowed; } .rv-card .chip.on { background: #166534; border-color: #4ade80; }
+    .mc-intro { color: #cbd5e1; font-size: 0.82rem; line-height: 1.5; margin-bottom: 0.7rem; }
+    .mc-chip { flex-shrink: 0; max-width: 46%; font-size: 0.74rem; padding: 0.3rem 0.6rem; border-radius: 999px; border: 1px solid; text-align: center; }
+    .mc-chip.gray { color: #94a3b8; border-color: #475569; } .mc-chip.amber { color: #fde68a; border-color: #f59e0b; background: rgba(120,53,15,0.35); }
+    .mc-chip.green { color: #bbf7d0; border-color: #4ade80; background: rgba(22,101,52,0.45); } .mc-chip.blue { color: #bfdbfe; border-color: #60a5fa; background: rgba(30,58,138,0.45); } .mc-chip.red { color: #fecaca; border-color: #f87171; background: rgba(127,29,29,0.45); }
+    #mc-btn.pulse { border-color: #4ade80; color: #bbf7d0; animation: mcp 1.2s infinite; } @keyframes mcp { 50% { box-shadow: 0 0 12px #4ade80; } }
+    .fxrow { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; margin-top: 0.35rem; } .fxrow b { font-size: 0.72rem !important; color: #94a3b8 !important; min-width: 5.2rem; }
+    .fxc { font-size: 0.76rem; padding: 0.15rem 0.5rem; border-radius: 6px; border: 1px solid; font-weight: 600; }
+    .fxc.good { background: rgba(22,101,52,0.55); border-color: #4ade80; color: #dcfce7; } .fxc.bad { background: rgba(127,29,29,0.55); border-color: #f87171; color: #fee2e2; }
+    .cr-choice { text-align: left !important; display: block !important; } .cr-ch-title { font-weight: 700; font-size: 0.95rem; color: #fff; }
+    .cr-ch-msg { margin-top: 0.4rem; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4; } .cr-ch-lock { margin-top: 0.35rem; color: #fca5a5; font-size: 0.78rem; }
+    .cr-note { padding: 0.5rem 0.7rem; border: 1px solid #f59e0b; background: rgba(120,53,15,0.35); color: #fde68a; border-radius: 10px; font-size: 0.82rem; margin-bottom: 0.5rem; text-align: left; }
+    .cr-result { text-align: left; padding: 0.4rem 0; }
+    #day-banner { position: fixed; top: 4.6rem; left: 50%; transform: translate(-50%, -14px); z-index: 55; background: rgba(8,13,26,0.92); border: 1px solid #fbbf24; color: #fef3c7; padding: 0.5rem 1.1rem 0.7rem; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; min-width: 200px; }
+    #day-banner.on { opacity: 1; transform: translate(-50%, 0); } #db-icon { font-size: 1.4rem; margin-right: 0.5rem; vertical-align: middle; }
+    .db-bar { height: 4px; background: #334155; border-radius: 4px; margin-top: 0.45rem; overflow: hidden; } .db-bar i { display: block; height: 100%; width: 0; background: #fbbf24; }
   </style>
 
   <script type="importmap">
@@ -345,6 +366,8 @@
     <div class="hud-group">
       <button type="button" class="nav-btn exit-btn game-only" id="exit-building-btn">&#8592; Exit Building [Q]</button>
       <button type="button" class="nav-btn game-only" id="toggle-fps-btn">First-Person EVA [V]</button>
+      <button type="button" class="nav-btn game-only" id="rover-btn">&#128665; Rover</button>
+      <button type="button" class="nav-btn game-only" id="mc-btn">&#9993;&#65039; Earth</button>
       <button type="button" class="nav-btn" id="help-btn">How To Play</button>
       <button type="button" class="nav-btn" id="sound-btn">Sound: On</button>
       <button type="button" class="nav-btn" id="settings-btn">&#9881; Settings</button>
@@ -465,6 +488,23 @@
   </div>
 
   <div id="toast"></div>
+  <div id="day-banner"><span id="db-icon">&#9728;&#65039;</span><span id="db-text"></span><div class="db-bar"><i id="db-fill"></i></div></div>
+  <div class="modal-backdrop" id="rover-modal">
+    <div class="modal-card" style="max-width:640px;text-align:left;max-height:90vh;overflow-y:auto;border-color:#22d3ee;">
+      <div class="drawer-tag">ROVER COMMAND</div>
+      <h2 style="font-size:1.3rem;">&#128665; Rover Control</h2>
+      <div id="rover-body"></div>
+      <div style="text-align:center;margin-top:1rem;"><button type="button" class="primary-cta" id="rover-close">Close</button></div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="mc-modal">
+    <div class="modal-card" style="max-width:640px;text-align:left;max-height:90vh;overflow-y:auto;border-color:#60a5fa;">
+      <div class="drawer-tag">MISSION CONTROL</div>
+      <h2 style="font-size:1.3rem;">&#9993;&#65039; Messages from Earth</h2>
+      <div id="mc-body"></div>
+      <div style="text-align:center;margin-top:1rem;"><button type="button" class="primary-cta" id="mc-close">Close</button></div>
+    </div>
+  </div>
 
   <!-- Settings -->
   <div class="modal-backdrop" id="settings-modal">
@@ -661,6 +701,9 @@
       on: { habitation: true, solar: true, research: true, silo: true, comms: true },
       hist: [],
       wings: 0,
+      rover: { drive: 0, armor: 0, drill: 0 },
+      samples: 0,
+      mc: { list: [], answered: 0, missed: 0 },
       expedition: null,
       surveyed: {},
       footDone: {},
@@ -704,7 +747,8 @@
     });
 
     // ==================== LIGHTING, SKY & MARTIAN TERRAIN ====================
-    scene.add(new THREE.HemisphereLight(0x93c5fd, 0x7c2d12, 0.85));
+    const hemiLight = new THREE.HemisphereLight(0x93c5fd, 0x7c2d12, 0.85);
+    scene.add(hemiLight);
 
     const sunLight = new THREE.DirectionalLight(0xffedd5, 2.45);
     sunLight.position.set(22, 24, -18);
@@ -779,8 +823,10 @@
     terrain.receiveShadow = true;
     scene.add(terrain);
     // scattered boulders across the hills
+    const ROCK_COLS = [];
     (function addRocks() {
       const rockGeo = new THREE.DodecahedronGeometry(1, 0), rockMat = new THREE.MeshStandardMaterial({ color: 0xa0280f, emissive: 0x2a0602, roughness: 1 });
+      window.__ROCKS = ROCK_COLS;
       const N = 260, rocks = new THREE.InstancedMesh(rockGeo, rockMat, N), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), c = new THREE.Color();
       let placed = 0;
       for (let tries = 0; tries < 2000 && placed < N; tries++) {
@@ -789,7 +835,7 @@
         const sc = 0.25 + Math.pow(Math.random(), 2.2) * 1.5;
         e.set(Math.random() * 3, Math.random() * 3, Math.random() * 3); q.setFromEuler(e);
         m4.compose(new THREE.Vector3(x, terrainH(x, z) + sc * 0.25, z), q, new THREE.Vector3(sc * 1.2, sc * 0.8, sc));
-        rocks.setMatrixAt(placed, m4); c.setHSL(0.2 * 0.05 + Math.random() * 0.02, 0.62, 0.2 + Math.random() * 0.12); rocks.setColorAt(placed, c); placed++;
+        ROCK_COLS.push({ x, z, r: sc * 1.0, top: terrainH(x, z) + sc * 1.0 }); rocks.setMatrixAt(placed, m4); c.setHSL(0.2 * 0.05 + Math.random() * 0.02, 0.62, 0.2 + Math.random() * 0.12); rocks.setColorAt(placed, c); placed++;
       }
       rocks.count = placed; scene.add(rocks);
     })();
@@ -971,7 +1017,7 @@
     astroHelmet.position.y = 1.16; astroGroup.add(astroHelmet);
     const astroVisor = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 }));
     astroVisor.position.set(0, 1.16, 0.14); astroGroup.add(astroVisor);
-    astroGroup.scale.setScalar(0.6);
+    astroGroup.scale.setScalar(0.5);
 
     // ==================== 3D BUILDING INTERIORS & PHYSICAL WALL BUTTONS ====================
     const interiorGroup = new THREE.Group();
@@ -1534,8 +1580,8 @@
     }
 
     // ==================== 3D PLATFORM COLLISION & JUMP PHYSICS ====================
-    const PLAYER_EYE_HEIGHT = 1.35;
-    const PLAYER_BODY_HEIGHT = 1.65;
+    const PLAYER_EYE_HEIGHT = 1.1;
+    const PLAYER_BODY_HEIGHT = 1.35;
     const MARS_GRAVITY = 10.2;
     const JUMP_VELOCITY = 5.65;
 
@@ -1588,7 +1634,7 @@
     }
 
     function resolvePlayerCollisions(pos) {
-      const r = 0.36;
+      const r = 0.3;
       if (state.insideBuilding) {
         pos.x = Math.max(-6.5, Math.min(6.5, pos.x));
         pos.z = Math.max(-5.4, Math.min(5.4, pos.z));
@@ -1612,6 +1658,13 @@
           else pos.z = maxZ;
         }
       }
+      if (!state.insideBuilding) {
+        for (const k of ROCK_COLS) {
+          if (fpsState.feetY + 0.28 >= k.top) continue;
+          const dx = pos.x - k.x, dz = pos.z - k.z, rr = k.r + r, d2 = dx * dx + dz * dz;
+          if (d2 < rr * rr) { const d = Math.sqrt(d2) || 0.001; pos.x = k.x + (dx / d) * rr; pos.z = k.z + (dz / d) * rr; }
+        }
+      }
     }
 
     const briefEl = document.getElementById('brief-modal');
@@ -1623,7 +1676,7 @@
     }
 
     function isAnyModalOpen() {
-      return ['settings-modal', 'site-modal', 'stats-modal', 'end-cut'].some((id) => document.getElementById(id).classList.contains('active')) || crisisEl.classList.contains('active') || briefEl.classList.contains('active') || endModalEl.classList.contains('active');
+      return ['settings-modal', 'site-modal', 'rover-modal', 'mc-modal', 'stats-modal', 'end-cut'].some((id) => document.getElementById(id).classList.contains('active')) || crisisEl.classList.contains('active') || briefEl.classList.contains('active') || endModalEl.classList.contains('active');
     }
 
     function requestFpsPointerLock() {
@@ -2034,7 +2087,7 @@
       fpsState.pos.set(-3.4, 0.25 + PLAYER_EYE_HEIGHT, -0.55);
       fpsState.feetY = 0.25; fpsState.velY = 0; fpsState.grounded = true;
       refreshBadges();
-      if (!state.started) { state.started = true; recordHist(); spawnScrapGroup(2); updateTopHUD(); }
+      if (!state.started) { state.started = true; recordHist(); spawnScrapGroup(2); initMC(); updateTopHUD(); }
 
       if (!userMovedCamera) {
         camera.position.copy(GAME_CAM_POS);
@@ -2439,7 +2492,7 @@
       return (!fx.power || fx.power >= 0 || state.power >= -fx.power) && (!fx.scrap || fx.scrap >= 0 || state.scrap >= -fx.scrap);
     }
 
-    function triggerCrisis() {
+    function triggerCrisisOld() {
       if (state.gameOver || state.mode !== 'game') return;
       releasePointerLock();
       if (!state.crisisDeck.length) state.crisisDeck = shuffle([...CRISES]);
@@ -2481,6 +2534,7 @@
       if (state.gameOver) return;
       nextSolBtn.blur();
       SFX.click();
+      startDayAnim(state.sol);
 
       const ev = state.forecast;
       let msg = '';
@@ -2509,7 +2563,7 @@
       const dusty = ev.type === 'dust';
       state.power = (state.panelsDeployed && !dusty) ? Math.round(state.maxPower * (0.6 + 0.4 * state.bs.clean / 100)) : 5;
 
-      msg += onNewSol(dusty);
+      msg += onNewSol(dusty, ev);
       const missionOver = state.sol > state.maxSols;
       state.forecast = state.schedule[state.sol - 1] || { type: 'quiet', label: 'Quiet Sun', sev: 0, date: '' };
       if (state.forecast.type !== 'quiet') SFX.alarm();
@@ -2529,7 +2583,7 @@
       } else if (missionOver) {
         endGame(false, `You survived all ${state.maxSols} sols with ${state.science}/${state.scienceGoal} science. Try balancing power differently!`);
       } else {
-        if (state.sol < state.maxSols && Math.random() < DF().ev) setTimeout(triggerCrisis, 450);
+        if (state.sol < state.maxSols && Math.random() < DF().ev) setTimeout(triggerCrisis, 2600);
         nextSolBtn.innerHTML = state.sol === state.maxSols ? 'Finish Mission &#9654;' : `Advance to Sol ${state.sol + 1} &#9654;`;
       }
     });
@@ -2902,7 +2956,12 @@
       // vertical panel seams
       for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; addBox(L, 0.02, 2.45, 0.02, Math.cos(a) * 0.93, 2.0, Math.sin(a) * 0.93, 0xcbd5e1, { cast: false }).rotation.z = Math.cos(a) * 0.09; }
       // cockpit window frame and hatch
-      dmesh(L, new THREE.TorusGeometry(0.33, 0.04, 10, 24), dm(0xe2e8f0, { metal: 0.8 }), 0.62, 2.55, 0.62, { ry: Math.PI / 4 });
+      cockpitWin.visible = false;
+      for (const [a, y] of [[Math.PI / 4, 2.55], [Math.PI / 4 + Math.PI / 2, 2.55], [Math.PI / 4 + Math.PI, 2.55], [Math.PI / 4 + 1.5 * Math.PI, 2.55]]) {
+        const r = 0.86 - (y - 2.5) * 0.1, px = Math.sin(a) * r, pz = Math.cos(a) * r;
+        const fr = addBox(L, 0.56, 0.4, 0.07, px, y, pz, 0xe2e8f0, { cast: false, metal: 0.8 }); fr.rotation.y = a;
+        const gl = addBox(L, 0.46, 0.3, 0.07, Math.sin(a) * (r + 0.02), y, Math.cos(a) * (r + 0.02), 0x7dd3fc, { cast: false, emissive: 0x38bdf8, emInt: 0.8 }); gl.rotation.y = a;
+      }
       frameRect(L, 1.0, 1.35, 0, 0.7, 1.3, 0.05, 0.08, 0xe2e8f0, 'zy');
       // fins
       for (let k = 0; k < 4; k++) {
@@ -2931,6 +2990,7 @@
     const STANDBY = { habitation: 2, silo: 1, research: 2, comms: 1 };
     const MODNAME = { habitation: 'Habitat', solar: 'Solar Array', research: 'Research Lab', silo: 'Food Silo', comms: 'Comms Dish' };
     const MODEMO = { habitation: '🏠', solar: '☀️', research: '🔬', silo: '🌱', comms: '📡' };
+    const siteLabelSprites = [];
     const FAC_IDS = ['habitation', 'solar', 'research', 'silo', 'comms'];
     const wrapAng = (a) => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
 
@@ -3074,7 +3134,7 @@
     function claimScrap(g) {
       const i = scrapPickups.indexOf(g);
       if (i < 0) return;
-      scrapPickups.splice(i, 1); scene.remove(g);
+      scrapPickups.splice(i, 1); scene.remove(g); mcEvent('scrap');
       const hi = clickableZones.indexOf(g.userData.hit); if (hi >= 0) clickableZones.splice(hi, 1);
       if (hoveredGroup === g) hoveredGroup = null;
       state.fpsTargetedObject = null; hoverTag.style.opacity = '0';
@@ -3113,7 +3173,7 @@
       roundRectPath(ctx, 6, 6, 408, 88, 20); ctx.fillStyle = 'rgba(7,12,24,0.9)'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#22d3ee'; ctx.stroke();
       ctx.textAlign = 'center'; ctx.fillStyle = '#e0f2fe'; ctx.font = '700 28px Space Grotesk, sans-serif';
       ctx.fillText(`${s.emoji} ${s.name}`, 210, 58); L.tex.needsUpdate = true;
-      L.s.position.y = 19.2; g.add(L.s);
+      L.s.position.y = 19.2; g.add(L.s); siteLabelSprites.push({ s: L.s, g });
       const hit = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 18, 12), new THREE.MeshBasicMaterial({ visible: false }));
       hit.position.y = 9;
       hit.userData = { kind: 'poi', site: s, label: `${s.emoji} ${s.name}`, subtitle: 'Click to explore or send the rover', visualGroup: null };
@@ -3127,7 +3187,7 @@
       if (state.gameOver || state.mode !== 'game') return;
       releasePointerLock();
       const ex = state.expedition, first = !state.surveyed[s.id];
-      const reward = first ? s.sci : Math.ceil(s.sci * 0.4);
+      const reward = roverReward(s);
       const dist = Math.round(Math.hypot(s.x, s.z));
       $('site-title').textContent = `${s.emoji} ${s.name}`;
       $('site-desc').textContent = `${s.desc} (about ${dist} m from base)`;
@@ -3140,7 +3200,7 @@
       };
       const busy = !!ex, noPow = state.power < 2;
       mk('🚙 Send the rover here',
-        busy ? `Rover is already on a trip to ${ex.site.name}.` : (noPow ? 'Needs 2 kW today (not enough!)' : `-2 kW · back in ${s.days} sols with about +${reward} science${first && s.scrap ? ` and +${s.scrap} scrap` : ''}${first ? ' (first-visit bonus!)' : ' (smaller reward: already surveyed)'}`),
+        busy ? `Rover is already on a trip to ${ex.site.name}.` : (noPow ? 'Needs 2 kW today (not enough!)' : `-2 kW · back in ${tripDays(s)} sols with about +${reward} science${first && s.scrap ? ` and +${s.scrap} scrap` : ''}${first ? ' (first-visit bonus!)' : ' (smaller reward: already surveyed)'}`),
         !busy && !noPow, () => launchRover(s));
       const near = state.viewMode === 'fps' && !state.insideBuilding && Math.hypot(fpsState.pos.x - s.x, fpsState.pos.z - s.z) < 9;
       const doneFoot = !!(state.footDone && state.footDone[s.id] === state.sol);
@@ -3160,21 +3220,24 @@
     }
     function launchRover(s) {
       state.power -= 2;
-      state.expedition = { site: s, returnSol: state.sol + s.days, phase: 'out', leg: 'orbit', due: false };
+      state.expedition = { site: s, returnSol: state.sol + tripDays(s), phase: 'out', leg: 'orbit', due: false, damaged: false, partial: 1 };
       SFX.rover();
-      logEvent(`🚙 The rover left for the ${s.name}. It will be back on Sol ${state.sol + s.days}.`, 'Real rovers drive slowly and carefully, and data takes minutes to reach Earth, so scientists plan drives a day ahead.');
+      logEvent(`🚙 The rover left for the ${s.name}. It will be back on Sol ${state.sol + tripDays(s)}.`, 'Real rovers drive slowly and carefully, and data takes minutes to reach Earth, so scientists plan drives a day ahead.');
       toast(`🚙 Rover heading to ${s.name}`);
       updateTopHUD(); siteModalClose();
     }
     function deliverRover() {
       const ex = state.expedition; if (!ex) return;
       const s = ex.site, first = !state.surveyed[s.id];
-      state.surveyed[s.id] = true;
-      const sci = first ? s.sci : Math.ceil(s.sci * 0.4), scr = first ? s.scrap : 0;
-      state.science = Math.min(state.scienceGoal, state.science + sci);
-      state.scrap += scr; state.stats.expeditions++; state.stats.roverSci += sci;
+      const partial = ex.partial == null ? 1 : ex.partial;
+      const mult = partial * (ex.damaged ? 0.7 : 1);
+      if (partial > 0) state.surveyed[s.id] = true;
+      const sci = Math.round(roverReward(s) * mult), scr = first && partial > 0 ? s.scrap : 0;
+      state.samples += sci;
+      state.scrap += scr; state.stats.expeditions++;
       state.expedition = null;
-      const txt = `🚙 Rover is back from the ${s.name}: +${sci} science${scr ? `, +${scr} scrap` : ''}!`;
+      mcEvent('rover');
+      const txt = sci || scr ? `🚙 Rover is back from the ${s.name}${ex.damaged ? ' (damaged, some samples lost)' : ''}: ${sci} science of samples to analyze in the Research Lab${scr ? `, +${scr} scrap` : ''}!` : '🚙 Rover is back at base (no samples this time).';
       state.lastWallMessage = txt; logEvent(txt, s.fact); toast(txt); SFX.upgrade();
       updateTopHUD(); recordHist();
       if (state.insideBuilding) updateInteriorWallScreens();
@@ -3238,6 +3301,8 @@
     const CREW_COLORS = [0xf97316, 0x22c55e, 0x3b82f6, 0xe879f9];
     const crewExt = [0, 1, 2].map((i) => makeCrew(CREW_COLORS[i]));
     const crewInt = [0, 1].map((i) => makeCrew(CREW_COLORS[i + 2]));
+    const crewAmb = [0, 1].map((i) => makeCrew(CREW_COLORS[(i + 1) % 4]));
+    const crewIntAmb = [0, 1].map((i) => makeCrew(CREW_COLORS[(i + 2) % 4]));
     const CREW_HOME = { x: -3.4, z: -0.5 };
     const CREW_ROUTES = {
       habitation: [[-4.6, -0.4]],
@@ -3246,12 +3311,12 @@
       comms: [[3.35, -0.4], [3.35, 5.0], [0.7, 5.5]],
       silo: [[3.35, -0.4], [3.35, 4.7], [5.4, 4.7]]
     };
-    function sendCrewExterior(fid) {
+    function sendCrewExterior(fid, who) {
       const route = CREW_ROUTES[fid]; if (!route) return;
-      const m = crewExt.find((c) => !c.busy) || crewExt[0];
+      const m = who || crewExt.find((c) => !c.busy) || crewExt[0];
       m.busy = true; m.x = CREW_HOME.x; m.z = CREW_HOME.z; m.face = null;
       const q = route.map((p) => ({ x: p[0], z: p[1], wait: 0 }));
-      q[q.length - 1].wait = 4.2;
+      q[q.length - 1].wait = 3.5;
       for (let i = route.length - 2; i >= 0; i--) q.push({ x: route[i][0], z: route[i][1], wait: 0 });
       q.push({ x: CREW_HOME.x, z: CREW_HOME.z, wait: 0 });
       m.queue = q; m.wait = 0;
@@ -3264,14 +3329,33 @@
       m.queue = [{ x: 0, z: 4.2, wait: 0 }, { x: Math.max(-5.8, Math.min(5.8, tx)), z: Math.max(-4.8, Math.min(4.8, tz)), wait: 2.6, face: [ux, uz] }, { x: 0, z: 4.2, wait: 0 }, { x: 0, z: 5.1, wait: 0 }];
       m.wait = 0; m.face = null;
     }
+    function ambientCrew(dt) {
+      const ids = Object.keys(CREW_ROUTES);
+      for (const m of crewAmb) {
+        if (m.busy) continue;
+        m.amb = (m.amb || (3 + Math.random() * 4)) - dt;
+        if (m.amb <= 0) { m.amb = 5 + Math.random() * 7; sendCrewExterior(ids[Math.floor(Math.random() * ids.length)], m); }
+      }
+      for (const m of crewIntAmb) {
+        if (m.busy) continue;
+        m.amb = (m.amb || (1 + Math.random() * 3)) - dt;
+        if (m.amb > 0) continue;
+        m.amb = 3 + Math.random() * 5;
+        let wx = 0, wz = 0;
+        for (let k = 0; k < 8; k++) { wx = (Math.random() - 0.5) * 9; wz = -3.5 + Math.random() * 7; if (Math.hypot(wx - fpsState.pos.x, wz - fpsState.pos.z) > 1.2) break; }
+        m.busy = true; m.x = 0; m.z = 5.0; m.face = null; m.wait = 0;
+        m.queue = [{ x: 0, z: 4.2, wait: 0 }, { x: wx, z: wz, wait: 1 + Math.random() * 2 }, { x: 0, z: 4.2, wait: 0 }, { x: 0, z: 5.1, wait: 0 }];
+      }
+    }
     function updateCrew(dt, t) {
+      if (state.mode === 'game' && !state.gameOver) ambientCrew(dt);
       const showExt = !state.insideBuilding && (state.mode === 'game' || state.mode === 'ending');
-      for (const m of crewExt) {
+      for (const m of crewExt.concat(crewAmb)) {
         if (!m.busy) { m.mesh.visible = false; continue; }
         stepCrew(m, dt, t, false);
         m.mesh.visible = showExt;
       }
-      for (const m of crewInt) {
+      for (const m of crewInt.concat(crewIntAmb)) {
         if (!state.insideBuilding) { m.busy = false; m.queue = []; m.mesh.visible = false; continue; }
         if (!m.busy) { m.mesh.visible = false; continue; }
         stepCrew(m, dt, t, true);
@@ -3296,11 +3380,12 @@
     function afterAction(fid, unit, opts) {
       if (opts.isSwitch) return;
       state.stats.actions++;
+      { const EV = { 'TRANSMIT SCIENCE TO EARTH': 'transmit', 'RUN LASER SPECTROMETER': 'spectro', 'HARVEST HYDROPONIC CROPS': 'harvest' }; if (opts.label && EV[opts.label]) mcEvent(EV[opts.label]); }
       if (FAC_IDS.includes(fid)) { sendCrewExterior(fid); sendCrewInterior(unit); toast(`👩‍🚀 Crew heading to the ${MODNAME[fid]}`); }
     }
 
     // ---------- per-sol hook (called inside "Advance" button) ----------
-    function onNewSol(dusty) {
+    function onNewSol(dusty, ev) {
       let m = '';
       const stand = standbyTotal();
       if (stand > 0) { state.power = Math.max(0, state.power - stand); m += `Modules left ON used ${stand} kW. `; }
@@ -3311,12 +3396,16 @@
       if (state.on.comms) { state.science = Math.min(state.scienceGoal, state.science + 1); g.push('+1 science (uplink)'); }
       if (g.length) m += `Modules running on their own gave ${g.join(', ')}. `;
       const ex = state.expedition;
+      if (ex && ex.phase !== 'back' && ((ev && ev.type === 'flare') || dusty) && Math.random() < RISK[state.rover.armor] && !ex.damaged) {
+        ex.damaged = true; ex.returnSol += 1; m += '⚠️ The rover was hit by the weather and is damaged. It will be 1 sol late and lose some samples. ';
+      }
       if (ex) {
         if (state.sol >= ex.returnSol) { ex.due = true; m += '🚙 Rover is driving home with samples. '; }
         else m += `🚙 Rover is exploring the ${ex.site.name} (back on Sol ${ex.returnSol}). `;
       }
       const n = spawnScrapGroup();
       if (n) m += `🔩 ${n} piece${n > 1 ? 's' : ''} of scrap appeared on the map. `;
+      m += mcNewSol();
       recordHist();
       return m;
     }
@@ -3359,6 +3448,10 @@
           onPress: () => { use('cells'); state.scrap -= 2; state.batteryCap += 2; state.battery = Math.min(state.batteryCap, state.battery + 2); done(`Battery bank upgraded to ${state.batteryCap} kW capacity.`); } });
       }
       if (id === 'research') {
+        B({ x: -6.55, z: 4.7, rotY: Math.PI / 2, label: 'ANALYZE ROVER SAMPLES', labelFn: () => `ANALYZE ROVER SAMPLES (${state.samples})`, costText: '-1 kW',
+          subText: '', subFn: () => state.samples ? `Turn ${state.samples} science of rover samples into real results.` : 'No samples yet. Send the rover to a site and bring it home.',
+          getStatus: () => ({ disabled: state.samples <= 0 || state.power < 1 || state.sheltered, done: false }),
+          onPress: () => { state.power -= 1; const g = sciGain(state.samples); state.science = Math.min(state.scienceGoal, state.science + g); state.stats.roverSci += g; state.samples = 0; done(`Rover samples analysed: +${g} science.`); } });
         B({ x: -3.6, label: 'BUILD SAMPLE DRILL', costText: '-2 Scrap, -2 kW', subText: 'A scrap-built drill reaches fresh rock underground. Gains science.',
           getStatus: () => ({ disabled: state.scrap < 2 || state.power < 2 || state.sheltered, done: !!state.used.drill }),
           onPress: () => { use('drill'); state.scrap -= 2; state.power -= 2; const g = sciGain(6); state.science = Math.min(state.scienceGoal, state.science + g); done(`Drill sample analysed: +${g} science.`); } });
@@ -3375,6 +3468,10 @@
           onPress: () => { use('soil'); state.scrap -= 1; state.bs.crop = 100; done('Soil washed. Crop health 100%.'); } });
       }
       if (id === 'comms') {
+        B({ x: -6.55, z: 4.7, rotY: Math.PI / 2, label: 'SEND REPORT TO EARTH', labelFn: () => `SEND REPORT TO EARTH (${mcReady()} ready)`, costText: '-1 kW',
+          subText: '', subFn: () => `Reports ready: ${mcReady()}. Earth replies ${state.levels.comms >= 2 ? '1 sol' : '2 sols'} after you send.`,
+          getStatus: () => ({ disabled: mcReady() === 0 || state.power < 1 || state.labsOff, done: false }),
+          onPress: () => { state.power -= 1; const n = mcSend(); done(`Report${n > 1 ? 's' : ''} sent to Earth! Mission Control will reply in ${state.levels.comms >= 2 ? 1 : 2} sol(s).`); updateMCBadge(); } });
         B({ x: -3.6, label: 'BUILD HIGH-GAIN FEED', costText: '-2 Scrap, -1 kW', subText: 'A better antenna feed: dish alignment +40 and +5 science.',
           getStatus: () => ({ disabled: state.scrap < 2 || state.power < 1 || state.labsOff, done: !!state.used.feed }),
           onPress: () => { use('feed'); state.scrap -= 2; state.power -= 1; state.bs.align = Math.min(100, state.bs.align + 40); const g = sciGain(5); state.science = Math.min(state.scienceGoal, state.science + g); done(`High-gain feed fitted: alignment +40, +${g} science.`); } });
@@ -3454,6 +3551,7 @@
     function endGame(victory, message) {
       if (state.mode === 'ending') return;
       state.gameOver = true;
+      $('rover-modal').classList.remove('active'); $('mc-modal').classList.remove('active');
       recordHist();
       let stars = 0;
       if (victory) stars++;
@@ -3532,7 +3630,7 @@
       $('stats-totals').innerHTML = [
         ['🔬 Science (points / goal)', `${state.science} / ${state.scienceGoal}`], ['⚡ Average power you had per sol', `${pw.avg.toFixed(1)} kW`], ['🔩 Scrap pieces claimed', S.scrapFound],
         ['🛠️ Wall buttons pressed', S.actions], ['⚠️ Surprise events handled', state.crisesHandled], ['🚙 Rover trips (science gained)', `${S.expeditions} (+${S.roverSci})`],
-        ['🥾 On-foot surveys', S.footSurveys], ['🛡️ Solar flares: sheltered / caught outside', `${S.flaresSheltered} / ${S.flaresExposed}`], ['⬆️ Module upgrades', Object.values(state.levels).reduce((a, b) => a + b - 1, 0)]
+        ['🥾 On-foot surveys', S.footSurveys], ['✉️ Earth reports answered / missed', `${state.mc.answered} / ${state.mc.missed}`], ['🛡️ Solar flares: sheltered / caught outside', `${S.flaresSheltered} / ${S.flaresExposed}`], ['⬆️ Module upgrades', Object.values(state.levels).reduce((a, b) => a + b - 1, 0)]
       ].map((r) => `<div class="st-tile"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
       drawStatsChart();
     }
@@ -3645,11 +3743,288 @@
       for (const id of FAC_IDS) labelSprites[id].s.visible = lv;
       updateCrew(dt, t);
       updateDetails(t);
+      updateLabelScale(); updateDayCycle(dt);
     }
     const TIPS = { 'pill-o2': 'Oxygen. Drops each sol. 0% = mission over.', 'pill-h2o': 'Water. Drops each sol. 0% = mission over.', 'pill-food': 'Food. Drops each sol. 0% = mission over.', 'pill-dose': 'Radiation absorbed by the crew. Only goes up. 100% = mission over.', 'pill-pwr': 'Power available today (kW). Every action spends it.', 'pill-batt': 'Stored power you can save for later.', 'pill-next': 'Estimated power tomorrow after standby costs.' };
     for (const k in TIPS) { const e = $(k); if (e) e.title = TIPS[k]; }
     window.__v10ready = true;
     applySettings(true);
+
+    // ==================== v10.5: ROVER COMMANDS, MISSION CONTROL, SAFE CRISES, DAY/NIGHT ====================
+    const tripDays = (s) => Math.max(1, s.days - state.rover.drive);
+    const RISK = [0.6, 0.3, 0];
+    const roverReward = (s) => Math.round((!state.surveyed[s.id] ? s.sci : Math.ceil(s.sci * 0.4)) * (1 + 0.25 * state.rover.drill));
+    const RUP = [
+      { k: 'drive', name: 'Drive motors', emoji: '⚙️', desc: 'Each level makes trips 1 sol shorter (never under 1 sol).', cost: [2, 3] },
+      { k: 'armor', name: 'Armor & shielding', emoji: '🛡️', desc: 'Chance a storm or flare damages the rover while away: 60% → 30% → 0%.', cost: [2, 3] },
+      { k: 'drill', name: 'Sample drill', emoji: '⛏️', desc: 'Each level brings back 25% more science from every trip.', cost: [2, 3] }
+    ];
+    function recallRover() {
+      const ex = state.expedition; if (!ex || ex.phase === 'back') return;
+      ex.partial = ex.phase === 'there' ? 0.6 : 0; ex.phase = 'back';
+      SFX.rover(); toast('🚙 Rover recalled');
+      logEvent(ex.partial ? `🚙 You recalled the rover early from the ${ex.site.name}. It keeps 60% of its samples.` : '🚙 You recalled the rover before it arrived. It comes home empty-handed.');
+      updateTopHUD();
+    }
+    function roverStatusText() {
+      const ex = state.expedition;
+      if (!ex) return '🏠 At base, waiting for orders.';
+      const dmg = ex.damaged ? ' ⚠️ Damaged (1 sol late, 30% of samples lost).' : '';
+      if (ex.phase === 'out') return `🛣️ Driving to the ${ex.site.name}. Due back on Sol ${ex.returnSol}.${dmg}`;
+      if (ex.phase === 'there') return `🔭 Exploring the ${ex.site.name}. Due back on Sol ${ex.returnSol}.${dmg}`;
+      return `↩️ Driving home with samples.${dmg}`;
+    }
+    function renderRover() {
+      const ex = state.expedition, busy = !!ex, noPow = state.power < 2;
+      const risk = Math.round(RISK[state.rover.armor] * 100);
+      const sites = SITES.map((s, i) => {
+        const why = busy ? 'Rover is busy' : (noPow ? 'Needs 2 kW today' : '');
+        return `<div class="rv-card"><div><b>${s.emoji} ${s.name}</b><small>${tripDays(s)} sol trip · about +${roverReward(s)} science${!state.surveyed[s.id] && s.scrap ? ` + ${s.scrap} scrap` : ''}${state.surveyed[s.id] ? ' (visited before: smaller reward)' : ' (first visit bonus)'}</small></div>
+          <button type="button" class="chip ${why ? '' : 'on'}" data-send="${i}" ${why ? 'disabled' : ''}>${why || 'Send · −2 kW'}</button></div>`;
+      }).join('');
+      const ups = RUP.map((u) => {
+        const lv = state.rover[u.k], max = lv >= 2, cost = u.cost[lv], can = !max && state.scrap >= cost;
+        return `<div class="rv-card"><div><b>${u.emoji} ${u.name} <span class="rv-lv">Lv ${lv}/2</span></b><small>${u.desc}</small></div>
+          <button type="button" class="chip ${can ? 'on' : ''}" data-up="${u.k}" ${can ? '' : 'disabled'}>${max ? 'Maxed' : (can ? `Upgrade · −${cost} scrap` : `Need ${cost} scrap`)}</button></div>`;
+      }).join('');
+      $('rover-body').innerHTML =
+        `<div class="rv-status">${roverStatusText()}</div>
+         <div class="rv-status" style="border-color:#c084fc">🧪 Samples waiting to be analyzed: <b>${state.samples}</b> science. Press <i>ANALYZE ROVER SAMPLES</i> in the Research Lab.</div>
+         <h3 class="rv-h">Send it somewhere</h3>${sites}
+         <small class="rv-note">If a dust storm or solar flare passes while the rover is away it can be damaged (your risk right now: <b>${risk}%</b>).</small>
+         <h3 class="rv-h">Orders</h3>
+         <div class="rv-card"><div><b>↩️ Recall the rover</b><small>Bring it home right now. Recalled before arriving = nothing; recalled while exploring = 60% of the samples.</small></div>
+           <button type="button" class="chip ${busy && ex.phase !== 'back' ? 'on' : ''}" data-recall="1" ${busy && ex.phase !== 'back' ? '' : 'disabled'}>Recall</button></div>
+         <h3 class="rv-h">Upgrades (cost scrap · you have ${state.scrap})</h3>${ups}`;
+    }
+    function openRover() { if (state.mode !== 'game') return; releasePointerLock(); renderRover(); $('rover-modal').classList.add('active'); }
+    $('rover-btn').addEventListener('click', () => { SFX.click(); openRover(); });
+    $('rover-close').addEventListener('click', () => { SFX.click(); $('rover-modal').classList.remove('active'); requestFpsPointerLock(); });
+    $('rover-body').addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b || b.disabled) return;
+      SFX.click();
+      if (b.dataset.send !== undefined) { launchRover(SITES[+b.dataset.send]); }
+      else if (b.dataset.recall) recallRover();
+      else if (b.dataset.up) {
+        const u = RUP.find((r) => r.k === b.dataset.up), lv = state.rover[u.k], cost = u.cost[lv];
+        if (lv < 2 && state.scrap >= cost) { state.scrap -= cost; state.rover[u.k]++; SFX.upgrade(); toast(`${u.emoji} ${u.name} upgraded to level ${state.rover[u.k]}`); updateTopHUD(); }
+      }
+      if ($('rover-modal').classList.contains('active')) renderRover();
+    });
+
+    // ---------------- Mission Control messages ----------------
+    const MC_POOL = [
+      { k: 'transmit', title: 'Data Downlink', desc: 'Earth wants fresh data. Transmit science to Earth 2 times (Comms Dish).', target: 2, reward: { science: 6 } },
+      { k: 'spectro', title: 'Rock Analysis', desc: 'Analyze 2 rock samples with the laser spectrometer (Research Lab).', target: 2, reward: { science: 5, scrap: 1 } },
+      { k: 'harvest', title: 'Fresh Food Report', desc: 'Harvest the hydroponic crops 2 times (Food Silo).', target: 2, reward: { science: 4, scrap: 2 } },
+      { k: 'scrap', title: 'Salvage Survey', desc: 'Collect 3 pieces of scrap from the surface.', target: 3, reward: { science: 3, scrap: 2 } },
+      { k: 'rover', title: 'Rover Expedition', desc: 'Bring the rover home from a trip with samples.', target: 1, reward: { science: 5, scrap: 2 } },
+      { k: 'battery', title: 'Power Reserve Test', desc: 'Store at least 6 kW in the battery bank (Solar Array).', target: 6, state: true, reward: { science: 4, scrap: 2 } }
+    ];
+    const MC_ARRIVE = [2, 5, 8, 11, 14, 17];
+    function initMC() {
+      const pool = shuffle(MC_POOL.map((p) => Object.assign({}, p)));
+      state.mc.list = pool.map((p, i) => ({ id: i, k: p.k, title: p.title, desc: p.desc, target: p.target, isState: !!p.state, reward: p.reward, arrive: MC_ARRIVE[i], deadline: MC_ARRIVE[i] + 6, status: 'incoming', prog: 0, replySol: 0 }));
+    }
+    const rewardText = (r) => [r.science ? `+${r.science} science` : '', r.scrap ? `+${r.scrap} scrap` : ''].filter(Boolean).join(', ');
+    function mcCheckState() {
+      if (!state.mc || !state.mc.list.length) return;
+      for (const c of state.mc.list) if (c.status === 'active' && c.isState) { c.prog = Math.min(c.target, state.battery); if (state.battery >= c.target) { c.status = 'ready'; toast('✉️ Ready to send! Use the Comms Dish.'); } }
+    }
+    function mcEvent(k, n) {
+      if (!state.mc) return;
+      for (const c of state.mc.list) if (c.status === 'active' && !c.isState && c.k === k) {
+        c.prog = Math.min(c.target, c.prog + (n || 1));
+        if (c.prog >= c.target) { c.status = 'ready'; toast(`✉️ "${c.title}" is done. Send the report from the Comms Dish!`); SFX.upgrade(); }
+      }
+    }
+    function mcNewSol() {
+      let m = ''; const s = state.sol;
+      for (const c of state.mc.list) {
+        if (c.status === 'incoming' && c.arrive <= s) { c.status = 'active'; m += `✉️ New message from Mission Control: "${c.title}" (send your report by Sol ${c.deadline}). `; toast('✉️ New message from Earth!'); }
+        else if ((c.status === 'active' || c.status === 'ready') && s > c.deadline) { c.status = 'failed'; state.mc.missed++; m += `✉️ You missed the deadline for "${c.title}". `; }
+        else if (c.status === 'sent' && c.replySol <= s) {
+          c.status = 'done'; state.mc.answered++;
+          if (c.reward.science) state.science = Math.min(state.scienceGoal, state.science + c.reward.science);
+          if (c.reward.scrap) state.scrap += c.reward.scrap;
+          m += `✉️ Earth replied about "${c.title}": ${rewardText(c.reward)}! `; toast(`✉️ Earth replied: ${rewardText(c.reward)}`); SFX.upgrade();
+        }
+      }
+      mcCheckState();
+      return m;
+    }
+    const mcReady = () => state.mc.list.filter((c) => c.status === 'ready').length;
+    function mcSend() {
+      const delay = state.levels.comms >= 2 ? 1 : 2; let n = 0;
+      for (const c of state.mc.list) if (c.status === 'ready') { c.status = 'sent'; c.replySol = state.sol + delay; n++; }
+      return n;
+    }
+    function updateMCBadge() {
+      const b = $('mc-btn'); if (!b || !state.mc) return;
+      const ready = mcReady(), act = state.mc.list.filter((c) => c.status === 'active').length, sent = state.mc.list.filter((c) => c.status === 'sent').length;
+      b.textContent = `✉️ Earth${ready ? ` (${ready} ready!)` : (act + sent ? ` (${act + sent})` : '')}`;
+      b.classList.toggle('pulse', ready > 0);
+    }
+    function renderMC() {
+      const chip = (c) => {
+        if (c.status === 'incoming') return `<span class="mc-chip gray">📡 Arrives Sol ${c.arrive}</span>`;
+        if (c.status === 'active') return `<span class="mc-chip amber">⏳ ${c.prog}/${c.target} · send by Sol ${c.deadline}</span>`;
+        if (c.status === 'ready') return `<span class="mc-chip green">✅ Done! Send it from the Comms Dish by Sol ${c.deadline}</span>`;
+        if (c.status === 'sent') return `<span class="mc-chip blue">📨 Sent · Earth replies on Sol ${c.replySol}</span>`;
+        if (c.status === 'done') return `<span class="mc-chip green">🎉 ${rewardText(c.reward)} received</span>`;
+        return '<span class="mc-chip red">❌ Deadline missed</span>';
+      };
+      const visible = state.mc.list.filter((c) => c.status !== 'incoming');
+      const incoming = state.mc.list.filter((c) => c.status === 'incoming').sort((a, b) => a.arrive - b.arrive)[0];
+      $('mc-body').innerHTML =
+        `<p class="mc-intro">Mission Control sends requests. <b>Do the task</b>, then <b>press SEND REPORT TO EARTH</b> (Comms Dish, 1 kW). Radio signals take 3 to 22 minutes each way, and the team needs time to review, so the <b>reply and reward arrive ${state.levels.comms >= 2 ? '1 sol' : '2 sols'} later</b> (upgrade the Comms Dish to Lv 2 for faster replies).</p>` +
+        (visible.length ? visible.map((c) => `<div class="mc-card ${c.status}"><div><b>${c.title}</b><small>${c.desc}</small><small>Reward: ${rewardText(c.reward)}</small></div>${chip(c)}</div>`).join('') : '<div class="mc-card"><div><b>No messages yet</b><small>The first message from Earth arrives on Sol 2.</small></div></div>') +
+        (incoming ? `<small class="rv-note">📡 Next message is on its way and arrives on Sol ${incoming.arrive}.</small>` : '');
+    }
+    function openMC() { if (state.mode !== 'game') return; releasePointerLock(); renderMC(); $('mc-modal').classList.add('active'); }
+    $('mc-btn').addEventListener('click', () => { SFX.click(); openMC(); });
+    $('mc-close').addEventListener('click', () => { SFX.click(); $('mc-modal').classList.remove('active'); requestFpsPointerLock(); });
+
+    // ---------------- challenges (surprise events): always answerable, clear results ----------------
+    const FX_META = {
+      o2: ['💨', 'O₂', '%'], h2o: ['💧', 'H₂O', '%'], food: ['🌱', 'Food', '%'], dose: ['☢️', 'Radiation dose', '%'], science: ['🔬', 'Science', ''],
+      power: ['⚡', 'Power', ' kW'], scrap: ['🔩', 'Scrap', ''], morale: ['😊', 'Crew morale', ''], clean: ['☀️', 'Panel cleanliness', ''],
+      calib: ['🎯', 'Calibration', ''], align: ['📡', 'Antenna alignment', ''], crop: ['🥬', 'Crop health', '']
+    };
+    function fxChipsHTML(fx) {
+      const good = [], bad = [];
+      for (const [k, v] of Object.entries(fx)) {
+        const m = FX_META[k] || ['•', k, ''], isGood = k === 'dose' ? v < 0 : v > 0;
+        (isGood ? good : bad).push(`<span class="fxc ${isGood ? 'good' : 'bad'}">${m[0]} ${m[1]} ${v > 0 ? '+' : '−'}${Math.abs(v)}${m[2]}</span>`);
+      }
+      return (good.length ? `<div class="fxrow"><b>You gain</b>${good.join('')}</div>` : '') + (bad.length ? `<div class="fxrow"><b>You lose</b>${bad.join('')}</div>` : '');
+    }
+    function shortText(fx) {
+      const parts = [];
+      if (fx.power && fx.power < 0 && state.power < -fx.power) parts.push(`needs ${-fx.power} kW, you have ${state.power}`);
+      if (fx.scrap && fx.scrap < 0 && state.scrap < -fx.scrap) parts.push(`needs ${-fx.scrap} scrap, you have ${state.scrap}`);
+      return parts.join(' and ');
+    }
+    function triggerCrisis() {
+      if (state.gameOver || state.mode !== 'game') return;
+      if (crisisEl.classList.contains('active')) return;
+      releasePointerLock();
+      if (!state.crisisDeck.length) state.crisisDeck = shuffle([...CRISES]);
+      const c = state.crisisDeck.pop();
+      SFX.alarm();
+      $('cr-badge').textContent = 'UNEXPECTED EVENT // ' + c.badge.toUpperCase();
+      $('cr-title').textContent = c.title; $('cr-desc').textContent = c.desc; $('cr-fact').textContent = 'Real science: ' + c.fact;
+      const box = $('cr-choices'); box.innerHTML = '';
+      const choices = c.choices.slice();
+      const stuck = !choices.some((ch) => canPay(ch.fx));
+      if (stuck) {
+        const note = document.createElement('div'); note.className = 'cr-note';
+        note.textContent = '⚠️ You do not have enough power or scrap for either fix, so you can only ride it out. (Tip: keep a little power and scrap in reserve for surprises.)';
+        box.appendChild(note);
+        choices.push({ label: 'Ride it out (costs nothing)', msg: 'With no power or scrap left to respond, the crew simply had to endure it.', fx: { o2: -6, h2o: -4, dose: 2 } });
+      }
+      choices.forEach((ch) => {
+        const ok = canPay(ch.fx);
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'action-btn cr-choice'; b.disabled = !ok;
+        b.innerHTML = `<div class="cr-ch-title">${ch.label}</div>${fxChipsHTML(ch.fx)}<div class="cr-ch-msg">What happens: ${ch.msg}</div>${ok ? '' : `<div class="cr-ch-lock">🔒 Not available: ${shortText(ch.fx)}</div>`}`;
+        b.addEventListener('click', () => {
+          SFX.click();
+          applyFx(ch.fx);
+          state.crisesHandled++;
+          if (c.vfx === 'dust') { state.dustUntil = state.sol + 1; state.bs.clean = Math.max(0, state.bs.clean - 25); }
+          if (c.vfx === 'shake') { state.shake = 0.6; state.bs.morale = Math.max(0, state.bs.morale - 10); }
+          state.lastWallMessage = `${ch.msg} (${ch.label})`;
+          updateTopHUD();
+          if (state.insideBuilding) updateInteriorWallScreens();
+          logEvent(ch.msg, c.fact);
+          if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) { crisisEl.classList.remove('active'); endGame(false, 'A crisis drained your life support on Sol ' + state.sol + '.'); return; }
+          if (state.dose >= 100) { crisisEl.classList.remove('active'); endGame(false, 'A crisis pushed the crew past the radiation limit.'); return; }
+          $('cr-badge').textContent = 'RESULT';
+          $('cr-title').textContent = '✅ You chose: ' + ch.label;
+          $('cr-desc').textContent = ch.msg;
+          box.innerHTML = `<div class="cr-result">${fxChipsHTML(ch.fx)}</div>`;
+          const go = document.createElement('button'); go.type = 'button'; go.className = 'primary-cta'; go.style.marginTop = '0.8rem'; go.textContent = 'Continue ▶';
+          go.addEventListener('click', () => { SFX.click(); crisisEl.classList.remove('active'); requestFpsPointerLock(); });
+          box.appendChild(go);
+        });
+        box.appendChild(b);
+      });
+      crisisEl.classList.add('active');
+    }
+
+    // ---------------- day / night time-lapse when advancing a sol ----------------
+    let dayAnim = null;
+    const DAY_A0 = Math.atan2(34 / 49, 48 / 70);
+    function startDayAnim(fromSol) {
+      dayAnim = { p: 0 };
+      $('db-text').textContent = `SOL ${fromSol}  ▸  SOL ${fromSol + 1}`;
+      $('day-banner').classList.add('on');
+    }
+    function updateDayCycle(dt) {
+      if (!dayAnim) return;
+      dayAnim.p += dt / 3.4;
+      const p = Math.min(1, dayAnim.p), a = DAY_A0 + p * Math.PI * 2, sn = Math.sin(a);
+      sunMesh.position.set(Math.cos(a) * 70, Math.sin(a) * 49, -55); sunHalo.position.copy(sunMesh.position);
+      const f = Math.max(0, Math.min(1, sn * 2.2 + 0.3)), warm = 1 - Math.max(0, Math.min(1, sn * 2.5));
+      sunLight.intensity = 2.45 * f + 0.05; hemiLight.intensity = 0.85 * (0.22 + 0.78 * f); fillLight.intensity = 0.5 * (0.35 + 0.65 * f);
+      sunLight.color.setRGB(1, 0.93 - 0.35 * warm, 0.84 - 0.55 * warm);
+      renderer.toneMappingExposure = 1.15 * (0.8 + 0.2 * f);
+      $('db-icon').textContent = sn > 0.35 ? '☀️' : (sn > -0.1 ? '🌅' : '🌙');
+      $('db-fill').style.width = (p * 100) + '%';
+      if (p >= 1) {
+        sunMesh.position.set(48, 34, -55); sunHalo.position.copy(sunMesh.position);
+        sunLight.intensity = 2.45; hemiLight.intensity = 0.85; fillLight.intensity = 0.5; sunLight.color.setHex(0xffedd5); renderer.toneMappingExposure = 1.15;
+        dayAnim = null; $('day-banner').classList.remove('on');
+      }
+    }
+
+    // ---------------- labels shrink when you walk up to them ----------------
+    function updateLabelScale() {
+      const cp = camera.position;
+      FAC_IDS.forEach((id) => {
+        const p = LBL_POS[id], d = Math.hypot(cp.x - p[0], cp.y - p[1], cp.z - p[2]), L = labelSprites[id];
+        L.s.material.opacity = Math.max(0, Math.min(1, (d - 3.5) / 5));
+      });
+      siteLabelSprites.forEach((o) => {
+        const d = Math.hypot(cp.x - o.g.position.x, cp.y - (o.g.position.y + 19.2), cp.z - o.g.position.z);
+        o.s.material.opacity = Math.max(0, Math.min(1, (d - 6) / 10));
+      });
+    }
+
+    // ==================== v10.6: DOORS FOR EVERY MODULE, SOLID OBJECTS ====================
+    (function huts() {
+      function hut(id, label, cx, cz, w, d, h, col) {
+        const g = new THREE.Group(), zf = cz + d / 2, y0 = 0.25;
+        addBox(g, w, h, d, cx, y0 + h / 2, cz, col, { metal: 0.4, rough: 0.5 });
+        addBox(g, w + 0.14, 0.09, d + 0.14, cx, y0 + h + 0.045, cz, 0x475569, { metal: 0.6 });
+        addBox(g, w, 0.07, 0.07, cx, y0 + 0.35, zf + 0.01, 0x1e293b, { cast: false });
+        frameRect(g, cx, y0 + 0.78, zf + 0.03, 0.95, 1.5, 0.07, 0.1, STEEL, 'xy');
+        addBox(g, 0.8, 1.4, 0.05, cx, y0 + 0.74, zf + 0.02, 0x0f172a, { cast: false, metal: 0.5 });
+        addBox(g, 0.34, 0.3, 0.04, cx, y0 + 1.1, zf + 0.05, 0x7dd3fc, { cast: false, emissive: 0x38bdf8, emInt: 0.7 });
+        addBox(g, 0.06, 0.24, 0.05, cx + 0.3, y0 + 0.7, zf + 0.06, 0xe2e8f0, { cast: false, metal: 0.8 });
+        addBox(g, 0.6, 0.07, 0.06, cx, y0 + 1.62, zf + 0.04, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 1.1 });
+        for (const sx of [-1, 1]) addBox(g, 0.05, 0.9, 0.05, cx + sx * (w / 2 - 0.05), y0 + h / 2, zf + 0.02, 0x94a3b8, { cast: false, metal: 0.7 });
+        if (id === 'solar') {
+          for (let i = 0; i < 3; i++) addBox(g, 0.28, 0.2, 0.04, cx - w / 2 + 0.35 + i * 0.3, y0 + 1.2, cz - d / 2 - 0.02, 0x1d4ed8, { cast: false, emissive: 0x1e3a8a, emInt: 0.5 });
+          beacon(g, cx + w / 2 - 0.15, y0 + h + 0.4, cz, 0xfbbf24);
+        } else {
+          dmesh(g, new THREE.CylinderGeometry(0.02, 0.02, 0.8, 8), dm(0xcbd5e1, { metal: 0.8 }), cx + w / 2 - 0.2, y0 + h + 0.4, cz - 0.2);
+          beacon(g, cx + w / 2 - 0.2, y0 + h + 0.82, cz - 0.2, 0xef4444);
+        }
+        baseGroup.add(g);
+        registerFacility(id, label, [w + 0.3, h + 0.3, d + 0.5], [cx, y0 + h / 2, cz + 0.12], g);
+        EXTERIOR_PLATFORMS.push({ minX: cx - w / 2, maxX: cx + w / 2, minZ: cz - d / 2, maxZ: cz + d / 2, bottomY: y0, topY: y0 + h });
+      }
+      hut('solar', 'SOLAR PANEL ARRAY', -1.6, 4.15, 1.5, 1.3, 1.8, 0x1e3a8a);
+      hut('comms', 'DEEP-SPACE COMMS DISH', 4.9, 4.75, 1.5, 1.1, 1.8, 0x64748b);
+      EXTERIOR_RETURN_POS.solar.set(-1.6, 0.25, 5.2);
+      EXTERIOR_RETURN_POS.comms.set(4.9, 0.25, 5.3);
+      EXTERIOR_RETURN_POS.research.set(-4.1, 0.25, 4.2);
+      // rocket is a solid tower, comms mast is solid
+      const pad = EXTERIOR_PLATFORMS.find((b) => b.topY === 0.65);
+      if (pad) { pad.minX = PAD_POS.x - 1.2; pad.maxX = PAD_POS.x + 1.2; pad.minZ = PAD_POS.z - 1.2; pad.maxZ = PAD_POS.z + 1.2; pad.topY = 6.0; }
+      EXTERIOR_PLATFORMS.push({ minX: 0.38, maxX: 1.02, minZ: 3.78, maxZ: 4.42, bottomY: 0.9, topY: 4.2 });
+    })();
 
     // ==================== MAIN 3D ANIMATION LOOP ====================
     const clock = new THREE.Clock();
