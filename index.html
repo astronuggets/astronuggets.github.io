@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASTRONUGGETS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 45%, #0c1326 0%, #05070f 65%, #020307 100%);
+      font-family: 'Space Grotesk', sans-serif;
+      color: #ffffff;
+    }
+
+    canvas#space {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Subtle futuristic HUD grid overlay */
+    .hud-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+      -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
+    }
+
+    /* Center Hero Title */
+    .hero {
+      position: relative;
+      z-index: 3;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 1.5rem;
+      pointer-events: none;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+    }
+
+    h1.team-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.4rem, 8.5vw, 7.2rem);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      line-height: 1.05;
+      background: linear-gradient(135deg, #ffffff 15%, #bae6fd 50%, #38bdf8 80%, #818cf8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 28px rgba(56, 189, 248, 0.38));
+      animation: pulseGlow 4s ease-in-out infinite alternate;
+    }
+
+    .scanline {
+      width: min(420px, 70vw);
+      height: 2px;
+      margin-top: 1.5rem;
+      background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
+      box-shadow: 0 0 16px #38bdf8;
+      opacity: 0.85;
+    }
+
+    @keyframes pulseGlow {
+      from {
+        filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.3));
+      }
+      to {
+        filter: drop-shadow(0 0 42px rgba(129, 140, 248, 0.55));
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="space"></canvas>
+  <div class="hud-grid"></div>
+
+  <main class="hero">
+    <div class="badge">ORBITAL DIVISION // ONLINE</div>
+    <h1 class="team-title">ASTRONUGGETS</h1>
+    <div class="scanline"></div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById('space');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    const stars = [];
+    const asteroids = [];
+    const STAR_COUNT = 160;
+    const ASTEROID_COUNT = 22;
+
+    function resize() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // Background twinkling starfield
+    for (let i = 0; i < STAR_COUNT; i++) {
+      stars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 1.5 + 0.3,
+        alpha: Math.random() * 0.8 + 0.2,
+        twinkle: (Math.random() - 0.5) * 0.015
+      });
+    }
+
+    // Procedural jagged 3D-shaded asteroid generator
+    function createAsteroid(spawnOffscreen = false) {
+      const radius = Math.random() * 26 + 10;
+      const vertices = Math.floor(Math.random() * 6) + 9;
+      const offsets = [];
+      for (let i = 0; i < vertices; i++) {
+        offsets.push(0.72 + Math.random() * 0.45);
+      }
+
+      // Generate 2-3 surface craters per asteroid
+      const craters = [];
+      const craterCount = Math.floor(Math.random() * 3) + 1;
+      for (let c = 0; c < craterCount; c++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * (radius * 0.45);
+        craters.push({
+          cx: Math.cos(angle) * dist,
+          cy: Math.sin(angle) * dist,
+          cr: radius * (0.12 + Math.random() * 0.14)
+        });
+      }
+
+      // Diagonal trajectory drifting across screen
+      const speedX = (Math.random() * 1.6 + 0.55) * (radius / 22);
+      const speedY = (Math.random() - 0.35) * 0.7;
+
+      return {
+        x: spawnOffscreen ? -radius * 2 : Math.random() * width,
+        y: Math.random() * height,
+        radius,
+        offsets,
+        craters,
+        vx: speedX,
+        vy: speedY,
+        angle: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.018,
+        hue: Math.random() > 0.75 ? 205 : 220 // subtle cool slate vs metallic tint
+      };
+    }
+
+    for (let i = 0; i < ASTEROID_COUNT; i++) {
+      asteroids.push(createAsteroid(false));
+    }
+
+    function drawAsteroid(a) {
+      ctx.save();
+      ctx.translate(a.x, a.y);
+
+      // Faint motion trail
+      const trailGrad = ctx.createLinearGradient(-a.vx * 24, -a.vy * 24, 0, 0);
+      trailGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+      trailGrad.addColorStop(1, 'rgba(56, 189, 248, 0.12)');
+      ctx.strokeStyle = trailGrad;
+      ctx.lineWidth = a.radius * 0.55;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-a.vx * 22, -a.vy * 22);
+      ctx.lineTo(0, 0);
+      ctx.stroke();
+
+      ctx.rotate(a.angle);
+
+      // Rocky polygon path
+      ctx.beginPath();
+      const count = a.offsets.length;
+      for (let i = 0; i < count; i++) {
+        const theta = (i / count) * Math.PI * 2;
+        const r = a.radius * a.offsets[i];
+        const px = Math.cos(theta) * r;
+        const py = Math.sin(theta) * r;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+
+      // Directional sunlight gradient for depth
+      const rockGrad = ctx.createRadialGradient(
+        -a.radius * 0.35, -a.radius * 0.35, a.radius * 0.1,
+        0, 0, a.radius * 1.25
+      );
+      rockGrad.addColorStop(0, `hsl(${a.hue}, 24%, 46%)`);
+      rockGrad.addColorStop(0.55, `hsl(${a.hue}, 20%, 24%)`);
+      rockGrad.addColorStop(1, `hsl(${a.hue}, 25%, 10%)`);
+
+      ctx.fillStyle = rockGrad;
+      ctx.fill();
+
+      // Rim highlight
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(148, 197, 255, 0.25)';
+      ctx.stroke();
+
+      // Craters
+      for (const c of a.craters) {
+        ctx.beginPath();
+        ctx.arc(c.cx, c.cy, c.cr, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(8, 12, 24, 0.45)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(186, 230, 253, 0.12)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw stars
+      for (const s of stars) {
+        s.alpha += s.twinkle;
+        if (s.alpha <= 0.15 || s.alpha >= 1) s.twinkle *= -1;
+        ctx.fillStyle = `rgba(224, 242, 254, ${s.alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Update & draw asteroids
+      for (let i = 0; i < asteroids.length; i++) {
+        const a = asteroids[i];
+        a.x += a.vx;
+        a.y += a.vy;
+        a.angle += a.spin;
+
+        // Respawn smoothly when exiting viewport
+        if (a.x - a.radius * 2 > width || a.y - a.radius * 2 > height || a.y + a.radius * 2 < 0) {
+          asteroids[i] = createAsteroid(true);
+        }
+
+        drawAsteroid(a);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
