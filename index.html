@@ -106,12 +106,70 @@
       opacity: 0.85;
     }
 
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .launch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.95rem 2.2rem;
+      border-radius: 999px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #030712;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.48);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .launch-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 42px rgba(56, 189, 248, 0.8);
+    }
+
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.92rem 1.8rem;
+      border-radius: 999px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: #e0f2fe;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .secondary-btn:hover {
+      border-color: #38bdf8;
+      background: rgba(30, 41, 59, 0.85);
+      transform: translateY(-2px);
+    }
+
     .hero-hint {
-      margin-top: 1.25rem;
-      font-size: 0.85rem;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: rgba(186, 230, 253, 0.65);
+      color: rgba(186, 230, 253, 0.6);
     }
 
     .scroll-indicator {
@@ -186,59 +244,16 @@
     .panel p {
       color: #cbd5e1;
       line-height: 1.75;
-      font-size: 1.05rem;
-      margin-bottom: 1.25rem;
-    }
-
-    /* Team Roster Grid */
-    .team-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1.25rem;
-      margin-top: 1.5rem;
-    }
-
-    .member-card {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 14px;
-      padding: 1.35rem;
-      transition: border-color 0.25s ease, transform 0.25s ease;
-    }
-
-    .member-card:hover {
-      border-color: rgba(56, 189, 248, 0.55);
-      transform: translateY(-3px);
-    }
-
-    .member-role {
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: #38bdf8;
-      margin-bottom: 0.35rem;
-      display: block;
-    }
-
-    .member-card h3 {
-      font-size: 1.15rem;
-      color: #f8fafc;
-      margin-bottom: 0.45rem;
-    }
-
-    .member-card p {
-      font-size: 0.92rem;
-      line-height: 1.55;
+      font-size: 1.08rem;
       margin-bottom: 0;
-      color: #94a3b8;
     }
 
     /* Game Objectives Grid */
     .objectives-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
       gap: 1.25rem;
-      margin: 1.75rem 0 2.25rem;
+      margin-top: 2rem;
     }
 
     .objective-card {
@@ -262,56 +277,7 @@
     .objective-card p {
       font-size: 0.93rem;
       line-height: 1.6;
-      margin-bottom: 0;
       color: #94a3b8;
-    }
-
-    /* Launch Game CTA Box */
-    .launch-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.25rem;
-      padding: 1.5rem 1.75rem;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(14, 116, 144, 0.25), rgba(79, 70, 229, 0.22));
-      border: 1px solid rgba(56, 189, 248, 0.4);
-    }
-
-    .launch-text h3 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.15rem;
-      color: #ffffff;
-      margin-bottom: 0.25rem;
-    }
-
-    .launch-text span {
-      font-size: 0.92rem;
-      color: #bae6fd;
-    }
-
-    .launch-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.65rem;
-      padding: 0.95rem 2rem;
-      border-radius: 999px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 0.9rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: #030712;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      box-shadow: 0 0 28px rgba(56, 189, 248, 0.45);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .launch-btn:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 0 40px rgba(56, 189, 248, 0.75);
     }
 
     footer {
@@ -348,54 +314,42 @@
     <div class="badge">JUNIOR ASTRONAUT MISSION TRAINER</div>
     <h1 class="team-title">ASTRONUGGETS</h1>
     <div class="scanline"></div>
+
+    <div class="hero-actions">
+      <!-- Replace href="#game-link" with your actual game URL when ready -->
+      <a href="#game-link" class="launch-btn" target="_blank" rel="noopener">
+        Play Game &#9654;
+      </a>
+      <a href="#mission-briefing" class="secondary-btn">
+        Mission Briefing
+      </a>
+    </div>
+
     <p class="hero-hint">Move cursor to ignite thruster trail &amp; deflect incoming asteroids</p>
 
     <a href="#mission-briefing" class="scroll-indicator">
-      <span>Mission Briefing</span>
+      <span>Scroll Down</span>
       <div class="scroll-arrow"></div>
     </a>
   </header>
 
   <!-- Scrollable Team & Game Info -->
   <main id="mission-briefing" class="content-wrapper">
-    <!-- About Us & Team Section -->
+    <!-- About Us Section -->
     <section class="panel" id="about-team">
-      <span class="section-tag">01 // Crew &amp; Command</span>
+      <span class="section-tag">01 // Who We Are</span>
       <h2>About Team Astronuggets</h2>
       <p>
-        We are <strong>Astronuggets</strong>—a student engineering and aerospace simulation team building interactive tools that bring real spaceflight problem-solving to junior astronauts. Edit this paragraph anytime to share your team's story, school, or competition mission.
+        We are <strong>Astronuggets</strong>—a student engineering simulation team that brings extraterrestrial problem-solving to junior astronauts.
       </p>
-
-      <div class="team-grid">
-        <div class="member-card">
-          <span class="member-role">Systems &amp; Web Lead</span>
-          <h3>Crew Member 1</h3>
-          <p>Replace with your name and role—simulation logic, UI design, and mission architecture.</p>
-        </div>
-        <div class="member-card">
-          <span class="member-role">Game Mechanics</span>
-          <h3>Crew Member 2</h3>
-          <p>Replace with teammate name—resource balancing, solar events, and outpost modules.</p>
-        </div>
-        <div class="member-card">
-          <span class="member-role">Aerospace Research</span>
-          <h3>Crew Member 3</h3>
-          <p>Replace with teammate name—NASA OSDR radiation thresholds, RTG power, and comms latency.</p>
-        </div>
-        <div class="member-card">
-          <span class="member-role">Design &amp; Testing</span>
-          <h3>Crew Member 4</h3>
-          <p>Replace with teammate name—mission testing, graphics, and cadet training briefings.</p>
-        </div>
-      </div>
     </section>
 
     <!-- Game Overview & Objectives Section -->
     <section class="panel" id="about-game">
-      <span class="section-tag">02 // Simulation Overview</span>
-      <h2>About the Game &amp; Mission Objectives</h2>
+      <span class="section-tag">02 // Mission Objective</span>
+      <h2>Junior Astronaut Mission Trainer</h2>
       <p>
-        <strong>Junior Astronaut Mission Trainer</strong> is a turn-based deep-space habitat survival simulation. Every turn represents <strong>1 Sol</strong> (a Martian day) or Lunar Shift, where every kilowatt of power and liter of recycled water forces a real engineering trade-off.
+        The <strong>Junior Astronaut Mission Trainer</strong> is a deep-space habitat simulation designed to prepare future astronauts for off-world survival. Each turn represents one Martian day—known as a <strong>Sol</strong>—where every command carries a critical trade-off. From limited electrical power to shrinking water reserves, your resources deplete every single day, forcing you to balance crew survival, radiation defense, and scientific progress.
       </p>
 
       <div class="objectives-grid">
@@ -415,18 +369,6 @@
           <h3>4. Advance Space Science</h3>
           <p>Allocate spare energy to the Research Lab and Comms Array (with 3–22 min light-speed delay) to hit mission science goals.</p>
         </div>
-      </div>
-
-      <!-- Link to the Game -->
-      <div class="launch-bar">
-        <div class="launch-text">
-          <h3>Ready for Launch, Cadet?</h3>
-          <span>Enter the Command Outpost and start Sol 1.</span>
-        </div>
-        <!-- Replace href="#game-link" with your actual game URL when ready -->
-        <a href="#game-link" class="launch-btn" target="_blank" rel="noopener">
-          Launch Game &#9654;
-        </a>
       </div>
     </section>
   </main>
@@ -563,7 +505,6 @@
     }
 
     function drawMouseTrail() {
-      // Short glowing ribbon (fades out in ~12 frames)
       for (let i = trail.length - 1; i >= 0; i--) {
         trail[i].life -= 0.085;
         if (trail[i].life <= 0) {
@@ -582,12 +523,10 @@
           ctx.moveTo(p0.x, p0.y);
           ctx.lineTo(p1.x, p1.y);
           ctx.lineCap = 'round';
-          // Outer warm lighter-flame halo
           ctx.strokeStyle = `rgba(251, 146, 60, ${alpha * 0.55})`;
           ctx.lineWidth = alpha * 6.5;
           ctx.stroke();
 
-          // Inner bright white-gold core
           ctx.strokeStyle = `rgba(254, 249, 195, ${alpha * 0.95})`;
           ctx.lineWidth = alpha * 2.2;
           ctx.stroke();
@@ -595,7 +534,6 @@
         }
       }
 
-      // Tiny rising sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
         const sp = sparks[i];
         sp.x += sp.vx;
@@ -616,7 +554,6 @@
       ctx.save();
       ctx.translate(a.x, a.y);
 
-      // Motion trail
       const trailGrad = ctx.createLinearGradient(-a.vx * 20, -a.vy * 20, 0, 0);
       trailGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
       trailGrad.addColorStop(1, a.hitFlash > 0
@@ -632,7 +569,6 @@
 
       ctx.rotate(a.angle);
 
-      // Rocky polygon path
       ctx.beginPath();
       const count = a.offsets.length;
       for (let i = 0; i < count; i++) {
@@ -656,14 +592,12 @@
       ctx.fillStyle = rockGrad;
       ctx.fill();
 
-      // Rim highlight (flashes warm orange when deflected by cursor)
       ctx.lineWidth = a.hitFlash > 0 ? 2.2 : 1.2;
       ctx.strokeStyle = a.hitFlash > 0
         ? `rgba(253, 186, 116, ${0.4 + a.hitFlash * 0.6})`
         : 'rgba(148, 197, 255, 0.25)';
       ctx.stroke();
 
-      // Craters
       for (const c of a.craters) {
         ctx.beginPath();
         ctx.arc(c.cx, c.cy, c.cr, 0, Math.PI * 2);
@@ -680,7 +614,6 @@
     function animate() {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw stars
       for (const s of stars) {
         s.alpha += s.twinkle;
         if (s.alpha <= 0.15 || s.alpha >= 1) s.twinkle *= -1;
@@ -690,11 +623,9 @@
         ctx.fill();
       }
 
-      // Update & draw asteroids
       for (let i = 0; i < asteroids.length; i++) {
         const a = asteroids[i];
 
-        // Check collision with mouse cursor
         if (mouse.active) {
           const dx = a.x - mouse.x;
           const dy = a.y - mouse.y;
@@ -702,25 +633,20 @@
           const hitRadius = a.radius + 10;
 
           if (dist < hitRadius && dist > 0.001) {
-            // Normal vector pointing away from cursor
             const nx = dx / dist;
             const ny = dy / dist;
 
-            // Push asteroid outside cursor collision zone so it doesn't stick
             a.x = mouse.x + nx * (hitRadius + 2);
             a.y = mouse.y + ny * (hitRadius + 2);
 
-            // Apply deflection impulse combining radial push + mouse swipe velocity
             const cursorSpeed = Math.min(Math.hypot(mouse.vx, mouse.vy), 28);
             const impulse = 3.2 + cursorSpeed * 0.22;
             a.vx = nx * impulse + mouse.vx * 0.15;
             a.vy = ny * impulse + mouse.vy * 0.15;
 
-            // Add extra spin & impact flash
             a.spin += (Math.random() - 0.5) * 0.08;
             a.hitFlash = 1.0;
 
-            // Burst of deflection sparks
             for (let k = 0; k < 8; k++) {
               sparks.push({
                 x: mouse.x,
@@ -742,7 +668,6 @@
         a.y += a.vy;
         a.angle += a.spin;
 
-        // Respawn smoothly when exiting viewport
         if (
           a.x - a.radius * 2.5 > width ||
           a.x + a.radius * 2.5 < -80 ||
@@ -755,10 +680,8 @@
         drawAsteroid(a);
       }
 
-      // Draw short lighter-style mouse trail on top
       drawMouseTrail();
 
-      // Decay mouse velocity when cursor stops moving
       mouse.vx *= 0.8;
       mouse.vy *= 0.8;
 
