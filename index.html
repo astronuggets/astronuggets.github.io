@@ -27,7 +27,7 @@
       color: #f8fafc;
     }
 
-    /* Fixed Starfield, Asteroid & Mouse Trail Canvas */
+    /* Fixed Starfield, Asteroid & Pointer Trail Canvas */
     canvas#space {
       position: fixed;
       inset: 0;
@@ -139,6 +139,21 @@
       font-weight: 600;
     }
 
+    @media (max-width: 600px) {
+      .energy-hud {
+        top: 0.85rem;
+        right: 0.85rem;
+        width: 185px;
+        padding: 0.65rem 0.8rem;
+      }
+      .energy-header {
+        font-size: 0.6rem;
+      }
+      .energy-status {
+        font-size: 0.62rem;
+      }
+    }
+
     /* Full-Screen Hero Section */
     .hero {
       position: relative;
@@ -168,10 +183,19 @@
       box-shadow: 0 0 25px rgba(56, 189, 248, 0.22);
     }
 
+    @media (max-width: 600px) {
+      .badge {
+        font-size: 0.65rem;
+        letter-spacing: 0.18em;
+        padding: 0.45rem 0.95rem;
+        margin-top: 2.5rem;
+      }
+    }
+
     h1.team-title {
       font-family: 'Orbitron', sans-serif;
       font-weight: 900;
-      font-size: clamp(2.4rem, 8.5vw, 7.2rem);
+      font-size: clamp(2.1rem, 8.5vw, 7.2rem);
       letter-spacing: 0.14em;
       text-transform: uppercase;
       line-height: 1.05;
@@ -258,6 +282,7 @@
       text-transform: uppercase;
       color: rgba(186, 230, 253, 0.65);
       user-select: none;
+      max-width: 90vw;
     }
 
     .scroll-indicator {
@@ -309,6 +334,12 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+    }
+
+    @media (max-width: 600px) {
+      .panel {
+        padding: 1.65rem;
+      }
     }
 
     .section-tag {
@@ -408,8 +439,8 @@
       <div class="energy-fill" id="energy-fill"></div>
     </div>
     <div class="energy-status">
-      <span id="energy-mode">HOLD CLICK: CHARGE</span>
-      <span>SPACE: FIRE</span>
+      <span id="energy-mode">HOLD: CHARGE</span>
+      <span id="energy-sub">SPACE: FIRE</span>
     </div>
   </aside>
 
@@ -428,7 +459,7 @@
       </a>
     </div>
 
-    <p class="hero-hint">Hold Click to Charge Power &bull; Hold Space to Ignite Trail &amp; Fire Bolts</p>
+    <p class="hero-hint" id="hero-hint">Hold Click to Charge Power &bull; Hold Space to Ignite Trail &amp; Fire Bolts</p>
 
     <a href="#mission-briefing" class="scroll-indicator">
       <span>Scroll Down</span>
@@ -514,6 +545,8 @@
     const energyFillEl = document.getElementById('energy-fill');
     const energyPctEl = document.getElementById('energy-pct');
     const energyModeEl = document.getElementById('energy-mode');
+    const energySubEl = document.getElementById('energy-sub');
+    const heroHintEl = document.getElementById('hero-hint');
 
     let width, height;
     const stars = [];
@@ -523,8 +556,11 @@
     const bullets = [];
     const shockwaves = [];
 
-    const STAR_COUNT = 160;
-    const ASTEROID_COUNT = 22;
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (isTouchDevice) {
+      heroHintEl.textContent = 'Touch & Hold to Charge Power • Swipe Asteroids to Deflect';
+      energySubEl.textContent = 'SWIPE: HIT';
+    }
 
     let energy = 0;
     let isCharging = false;
@@ -532,7 +568,7 @@
     let lastShotTime = 0;
     const SHOT_INTERVAL_MS = 500;
 
-    const mouse = {
+    const pointer = {
       x: -9999,
       y: -9999,
       px: -9999,
@@ -541,15 +577,54 @@
       vy: 0,
       dirX: 1,
       dirY: 0,
-      active: false
+      active: false,
+      isTouch: false
     };
+
+    // Scale asteroid count & star count proportionally to screen area so mobile isn't crowded
+    function getTargetAsteroidCount() {
+      const area = window.innerWidth * window.innerHeight;
+      return Math.max(6, Math.min(22, Math.round(area / 72000)));
+    }
+
+    function getTargetStarCount() {
+      const area = window.innerWidth * window.innerHeight;
+      return Math.max(65, Math.min(160, Math.round(area / 10000)));
+    }
+
+    function syncStarCount() {
+      const target = getTargetStarCount();
+      while (stars.length < target) {
+        stars.push({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          r: Math.random() * 1.5 + 0.3,
+          alpha: Math.random() * 0.8 + 0.2,
+          twinkle: (Math.random() - 0.5) * 0.015
+        });
+      }
+      if (stars.length > target) {
+        stars.length = target;
+      }
+    }
+
+    function syncAsteroidCount() {
+      const target = getTargetAsteroidCount();
+      while (asteroids.length < target) {
+        asteroids.push(createAsteroid(false));
+      }
+      if (asteroids.length > target) {
+        asteroids.length = target;
+      }
+    }
 
     function resize() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
+      syncStarCount();
+      syncAsteroidCount();
     }
     window.addEventListener('resize', resize);
-    resize();
 
     function updateEnergyHUD() {
       const clamped = Math.max(0, Math.min(100, energy));
@@ -566,11 +641,59 @@
         energyModeEl.textContent = 'ENERGY READY';
         energyModeEl.classList.remove('active-mode');
       } else {
-        energyModeEl.textContent = 'HOLD CLICK: CHARGE';
+        energyModeEl.textContent = isTouchDevice ? 'HOLD: CHARGE' : 'HOLD CLICK: CHARGE';
         energyModeEl.classList.remove('active-mode');
       }
     }
 
+    function updatePointerPosition(clientX, clientY, isTouch = false) {
+      if (!pointer.active) {
+        pointer.px = clientX;
+        pointer.py = clientY;
+        pointer.active = true;
+      } else {
+        pointer.px = pointer.x;
+        pointer.py = pointer.y;
+      }
+
+      pointer.x = clientX;
+      pointer.y = clientY;
+      pointer.isTouch = isTouch;
+      pointer.vx = pointer.x - pointer.px;
+      pointer.vy = pointer.y - pointer.py;
+
+      const speed = Math.hypot(pointer.vx, pointer.vy);
+      if (speed > 0.5) {
+        pointer.dirX = pointer.vx / speed;
+        pointer.dirY = pointer.vy / speed;
+      }
+
+      const ignited = isSpaceHeld && energy > 0;
+
+      trail.push({
+        x: pointer.x,
+        y: pointer.y,
+        life: 1.0,
+        ignited
+      });
+
+      if (speed > 1.5 || ignited) {
+        const sparkCount = ignited ? 3 : 1;
+        for (let s = 0; s < sparkCount; s++) {
+          sparks.push({
+            x: pointer.x + (Math.random() - 0.5) * (ignited ? 10 : 4),
+            y: pointer.y + (Math.random() - 0.5) * (ignited ? 10 : 4),
+            vx: -pointer.vx * 0.12 + (Math.random() - 0.5) * (ignited ? 2.6 : 1.2),
+            vy: -pointer.vy * 0.12 - Math.random() * (ignited ? 1.8 : 0.9),
+            life: 1.0,
+            size: ignited ? Math.random() * 2.6 + 1.2 : Math.random() * 1.8 + 0.8,
+            ignited
+          });
+        }
+      }
+    }
+
+    // ==================== DESKTOP MOUSE EVENTS ====================
     window.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       if (e.target.closest('a, button')) return;
@@ -582,6 +705,49 @@
       isCharging = false;
     });
 
+    window.addEventListener('mousemove', (e) => {
+      updatePointerPosition(e.clientX, e.clientY, false);
+    });
+
+    window.addEventListener('mouseleave', () => {
+      pointer.active = false;
+      pointer.x = -9999;
+      pointer.y = -9999;
+    });
+
+    // ==================== MOBILE TOUCH EVENTS ====================
+    window.addEventListener('touchstart', (e) => {
+      if (e.target.closest('a, button')) return;
+      if (e.touches.length > 0) {
+        const t = e.touches[0];
+        pointer.active = false; // Reset prev position so velocity doesn't spike between taps
+        updatePointerPosition(t.clientX, t.clientY, true);
+        isCharging = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0) {
+        const t = e.touches[0];
+        updatePointerPosition(t.clientX, t.clientY, true);
+      }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      isCharging = false;
+      pointer.active = false;
+      pointer.x = -9999;
+      pointer.y = -9999;
+    });
+
+    window.addEventListener('touchcancel', () => {
+      isCharging = false;
+      pointer.active = false;
+      pointer.x = -9999;
+      pointer.y = -9999;
+    });
+
+    // ==================== KEYBOARD EVENTS ====================
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.target.matches('input, textarea')) {
         e.preventDefault();
@@ -600,70 +766,11 @@
       isSpaceHeld = false;
     });
 
-    window.addEventListener('mousemove', (e) => {
-      if (!mouse.active) {
-        mouse.px = e.clientX;
-        mouse.py = e.clientY;
-        mouse.active = true;
-      } else {
-        mouse.px = mouse.x;
-        mouse.py = mouse.y;
-      }
-
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-      mouse.vx = mouse.x - mouse.px;
-      mouse.vy = mouse.y - mouse.py;
-
-      const speed = Math.hypot(mouse.vx, mouse.vy);
-      if (speed > 0.5) {
-        mouse.dirX = mouse.vx / speed;
-        mouse.dirY = mouse.vy / speed;
-      }
-
-      const ignited = isSpaceHeld && energy > 0;
-
-      trail.push({
-        x: mouse.x,
-        y: mouse.y,
-        life: 1.0,
-        ignited
-      });
-
-      if (speed > 1.5 || ignited) {
-        const sparkCount = ignited ? 3 : 1;
-        for (let s = 0; s < sparkCount; s++) {
-          sparks.push({
-            x: mouse.x + (Math.random() - 0.5) * (ignited ? 10 : 4),
-            y: mouse.y + (Math.random() - 0.5) * (ignited ? 10 : 4),
-            vx: -mouse.vx * 0.12 + (Math.random() - 0.5) * (ignited ? 2.6 : 1.2),
-            vy: -mouse.vy * 0.12 - Math.random() * (ignited ? 1.8 : 0.9),
-            life: 1.0,
-            size: ignited ? Math.random() * 2.6 + 1.2 : Math.random() * 1.8 + 0.8,
-            ignited
-          });
-        }
-      }
-    });
-
-    window.addEventListener('mouseleave', () => {
-      mouse.active = false;
-      mouse.x = -9999;
-      mouse.y = -9999;
-    });
-
-    for (let i = 0; i < STAR_COUNT; i++) {
-      stars.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: Math.random() * 1.5 + 0.3,
-        alpha: Math.random() * 0.8 + 0.2,
-        twinkle: (Math.random() - 0.5) * 0.015
-      });
-    }
-
+    // ==================== ASTEROID GENERATOR ====================
     function createAsteroid(spawnOffscreen = false) {
-      const radius = Math.random() * 26 + 11;
+      // Slightly smaller asteroids on mobile screens so they don't dominate the viewport
+      const sizeScale = width < 600 ? 0.72 : 1.0;
+      const radius = (Math.random() * 24 + 10) * sizeScale;
       const vertices = Math.floor(Math.random() * 6) + 9;
       const offsets = [];
       for (let i = 0; i < vertices; i++) {
@@ -682,7 +789,7 @@
         });
       }
 
-      const baseSpeed = (Math.random() * 1.5 + 0.6) * (radius / 22);
+      const baseSpeed = (Math.random() * 1.45 + 0.55) * (radius / (22 * sizeScale));
       const margin = radius * 2.2;
       let x, y, vx, vy;
 
@@ -734,32 +841,31 @@
       };
     }
 
-    for (let i = 0; i < ASTEROID_COUNT; i++) {
-      asteroids.push(createAsteroid(false));
-    }
+    // Initialize viewport dimensions and entities
+    resize();
 
     function fireBullet() {
-      if (!mouse.active || energy <= 0) return;
+      if (!pointer.active || energy <= 0) return;
 
       const bulletCost = 8;
       energy = Math.max(0, energy - bulletCost);
 
       const speed = 15;
       bullets.push({
-        x: mouse.x,
-        y: mouse.y,
-        vx: mouse.dirX * speed,
-        vy: mouse.dirY * speed,
-        angle: Math.atan2(mouse.dirY, mouse.dirX),
+        x: pointer.x,
+        y: pointer.y,
+        vx: pointer.dirX * speed,
+        vy: pointer.dirY * speed,
+        angle: Math.atan2(pointer.dirY, pointer.dirX),
         life: 1.0
       });
 
       for (let k = 0; k < 7; k++) {
         sparks.push({
-          x: mouse.x,
-          y: mouse.y,
-          vx: mouse.dirX * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
-          vy: mouse.dirY * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
+          x: pointer.x,
+          y: pointer.y,
+          vx: pointer.dirX * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
+          vy: pointer.dirY * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
           life: 1.0,
           size: Math.random() * 2.2 + 1,
           ignited: true
@@ -767,13 +873,13 @@
       }
     }
 
-    function drawMouseTrail() {
+    function drawPointerTrail() {
       const ignited = isSpaceHeld && energy > 0;
 
-      if (ignited && mouse.active) {
+      if (ignited && pointer.active) {
         trail.push({
-          x: mouse.x + (Math.random() - 0.5) * 3,
-          y: mouse.y + (Math.random() - 0.5) * 3,
+          x: pointer.x + (Math.random() - 0.5) * 3,
+          y: pointer.y + (Math.random() - 0.5) * 3,
           life: 1.0,
           ignited: true
         });
@@ -823,11 +929,11 @@
         }
       }
 
-      if (mouse.active && (isCharging || energy > 0)) {
+      if (pointer.active && (isCharging || energy > 0)) {
         const radius = 5 + (energy / 100) * 6;
         ctx.save();
         ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, radius, 0, Math.PI * 2);
+        ctx.arc(pointer.x, pointer.y, radius, 0, Math.PI * 2);
         ctx.strokeStyle = isSpaceHeld && energy > 0
           ? 'rgba(56, 189, 248, 0.85)'
           : `rgba(251, 146, 60, ${0.3 + (energy / 100) * 0.65})`;
@@ -1028,33 +1134,35 @@
       for (let i = 0; i < asteroids.length; i++) {
         const a = asteroids[i];
 
-        if (mouse.active) {
-          const dx = a.x - mouse.x;
-          const dy = a.y - mouse.y;
+        if (pointer.active) {
+          const dx = a.x - pointer.x;
+          const dy = a.y - pointer.y;
           const dist = Math.hypot(dx, dy);
-          const cursorRadius = 5 + (energy / 100) * 6;
+          // Slightly more forgiving touch hitbox on fingers so swiping feels responsive
+          const baseCursorRadius = pointer.isTouch ? 14 : 5;
+          const cursorRadius = baseCursorRadius + (energy / 100) * 6;
           const hitRadius = a.radius + cursorRadius;
 
           if (dist < hitRadius && dist > 0.001) {
             const nx = dx / dist;
             const ny = dy / dist;
 
-            a.x = mouse.x + nx * (hitRadius + 2);
-            a.y = mouse.y + ny * (hitRadius + 2);
+            a.x = pointer.x + nx * (hitRadius + 2);
+            a.y = pointer.y + ny * (hitRadius + 2);
 
             const energyBoost = (energy / 100) * 13.5;
-            const cursorSpeed = Math.min(Math.hypot(mouse.vx, mouse.vy), 28);
+            const cursorSpeed = Math.min(Math.hypot(pointer.vx, pointer.vy), 28);
             const impulse = 3.2 + cursorSpeed * 0.22 + energyBoost;
 
-            a.vx = nx * impulse + mouse.vx * 0.15;
-            a.vy = ny * impulse + mouse.vy * 0.15;
+            a.vx = nx * impulse + pointer.vx * 0.15;
+            a.vy = ny * impulse + pointer.vy * 0.15;
             a.spin += (Math.random() - 0.5) * (0.08 + (energy / 100) * 0.18);
             a.hitFlash = 1.0;
 
             if (energy > 10) {
               shockwaves.push({
-                x: mouse.x,
-                y: mouse.y,
+                x: pointer.x,
+                y: pointer.y,
                 r: 6,
                 alpha: 0.95
               });
@@ -1063,8 +1171,8 @@
 
             for (let k = 0; k < 10; k++) {
               sparks.push({
-                x: mouse.x,
-                y: mouse.y,
+                x: pointer.x,
+                y: pointer.y,
                 vx: nx * (Math.random() * 4 + 1) + (Math.random() - 0.5) * 3,
                 vy: ny * (Math.random() * 4 + 1) + (Math.random() - 0.5) * 3,
                 life: 1.0,
@@ -1097,10 +1205,10 @@
       }
 
       drawBulletsAndShockwaves();
-      drawMouseTrail();
+      drawPointerTrail();
 
-      mouse.vx *= 0.8;
-      mouse.vy *= 0.8;
+      pointer.vx *= 0.8;
+      pointer.vy *= 0.8;
 
       requestAnimationFrame(animate);
     }
