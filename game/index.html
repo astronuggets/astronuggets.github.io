@@ -162,8 +162,17 @@
       border: 1px solid rgba(56, 189, 248, 0.4);
       padding: 0.42rem 1.15rem;
       border-radius: 999px;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1rem;
       box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .precharge-banner {
+      display: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      color: #34d399;
+      margin-bottom: 0.85rem;
     }
 
     .scene-title {
@@ -321,13 +330,14 @@
         <span class="pulse-dot"></span>
         <span>ASTRONUGGETS // TRANSMISSION</span>
       </div>
-      <a href="/" class="home-link" id="home-link">&#8592; Home</a>
+      <a href="index.html" class="home-link" id="home-link">&#8592; Home</a>
     </div>
 
     <!-- Center Cutscene Briefing Box -->
     <section class="transmission-card" aria-live="polite">
       <div class="phase-badge" id="phase-badge">TRANSMISSION 01 // ARRIVAL</div>
-      <h1 class="scene-title" id="scene-title">ORBITAL INSERTION</h1>
+      <div class="precharge-banner" id="precharge-banner"></div>
+      <h1 class="scene-title" id="scene-title">MARS INSERTION // JEZERO SECTOR</h1>
       <div class="scanline"></div>
       <p class="dialogue-box">
         <span id="dialogue-text"></span><span class="cursor-bar"></span>
@@ -346,8 +356,7 @@
         <button type="button" class="next-btn" id="next-btn">
           Next &#9654;
         </button>
-        <!-- Replace #your-game-url with your actual game link when ready -->
-        <a href="#your-game-url" class="skip-btn" id="skip-link">
+        <a href="play.html" class="skip-btn" id="skip-link">
           Skip Intro
         </a>
       </div>
@@ -356,8 +365,7 @@
 
   <script>
     // ==================== GAME DESTINATION URL ====================
-    // Replace '#your-game-url' with the URL to your actual game when ready:
-    const GAME_DESTINATION_URL = '#your-game-url';
+    const GAME_DESTINATION_URL = 'play.html';
 
     const transitionEl = document.getElementById('page-transition');
     const homeLink = document.getElementById('home-link');
@@ -365,6 +373,7 @@
     const ctx = canvas.getContext('2d');
 
     const phaseBadgeEl = document.getElementById('phase-badge');
+    const prechargeBannerEl = document.getElementById('precharge-banner');
     const sceneTitleEl = document.getElementById('scene-title');
     const dialogueTextEl = document.getElementById('dialogue-text');
     const nextBtn = document.getElementById('next-btn');
@@ -372,6 +381,13 @@
     const dots = document.querySelectorAll('.dot');
 
     skipLink.href = GAME_DESTINATION_URL;
+
+    // Check if player charged deflector energy on index.html
+    const carriedEnergy = Number(sessionStorage.getItem('astronuggets_deflector_energy') || 0);
+    if (carriedEnergy > 0) {
+      prechargeBannerEl.style.display = 'block';
+      prechargeBannerEl.textContent = `DEFLECTOR CAPACITOR CARRIED OVER: ${carriedEnergy}% (+${carriedEnergy >= 50 ? '2' : '1'} BONUS SCRAP)`;
+    }
 
     // Smooth fade-in on arrival
     requestAnimationFrame(() => {
@@ -396,10 +412,8 @@
     });
 
     skipLink.addEventListener('click', (e) => {
-      if (!GAME_DESTINATION_URL.startsWith('#')) {
-        e.preventDefault();
-        navigateWithFade(GAME_DESTINATION_URL);
-      }
+      e.preventDefault();
+      navigateWithFade(GAME_DESTINATION_URL);
     });
 
     window.addEventListener('pageshow', (e) => {
@@ -428,22 +442,22 @@
 
     const scenes = [
       {
-        badge: 'TRANSMISSION 01 // ARRIVAL',
-        title: 'DEEP SPACE INSERTION',
-        text: 'Welcome, Cadet. Your vessel has cleared the outer asteroid belt and entered orbit above the Martian frontier. Signal delay to Earth is up to 22 minutes—command authority now rests with you.',
-        planetRadiusFactor: 0.18
+        badge: 'TRANSMISSION 01 // ORBITAL ARRIVAL',
+        title: 'MARS INSERTION // JEZERO SECTOR',
+        text: 'Welcome, Cadet. Your vessel has cleared the outer asteroid belt and entered orbit above Mars. One-way signal delay to Earth varies from 3 to 22 minutes—command authority now rests with you.',
+        planetRadiusFactor: 0.19
       },
       {
-        badge: 'TRANSMISSION 02 // HAZARD BRIEFING',
+        badge: 'TRANSMISSION 02 // REAL NASA TELEMETRY',
         title: 'SOLAR STORMS & RESOURCE DRAIN',
-        text: 'Each Martian day—called a Sol—depletes your oxygen, water, power, and supplies. Incoming solar flares and dust storms will force tough trade-offs between shielding, life support, and research.',
-        planetRadiusFactor: 0.26
+        text: 'Each Martian day—called a Sol—depletes O₂, H₂O, power, and rations. Incoming Solar Particle Events and dust storms will force tough kilowatt trade-offs across MOXIE, ECLSS water recycling, and magnetic shielding.',
+        planetRadiusFactor: 0.27
       },
       {
-        badge: 'TRANSMISSION 03 // READY FOR LAUNCH',
+        badge: 'TRANSMISSION 03 // READY FOR TOUCHDOWN',
         title: 'JUNIOR ASTRONAUT MISSION TRAINER',
-        text: 'Step into the command console, balance your outpost systems, and keep your crew alive. Your mission begins now.',
-        planetRadiusFactor: 0.34
+        text: 'Step into the command console, dispatch your crew through pressurized tunnels and EVA airlocks, and survive 20 Sols on the Martian frontier.',
+        planetRadiusFactor: 0.35
       }
     ];
 
@@ -473,7 +487,7 @@
       updateDots(index);
 
       if (index === scenes.length - 1) {
-        nextBtn.innerHTML = 'Start Mission &#9654;';
+        nextBtn.innerHTML = 'Launch Console &#9654;';
       } else {
         nextBtn.innerHTML = 'Next &#9654;';
       }
@@ -529,28 +543,30 @@
       const cx = width / 2;
       const cy = height + currentPlanetR * 0.62;
 
+      // Martian Rust Atmospheric Glow
       const glow = ctx.createRadialGradient(cx, cy, currentPlanetR * 0.75, cx, cy, currentPlanetR * 1.35);
-      glow.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
-      glow.addColorStop(0.5, 'rgba(129, 140, 248, 0.1)');
+      glow.addColorStop(0, 'rgba(251, 146, 60, 0.26)');
+      glow.addColorStop(0.5, 'rgba(239, 68, 68, 0.1)');
       glow.addColorStop(1, 'rgba(2, 3, 7, 0)');
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(cx, cy, currentPlanetR * 1.35, 0, Math.PI * 2);
       ctx.fill();
 
+      // Mars Surface Sphere
       const sphere = ctx.createRadialGradient(
         cx - currentPlanetR * 0.25, cy - currentPlanetR * 0.6, currentPlanetR * 0.1,
         cx, cy, currentPlanetR
       );
-      sphere.addColorStop(0, '#1e3a8a');
-      sphere.addColorStop(0.45, '#0f172a');
-      sphere.addColorStop(1, '#02040a');
+      sphere.addColorStop(0, '#c2410c');
+      sphere.addColorStop(0.48, '#7c2d12');
+      sphere.addColorStop(1, '#1c0a06');
       ctx.fillStyle = sphere;
       ctx.beginPath();
       ctx.arc(cx, cy, currentPlanetR, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.strokeStyle = 'rgba(251, 146, 60, 0.42)';
       ctx.lineWidth = 1.5;
       ctx.stroke();
 
