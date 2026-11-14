@@ -492,8 +492,8 @@
       py: -9999,
       vx: 0,
       vy: 0,
-      dirX: 1, // Last normalized movement direction X
-      dirY: 0, // Last normalized movement direction Y
+      dirX: 1,
+      dirY: 0,
       active: false
     };
 
@@ -527,7 +527,6 @@
     // Hold Left-Click to charge energy bar
     window.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
-      // Don't hijack link clicks
       if (e.target.closest('a, button')) return;
       isCharging = true;
     });
@@ -580,7 +579,6 @@
 
       const ignited = isSpaceHeld && energy > 0;
 
-      // Add short-lived lighter/plasma trail points
       trail.push({
         x: mouse.x,
         y: mouse.y,
@@ -588,7 +586,6 @@
         ignited
       });
 
-      // Spawn embers along trail
       if (speed > 1.5 || ignited) {
         const sparkCount = ignited ? 3 : 1;
         for (let s = 0; s < sparkCount; s++) {
@@ -622,7 +619,7 @@
       });
     }
 
-    // Procedural jagged 3D-shaded asteroid generator
+    // Procedural jagged 3D-shaded asteroid generator spawning from ALL 4 sides
     function createAsteroid(spawnOffscreen = false) {
       const radius = Math.random() * 26 + 11;
       const vertices = Math.floor(Math.random() * 6) + 9;
@@ -643,17 +640,57 @@
         });
       }
 
-      const speedX = (Math.random() * 1.6 + 0.55) * (radius / 22);
-      const speedY = (Math.random() - 0.35) * 0.7;
+      const baseSpeed = (Math.random() * 1.5 + 0.6) * (radius / 22);
+      const margin = radius * 2.2;
+      let x, y, vx, vy;
+
+      if (!spawnOffscreen) {
+        // Initial scatter across viewport moving in random directions
+        x = Math.random() * width;
+        y = Math.random() * height;
+        const angle = Math.random() * Math.PI * 2;
+        vx = Math.cos(angle) * baseSpeed;
+        vy = Math.sin(angle) * baseSpeed;
+      } else {
+        // Pick one of 4 sides: 0 = left, 1 = right, 2 = top, 3 = bottom
+        const side = Math.floor(Math.random() * 4);
+        const spread = (Math.random() - 0.5) * 1.1; // +/- ~31 deg inward angle
+
+        if (side === 0) {
+          // Left edge -> moving right
+          x = -margin;
+          y = Math.random() * height;
+          vx = Math.cos(spread) * baseSpeed;
+          vy = Math.sin(spread) * baseSpeed;
+        } else if (side === 1) {
+          // Right edge -> moving left
+          x = width + margin;
+          y = Math.random() * height;
+          vx = -Math.cos(spread) * baseSpeed;
+          vy = Math.sin(spread) * baseSpeed;
+        } else if (side === 2) {
+          // Top edge -> moving down
+          x = Math.random() * width;
+          y = -margin;
+          vx = Math.sin(spread) * baseSpeed;
+          vy = Math.cos(spread) * baseSpeed;
+        } else {
+          // Bottom edge -> moving up
+          x = Math.random() * width;
+          y = height + margin;
+          vx = Math.sin(spread) * baseSpeed;
+          vy = -Math.cos(spread) * baseSpeed;
+        }
+      }
 
       return {
-        x: spawnOffscreen ? -radius * 2 : Math.random() * width,
-        y: Math.random() * height,
+        x,
+        y,
         radius,
         offsets,
         craters,
-        vx: speedX,
-        vy: speedY,
+        vx,
+        vy,
         angle: Math.random() * Math.PI * 2,
         spin: (Math.random() - 0.5) * 0.018,
         hue: Math.random() > 0.75 ? 205 : 220,
@@ -681,7 +718,6 @@
         life: 1.0
       });
 
-      // Muzzle flash sparks
       for (let k = 0; k < 7; k++) {
         sparks.push({
           x: mouse.x,
@@ -698,7 +734,6 @@
     function drawMouseTrail() {
       const ignited = isSpaceHeld && energy > 0;
 
-      // If holding Space while stationary, keep feeding a glowing flame around the cursor
       if (ignited && mouse.active) {
         trail.push({
           x: mouse.x + (Math.random() - 0.5) * 3,
@@ -728,7 +763,6 @@
           ctx.lineCap = 'round';
 
           if (p1.ignited) {
-            // Bright overcharged plasma flame when Space is held
             ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 0.75})`;
             ctx.lineWidth = alpha * 14;
             ctx.stroke();
@@ -741,7 +775,6 @@
             ctx.lineWidth = alpha * 3;
             ctx.stroke();
           } else {
-            // Subtle short-lived lighter flame during normal movement
             ctx.strokeStyle = `rgba(251, 146, 60, ${alpha * 0.55})`;
             ctx.lineWidth = alpha * 6.5;
             ctx.stroke();
@@ -754,16 +787,16 @@
         }
       }
 
-      // Charging aura ring around cursor when holding Click
+      // Compact charging ring around cursor (5px to 11px)
       if (mouse.active && (isCharging || energy > 0)) {
-        const radius = 10 + (energy / 100) * 18;
+        const radius = 5 + (energy / 100) * 6;
         ctx.save();
         ctx.beginPath();
         ctx.arc(mouse.x, mouse.y, radius, 0, Math.PI * 2);
         ctx.strokeStyle = isSpaceHeld && energy > 0
           ? 'rgba(56, 189, 248, 0.85)'
-          : `rgba(251, 146, 60, ${0.25 + (energy / 100) * 0.65})`;
-        ctx.lineWidth = isCharging ? 2.5 : 1.5;
+          : `rgba(251, 146, 60, ${0.3 + (energy / 100) * 0.65})`;
+        ctx.lineWidth = isCharging ? 1.8 : 1.2;
         ctx.stroke();
         ctx.restore();
       }
@@ -788,11 +821,10 @@
     }
 
     function drawBulletsAndShockwaves() {
-      // Shockwaves from charged asteroid hits
       for (let i = shockwaves.length - 1; i >= 0; i--) {
         const sw = shockwaves[i];
-        sw.r += 7;
-        sw.alpha -= 0.05;
+        sw.r += 6;
+        sw.alpha -= 0.055;
         if (sw.alpha <= 0) {
           shockwaves.splice(i, 1);
           continue;
@@ -801,30 +833,26 @@
         ctx.beginPath();
         ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
         ctx.strokeStyle = `rgba(56, 189, 248, ${sw.alpha})`;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2.5;
         ctx.stroke();
         ctx.restore();
       }
 
-      // Plasma bolts fired while holding Space
       for (let i = bullets.length - 1; i >= 0; i--) {
         const b = bullets[i];
         b.x += b.vx;
         b.y += b.vy;
 
-        // Remove off-screen bullets
         if (b.x < -50 || b.x > width + 50 || b.y < -50 || b.y > height + 50) {
           bullets.splice(i, 1);
           continue;
         }
 
-        // Check bullet collision with asteroids
         let hit = false;
         for (let j = 0; j < asteroids.length; j++) {
           const a = asteroids[j];
           const dist = Math.hypot(a.x - b.x, a.y - b.y);
           if (dist < a.radius + 8) {
-            // Deflect asteroid strongly in the bullet's travel direction
             const bSpeed = Math.hypot(b.vx, b.vy);
             const nx = b.vx / bSpeed;
             const ny = b.vy / bSpeed;
@@ -834,7 +862,7 @@
             a.spin += (Math.random() - 0.5) * 0.15;
             a.hitFlash = 1.0;
 
-            shockwaves.push({ x: b.x, y: b.y, r: 6, alpha: 0.9 });
+            shockwaves.push({ x: b.x, y: b.y, r: 5, alpha: 0.9 });
 
             for (let k = 0; k < 10; k++) {
               sparks.push({
@@ -858,7 +886,6 @@
           continue;
         }
 
-        // Draw glowing plasma bolt
         ctx.save();
         ctx.translate(b.x, b.y);
         ctx.rotate(b.angle);
@@ -941,14 +968,12 @@
     function animate(now) {
       ctx.clearRect(0, 0, width, height);
 
-      // Charge energy while holding left-click
       if (isCharging) {
         energy = Math.min(100, energy + 0.9);
       }
 
-      // Drain energy & fire bullets every 0.5s while holding Space
       if (isSpaceHeld && energy > 0) {
-        energy = Math.max(0, energy - 0.12); // Trail ignition sustain drain
+        energy = Math.max(0, energy - 0.12);
         if (now - lastShotTime >= SHOT_INTERVAL_MS) {
           fireBullet();
           lastShotTime = now;
@@ -973,7 +998,8 @@
           const dx = a.x - mouse.x;
           const dy = a.y - mouse.y;
           const dist = Math.hypot(dx, dy);
-          const hitRadius = a.radius + 10 + (energy / 100) * 14;
+          const cursorRadius = 5 + (energy / 100) * 6;
+          const hitRadius = a.radius + cursorRadius;
 
           if (dist < hitRadius && dist > 0.001) {
             const nx = dx / dist;
@@ -982,7 +1008,6 @@
             a.x = mouse.x + nx * (hitRadius + 2);
             a.y = mouse.y + ny * (hitRadius + 2);
 
-            // Use stored energy to launch the asteroid much further
             const energyBoost = (energy / 100) * 13.5;
             const cursorSpeed = Math.min(Math.hypot(mouse.vx, mouse.vy), 28);
             const impulse = 3.2 + cursorSpeed * 0.22 + energyBoost;
@@ -996,10 +1021,9 @@
               shockwaves.push({
                 x: mouse.x,
                 y: mouse.y,
-                r: 10,
+                r: 6,
                 alpha: 0.95
               });
-              // Consume energy used for the power hit
               energy = 0;
             }
 
@@ -1025,11 +1049,12 @@
         a.y += a.vy;
         a.angle += a.spin;
 
+        const outMargin = a.radius * 3;
         if (
-          a.x - a.radius * 2.5 > width ||
-          a.x + a.radius * 2.5 < -80 ||
-          a.y - a.radius * 2.5 > height ||
-          a.y + a.radius * 2.5 < -80
+          a.x > width + outMargin ||
+          a.x < -outMargin ||
+          a.y > height + outMargin ||
+          a.y < -outMargin
         ) {
           asteroids[i] = createAsteroid(true);
         }
