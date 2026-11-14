@@ -220,6 +220,80 @@
     .action-cost { color: #fb923c; font-size: 0.7rem; }
 
     @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+  
+    /* ===== v10 additions ===== */
+    #toast { position: fixed; left: 50%; bottom: 7.2rem; transform: translate(-50%, 12px); z-index: 60; background: rgba(8,13,26,0.94); border: 1px solid #38bdf8; color: #e0f2fe; padding: 0.5rem 1rem; border-radius: 999px; font-size: 0.82rem; opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; max-width: 90vw; text-align: center; }
+    #toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .set-row { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid rgba(148,163,184,0.15); text-align: left; }
+    .set-row b { display: block; color: #fff; font-size: 0.92rem; }
+    .set-row span { display: block; color: #94a3b8; font-size: 0.76rem; line-height: 1.35; }
+    .set-ctl { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+    .set-ctl input[type=range] { width: 120px; accent-color: #38bdf8; }
+    .chips { display: flex; gap: 0.35rem; flex-wrap: wrap; justify-content: flex-end; }
+    .chip { background: #0f172a; color: #cbd5e1; border: 1px solid #334155; border-radius: 999px; padding: 0.28rem 0.75rem; font-size: 0.76rem; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 0.35rem; }
+    .chip.on { background: #0c4a6e; border-color: #38bdf8; color: #fff; }
+    .chip:hover { border-color: #7dd3fc; }
+    .set-gloss { margin: 0.8rem 0; padding: 0.7rem 0.85rem; border-radius: 10px; background: rgba(15,23,42,0.8); color: #cbd5e1; font-size: 0.78rem; line-height: 1.55; text-align: left; }
+    .set-btns { display: grid; gap: 0.4rem; }
+    #stats-canvas { width: 100%; height: 270px; display: block; background: #070d1c; border: 1px solid #1e3a5f; border-radius: 10px; }
+    #stats-legend { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0; }
+    #stats-table table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-bottom: 0.7rem; }
+    #stats-table th, #stats-table td { padding: 0.3rem 0.4rem; text-align: right; border-bottom: 1px solid rgba(148,163,184,0.15); color: #e2e8f0; }
+    #stats-table th:first-child, #stats-table td:first-child { text-align: left; }
+    #stats-table th { color: #7dd3fc; font-weight: 600; }
+    #stats-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.4rem; margin-bottom: 1rem; }
+    .st-tile { background: rgba(15,23,42,0.85); border: 1px solid #1e3a5f; border-radius: 10px; padding: 0.4rem 0.6rem; text-align: left; }
+    .st-tile span { display: block; color: #94a3b8; font-size: 0.7rem; }
+    .st-tile b { color: #fff; font-size: 0.95rem; }
+    #end-cut { position: fixed; inset: 0; z-index: 40; display: none; flex-direction: column; justify-content: flex-end; align-items: center; padding: 1.2rem 1rem 1.6rem; background: linear-gradient(180deg, rgba(4,7,16,0.75) 0%, rgba(4,7,16,0.15) 38%, rgba(4,7,16,0.55) 100%); }
+    #end-cut.active { display: flex; }
+    #ec-card { width: min(780px, 94vw); background: rgba(8,13,26,0.9); border: 1px solid rgba(56,189,248,0.55); border-radius: 18px; padding: 1.3rem 1.5rem; text-align: center; backdrop-filter: blur(10px); opacity: 0; transform: translateY(18px); }
+    #ec-card.in { opacity: 1; transform: none; transition: opacity .6s, transform .6s; }
+    #ec-card h2 { font-family: 'Orbitron', sans-serif; font-size: 1.45rem; color: #fff; margin: 0.3rem 0 0.5rem; }
+    .ec-msg, .ec-fact { color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; margin: 0 0 0.9rem; }
+    .ec-fact { font-size: 1.05rem; }
+    .ec-src { color: #64748b; font-size: 0.72rem; margin: 0; }
+    .ec-bigemo { font-size: 3.2rem; line-height: 1; }
+    .ec-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
+    .ec-tile { background: rgba(15,23,42,0.85); border: 1px solid #1e3a5f; border-radius: 12px; padding: 0.55rem 0.4rem; }
+    .ec-emo { font-size: 1.3rem; }
+    .ec-val { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: #38bdf8; }
+    .ec-lbl { color: #94a3b8; font-size: 0.72rem; }
+    .ec-stars { font-size: 3rem; color: #fbbf24; letter-spacing: 0.2em; } .ec-stars span { color: #334155; }
+    .ec-ctrl { display: flex; gap: 0.6rem; margin-top: 0.8rem; align-items: center; }
+    #ec-dots { display: flex; gap: 6px; margin-top: 0.7rem; } #ec-dots i { width: 8px; height: 8px; border-radius: 50%; background: #334155; display: block; } #ec-dots i.on { background: #38bdf8; }
+    body.mode-ending .bottom-hud, body.mode-ending .minimap-wrap, body.mode-ending .fps-controls-bar, body.mode-ending #fps-reticle, body.mode-ending #fps-prompt, body.mode-ending #exit-building-btn, body.mode-ending #toggle-fps-btn, body.mode-ending #replay-cutscene-btn, body.mode-ending #reset-cam-btn { display: none !important; }
+
+    /* ===== v10.1 smooth overlays ===== */
+    #hover-tag { display: block !important; opacity: 0; transform: translate(14px, 16px); transition: opacity .18s ease, left .07s linear, top .07s linear; will-change: opacity, left, top; }
+    .fps-prompt { display: block !important; opacity: 0; transform: translate(-50%, 6px); transition: opacity .2s ease, transform .2s ease; }
+    body.mode-game.fps-active .fps-prompt.visible { opacity: 1; transform: translate(-50%, 0); }
+    .fps-reticle { display: block !important; opacity: 0; transition: opacity .25s ease, transform .15s ease; }
+    body.mode-game.fps-active .fps-reticle { opacity: 1; }
+    .fps-reticle::before, .fps-reticle::after { transition: background .15s ease, box-shadow .15s ease; }
+    .fps-reticle.locked-target { transform: translate(-50%, -50%) scale(1.3); }
+    .fps-controls-bar { display: block !important; opacity: 0; transition: opacity .35s ease; }
+    body.mode-game.fps-active .fps-controls-bar { opacity: 1; }
+    .modal-backdrop.active { animation: fadeIn .22s ease; }
+    .modal-backdrop.active .modal-card { animation: popIn .26s cubic-bezier(.2,.9,.3,1.2); }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+    .how-sec { background: rgba(15,23,42,0.75); border: 1px solid #1e3a5f; border-radius: 12px; margin: 0.55rem 0; padding: 0.15rem 0.9rem; }
+    .how-sec > summary { cursor: pointer; font-family: 'Orbitron', sans-serif; font-size: 0.86rem; color: #7dd3fc; padding: 0.6rem 0; list-style: none; }
+    .how-sec > summary::-webkit-details-marker { display: none; }
+    .how-sec > summary::after { content: '+'; float: right; color: #64748b; } .how-sec[open] > summary::after { content: '–'; }
+    .how-body { padding-bottom: 0.7rem; color: #cbd5e1; font-size: 0.86rem; line-height: 1.55; }
+    .how-body p { margin: 0 0 0.5rem; font-size: 0.86rem; }
+    .how-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 0.45rem; }
+    .how-item { background: rgba(7,12,24,0.8); border-radius: 10px; padding: 0.5rem 0.65rem; border-left: 3px solid #38bdf8; }
+    .how-item b { color: #fff; display: block; } .how-item small { color: #94a3b8; font-size: 0.76rem; display: block; margin-top: 2px; line-height: 1.4; }
+    .how-keys { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 0.8rem; align-items: center; }
+    .how-keys kbd { background: #0f172a; border: 1px solid #475569; border-bottom-width: 3px; border-radius: 6px; padding: 1px 8px; color: #e2e8f0; font-size: 0.78rem; font-family: 'Orbitron', sans-serif; justify-self: start; }
+    .how-steps { counter-reset: st; list-style: none; padding: 0; margin: 0; } .how-steps li { counter-increment: st; padding-left: 2rem; position: relative; margin-bottom: 0.45rem; }
+    .how-steps li::before { content: counter(st); position: absolute; left: 0; top: 0; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #0c4a6e; color: #fff; text-align: center; font-size: 0.78rem; line-height: 1.4rem; font-family: 'Orbitron', sans-serif; }
+    #stats-table td.mean { text-align: left; color: #94a3b8; font-size: 0.72rem; }
+    .stats-note { color: #94a3b8; font-size: 0.78rem; line-height: 1.5; margin: 0.4rem 0 0.2rem; }
+    @media (max-width: 700px) { .set-row { flex-direction: column; align-items: flex-start; } }
   </style>
 
   <script type="importmap">
@@ -263,6 +337,7 @@
       <div class="hud-pill game-only" id="pill-dose">DOSE <strong id="hud-dose">0%</strong></div>
       <div class="hud-pill game-only" id="pill-pwr">POWER <strong id="hud-pwr">9 kW</strong></div>
       <div class="hud-pill game-only" id="pill-batt">BATT <strong id="hud-batt">0 kW</strong></div>
+      <div class="hud-pill game-only" id="pill-next" title="Estimated power next sol after standby costs">NEXT SOL <strong id="hud-next">~0 kW</strong></div>
       <div class="hud-pill good game-only">SCIENCE <strong id="hud-sci">0 / 80</strong></div>
       <div class="hud-pill game-only">SCRAP <strong id="hud-scrap">4</strong></div>
     </div>
@@ -272,6 +347,7 @@
       <button type="button" class="nav-btn game-only" id="toggle-fps-btn">First-Person EVA [V]</button>
       <button type="button" class="nav-btn" id="help-btn">How To Play</button>
       <button type="button" class="nav-btn" id="sound-btn">Sound: On</button>
+      <button type="button" class="nav-btn" id="settings-btn">&#9881; Settings</button>
       <button type="button" class="nav-btn game-only" id="replay-cutscene-btn">Replay Cutscene</button>
       <button type="button" class="nav-btn" id="reset-cam-btn">Reset View</button>
     </div>
@@ -317,11 +393,49 @@
     <div class="modal-card" style="max-width:640px;text-align:left;max-height:88vh;overflow-y:auto;">
       <div class="drawer-tag">MISSION BRIEFING</div>
       <h2 style="font-size:1.3rem;">How to Survive on Mars</h2>
-      <p style="margin-bottom:0.7rem;"><b>Goal:</b> Collect <b>80 Science</b> in <b>20 Sols</b> without letting O₂, H₂O, or Food hit 0%, and keeping Crew Radiation Dose below 100%.</p>
-      <p style="margin-bottom:0.7rem;"><b>Step Inside Every Building:</b> Click any of the 5 buildings outside (or press <b>E</b> near one) to walk inside its 3D interior! Walk up to the <b>physical 3D wall buttons</b>, press <b>E</b> or <b>Click</b>, and watch the live <b>3D wall screens</b> update.</p>
-      <p style="margin-bottom:0.7rem;"><b>Jump on Top of Things:</b> Press <b>Spacebar</b> in Mars low-gravity to jump onto cargo crates, lab tables, hydroponic beds, battery banks, cryo tanks, and even climb onto the building roofs outside!</p>
-      <p style="margin-bottom:0.7rem;"><b>Watch the Forecast:</b> Real NASA DONKI solar flares and Mars dust storms hit between Sols. Stow solar panels before dust storms and activate the Storm Shelter during solar flares.</p>
-      <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:1.2rem;"><b>Data sources:</b> Archived solar flare dates from NASA DONKI; dust storm, ice, soil, radiation, and radio-blackout facts from NASA Phoenix, Opportunity, Curiosity RAD, and Perseverance.</p>
+      <details class="how-sec" open><summary>🎯 YOUR GOAL</summary><div class="how-body">
+        <p>Run Jezero Base for <b>20 sols</b> (a sol is one Mars day). Collect <b id="brief-goal">80 Science</b> to win. You lose if <b>O₂, H₂O or Food reaches 0%</b>, or the crew's <b>radiation dose reaches 100%</b>.</p>
+        <p>Everything you do costs <b>power (kW)</b>, and you only get a limited amount each sol. So the real game is choosing what to power and what to leave off.</p>
+      </div></details>
+      <details class="how-sec" open><summary>🔁 HOW A SOL (DAY) WORKS</summary><div class="how-body"><ol class="how-steps">
+        <li>Read the <b>forecast</b> in the bottom bar. It tells you if a solar flare or dust storm is coming.</li>
+        <li><b>Click a building</b> (or press <kbd>E</kbd> next to it) to walk inside. Press the glowing <b>wall buttons</b> to act. Each button can be used <b>once per sol</b>.</li>
+        <li>Collect <b>scrap</b> and explore if you like (see below).</li>
+        <li>Press <b>Advance to Sol…</b>. Your supplies drain, new power arrives, a new forecast appears and a surprise event may happen.</li>
+      </ol></div></details>
+      <details class="how-sec"><summary>📊 WHAT EACH NUMBER MEANS</summary><div class="how-body"><div class="how-grid">
+        <div class="how-item"><b>O₂ (oxygen)</b><small>Air for the crew. Drops about 6–8% each sol. At 0% the mission ends. Fix it with MOXIE in the Habitat.</small></div>
+        <div class="how-item"><b>H₂O (water)</b><small>Drinking and farming water. Drops about 4–6% each sol. At 0% the mission ends. Clean water in the Habitat.</small></div>
+        <div class="how-item"><b>FOOD</b><small>Crew meals. Drops about 3–5% each sol. At 0% the mission ends. Harvest crops in the Food Silo.</small></div>
+        <div class="how-item" style="border-color:#fb923c"><b>DOSE (radiation)</b><small>Radiation the crew has absorbed. It only goes UP (lower is better). +1% every sol, plus a big jump on solar-flare days unless you shelter. At 100% the crew must go home. Above 60% your science results are halved.</small></div>
+        <div class="how-item" style="border-color:#fbbf24"><b>POWER (kW)</b><small>Your budget for today. It refills each sol: about 6–10 kW when panels are open and clean, only 5 when they are stowed or in a dust storm, minus standby costs.</small></div>
+        <div class="how-item" style="border-color:#fbbf24"><b>BATT (battery)</b><small>Stored power. Charge it on a good day (costs 3 kW for +2) and use it on a bad day.</small></div>
+        <div class="how-item" style="border-color:#34d399"><b>NEXT SOL</b><small>An estimate of how much power you will get tomorrow after modules that are ON use their standby power.</small></div>
+        <div class="how-item" style="border-color:#c084fc"><b>SCIENCE</b><small>Your score. Reach the goal to win. Earn it with the spectrometer, comms uplinks, the rover and exploring.</small></div>
+        <div class="how-item" style="border-color:#94a3b8"><b>SCRAP</b><small>Salvaged metal. Pay for upgrades and special builds (radiation shield, extra solar panels, a drill, a CubeSat…).</small></div>
+        <div class="how-item" style="border-color:#94a3b8"><b>Module health bars</b><small>Each building has a hidden condition (crew morale, panel cleanliness, instrument calibration, crop health, antenna alignment). They fade each sol and weaken that module's results below 40%. Maintenance buttons restore them.</small></div>
+      </div></div></details>
+      <details class="how-sec"><summary>🏠 THE FIVE MODULES + ON/OFF SWITCHES</summary><div class="how-body">
+        <p>🏠 <b>Habitat</b>: oxygen, water, storm shelter, movie night. · ☀️ <b>Solar Array</b>: power, battery, dust brushing. · 🔬 <b>Research Lab</b>: science and calibration. · 🌱 <b>Food Silo</b>: crops and spare parts. · 📡 <b>Comms Dish</b>: send science to Earth.</p>
+        <p>Every module except solar has a <b>POWER switch</b> on its left wall. <b>ON</b> uses standby power each sol (Habitat 2, Lab 2, Silo 1, Comms 1 kW) but gives small free gains by itself. <b>OFF</b> saves that power but locks the module's buttons (except the storm shelter). Floating labels over each building show its ON/OFF state.</p>
+      </div></details>
+      <details class="how-sec"><summary>🔩 SCRAP, HILLS &amp; THE ROVER</summary><div class="how-body">
+        <p>Each sol, <b>1–3 pieces of scrap</b> appear as glowing amber markers on the map. <b>Click one</b> to claim it (in first person, aim at it within about 9 m). The minimap shows them as yellow squares.</p>
+        <p>The <b>cyan beacons</b> on the far hills are exploration sites (cyan diamonds on the minimap). Click one to <b>send the rover</b> (2 kW). It drives there and comes back after 2–4 sols with science. The first visit pays the most. Or walk there in first person and <b>survey on foot</b> for +2 science (adds a little radiation).</p>
+      </div></details>
+      <details class="how-sec"><summary>🕹️ CONTROLS</summary><div class="how-body"><div class="how-keys">
+        <kbd>W A S D</kbd><span>Walk (first person / inside buildings)</span>
+        <kbd>Shift</kbd><span>Run</span>
+        <kbd>Space</kbd><span>Jump (Mars gravity is only 38% of Earth's)</span>
+        <kbd>E</kbd><span>Press a button, enter a door, claim scrap</span>
+        <kbd>V</kbd><span>Switch between orbit view and first-person walking</span>
+        <kbd>Q</kbd><span>Exit the building you are in</span>
+        <kbd>Mouse</kbd><span>Look around (click the screen to lock the mouse; Esc releases it)</span>
+      </div></div></details>
+      <details class="how-sec"><summary>⚠️ FORECAST &amp; SURPRISES</summary><div class="how-body">
+        <p><b>Solar flare:</b> stay safe by pressing <i>Activate Storm Shelter</i> in the Habitat before advancing. Skip it and you take 3.5 times more radiation. <b>Dust storm:</b> stow the panels first, or they get scratched (max power drops permanently). <b>Surprise events</b> pop up after a sol and make you pick between two costly choices.</p>
+      </div></details>
+      <p style="color:#94a3b8;font-size:0.78rem;margin:0.8rem 0 1.1rem;"><b>Data sources:</b> archived solar flare dates from NASA DONKI (not live); radiation from Curiosity RAD; dust storms, ice, soil and relay facts from NASA Phoenix, Opportunity, InSight, Ingenuity and Perseverance mission archives.</p>
       <div style="text-align:center;"><button type="button" class="primary-cta" id="brief-close">Got It &#9654;</button></div>
     </div>
   </div>
@@ -343,8 +457,55 @@
       <div class="drawer-tag" id="modal-tag">MISSION DEBRIEF</div>
       <h2 id="modal-title">MISSION COMPLETE</h2>
       <p id="modal-body"></p>
-      <button type="button" class="primary-cta" onclick="window.location.reload()">Run New Simulation &#8635;</button>
+      <div style="display:flex;gap:0.6rem;justify-content:center;flex-wrap:wrap;">
+        <button type="button" class="primary-cta" id="stats-btn">&#128202; Statistics</button>
+        <button type="button" class="primary-cta" onclick="window.location.reload()">Try Again &#8635;</button>
+      </div>
     </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <!-- Settings -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal-card" style="max-width:640px;text-align:left;max-height:90vh;overflow-y:auto;">
+      <div class="drawer-tag">SETTINGS</div>
+      <h2 style="font-size:1.3rem;">Control Panel</h2>
+      <div id="settings-body"></div>
+      <div style="text-align:center;margin-top:1rem;"><button type="button" class="primary-cta" id="settings-close">Done &#9654;</button></div>
+    </div>
+  </div>
+
+  <!-- Explore site / rover -->
+  <div class="modal-backdrop" id="site-modal">
+    <div class="modal-card" style="max-width:620px;border-color:#22d3ee;">
+      <div class="drawer-tag">MARS EXPLORATION SITE</div>
+      <h2 id="site-title" style="font-size:1.3rem;"></h2>
+      <p id="site-desc" style="margin-bottom:0.6rem;"></p>
+      <p id="site-fact" style="color:#7dd3fc;font-size:0.85rem;font-style:italic;"></p>
+      <div class="action-list" id="site-choices" style="text-align:left;"></div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="modal-backdrop" id="stats-modal">
+    <div class="modal-card" style="max-width:760px;text-align:left;max-height:92vh;overflow-y:auto;">
+      <div class="drawer-tag">MISSION STATISTICS</div>
+      <h2 style="font-size:1.3rem;">Your Journey, Sol by Sol</h2>
+      <canvas id="stats-canvas"></canvas>
+      <div id="stats-legend"></div>
+      <div id="stats-note" class="stats-note"></div>
+      <div id="stats-table"></div>
+      <div id="stats-totals"></div>
+      <div style="text-align:center;"><button type="button" class="primary-cta" id="stats-close">Close</button></div>
+    </div>
+  </div>
+
+  <!-- End cutscene -->
+  <div id="end-cut">
+    <div id="ec-card"></div>
+    <div id="ec-dots"></div>
+    <div class="ec-ctrl"><button type="button" class="nav-btn" id="ec-skip">Skip</button><button type="button" class="primary-cta" id="ec-next" style="padding:0.6rem 1.6rem;">Next &#9654;</button></div>
   </div>
 
   <script type="module">
@@ -367,7 +528,7 @@
         try {
           const o = this.ctx.createOscillator(), g = this.ctx.createGain(), n = this.ctx.currentTime;
           o.type = type; o.frequency.setValueAtTime(f, n);
-          g.gain.setValueAtTime(vol, n); g.gain.exponentialRampToValueAtTime(0.001, n + dur);
+          g.gain.setValueAtTime(vol * (this.vol == null ? 1 : this.vol), n); g.gain.exponentialRampToValueAtTime(0.001, n + dur);
           o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(n + dur);
         } catch (_) {}
       }
@@ -379,6 +540,77 @@
       lose() { this.seq([340, 270, 200, 140], 100, 'sawtooth', 0.25, 0.1); }
     }
     const SFX = new SoundFX();
+
+    // ==================== v10: SETTINGS, DIFFICULTY, MUSIC ====================
+    const SET_KEY = 'astro_settings_v10';
+    const SET = { music: true, musicVol: 0.5, sfx: true, sfxVol: 0.8, labels: true, minimap: true, shake: true, sens: 1, fov: 65, diff: 'normal' };
+    try { Object.assign(SET, JSON.parse(localStorage.getItem(SET_KEY) || '{}')); } catch (_) {}
+    function saveSettings() { try { localStorage.setItem(SET_KEY, JSON.stringify(SET)); } catch (_) {} }
+    // drain = life-support use per sol, ev = chance of a surprise event, goal = science needed, dose = radiation multiplier
+    const DIFFS = {
+      easy:   { drain: 0.7,  ev: 0.5,  goal: 60,  dose: 0.6, pw: 3, flares: 4, name: 'Easy',   blurb: '+3 kW power capacity, gentle drain, fewer surprises, 60 science to win.' },
+      normal: { drain: 0.85, ev: 0.65, goal: 80,  dose: 0.8, pw: 0, flares: 6, name: 'Normal', blurb: 'Standard power capacity. 80 science to win.' },
+      hard:   { drain: 1,    ev: 0.75, goal: 100, dose: 1,   pw: -1, flares: 7, name: 'Hard',   blurb: '-1 kW power capacity, full drain, many surprises, 100 science to win.' }
+    };
+    if (!DIFFS[SET.diff]) SET.diff = 'normal';
+    function DF() { return DIFFS[state.diff] || DIFFS.normal; }
+
+    Object.assign(SoundFX.prototype, {
+      toggle() { this.seq([300, 460], 55, 'square', 0.07, 0.05); },
+      pickup() { this.seq([660, 880, 1175], 60, 'triangle', 0.1, 0.09); },
+      rover() { this.seq([200, 260, 200, 330], 90, 'square', 0.1, 0.05); }
+    });
+    SFX.muted = !SET.sfx;
+    SFX.vol = SET.sfxVol;
+
+    class MusicFX {
+      constructor() { this.ctx = null; this.master = null; this.timer = null; this.playing = false; this.vol = 0.5; this.n = 0; }
+      ensure() {
+        if (this.ctx) return true;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        this.ctx = new AC();
+        this.master = this.ctx.createGain(); this.master.gain.value = 0;
+        this.lp = this.ctx.createBiquadFilter(); this.lp.type = 'lowpass'; this.lp.frequency.value = 1300;
+        this.lp.connect(this.master); this.master.connect(this.ctx.destination);
+        return true;
+      }
+      start() {
+        if (!this.ensure()) return;
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        if (this.playing) return;
+        this.playing = true;
+        this.master.gain.setTargetAtTime(this.vol * 0.25, this.ctx.currentTime, 0.8);
+        this.tick();
+        this.timer = setInterval(() => this.tick(), 4000);
+      }
+      stop() {
+        if (!this.playing) return;
+        this.playing = false; clearInterval(this.timer);
+        this.master.gain.setTargetAtTime(0, this.ctx.currentTime, 0.4);
+      }
+      setVol(v) { this.vol = v; if (this.playing) this.master.gain.setTargetAtTime(v * 0.25, this.ctx.currentTime, 0.2); }
+      note(f, t0, dur, type, peak) {
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = type; o.frequency.value = f; o.detune.value = (Math.random() - 0.5) * 8;
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.linearRampToValueAtTime(peak, t0 + dur * 0.35);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(this.lp); o.start(t0); o.stop(t0 + dur + 0.05);
+      }
+      tick() {
+        if (!this.playing) return;
+        const CH = [[110, 164.81, 196, 261.63], [98, 146.83, 196, 246.94], [87.31, 130.81, 174.61, 220], [98, 146.83, 185, 233.08]];
+        const ch = CH[this.n % CH.length]; this.n++;
+        const t = this.ctx.currentTime + 0.05;
+        ch.forEach((f, i) => this.note(f, t + i * 0.12, 5.2, i === 0 ? 'sine' : 'triangle', i === 0 ? 0.5 : 0.22));
+        const P = [523.25, 587.33, 659.25, 783.99, 880];
+        for (let k = 0; k < 2; k++) if (Math.random() < 0.75) this.note(P[Math.floor(Math.random() * P.length)], t + 1 + k * 1.6 + Math.random() * 0.8, 2.6, 'sine', 0.16);
+      }
+    }
+    const MUSIC = new MusicFX();
+    MUSIC.vol = SET.musicVol;
+    ['pointerdown', 'keydown'].forEach((ev) => window.addEventListener(ev, () => { if (SET.music) MUSIC.start(); }, { once: true }));
 
     // ==================== GAME & CUTSCENE STATE ====================
     const carriedEnergy = Number(sessionStorage.getItem('astronuggets_deflector_energy') || 0);
@@ -399,10 +631,12 @@
       o2: 88,
       h2o: 85,
       food: 82,
-      power: 9,
-      maxPower: 10,
+      power: 9 + DIFFS[SET.diff].pw,
+      maxPower: 10 + DIFFS[SET.diff].pw,
+      diffPower: DIFFS[SET.diff].pw,
       science: 0,
-      scienceGoal: 80,
+      scienceGoal: DIFFS[SET.diff].goal,
+      diff: SET.diff,
       scrap: 4 + bonusScrap,
       dose: 0,
       sheltered: false,
@@ -422,14 +656,23 @@
       labsOff: false,
       lastWallMessage: '',
       fpsTargetedObject: null,
-      gameOver: false
+      gameOver: false,
+      started: false,
+      on: { habitation: true, solar: true, research: true, silo: true, comms: true },
+      hist: [],
+      wings: 0,
+      expedition: null,
+      surveyed: {},
+      footDone: {},
+      stats: { scrapFound: 0, actions: 0, expeditions: 0, roverSci: 0, footSurveys: 0, flaresSheltered: 0, flaresExposed: 0, peakDose: 0 }
     };
+    let currentBuildId = null;
 
     // ==================== THREE.JS RENDERER, SCENE & CAMERA ====================
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060914);
-    scene.fog = new THREE.FogExp2(0x2a1208, 0.011);
+    scene.background = new THREE.Color(0x000000);
+    scene.fog = new THREE.FogExp2(0x4a1409, 0.0085);
 
     const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 300);
     const GAME_CAM_POS = new THREE.Vector3(-12, 13.5, 17.5);
@@ -451,7 +694,7 @@
     controls.dampingFactor = 0.06;
     controls.maxPolarAngle = Math.PI * 0.47;
     controls.minDistance = 6;
-    controls.maxDistance = 42;
+    controls.maxDistance = 75;
     controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE };
     renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -497,23 +740,60 @@
       starPositions[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    const starPoints = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.45, transparent: true, opacity: 0.85 }));
+    const starPoints = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 2.4, sizeAttenuation: false, transparent: true, opacity: 1, fog: false }));
     scene.add(starPoints);
 
-    const terrainGeo = new THREE.PlaneGeometry(180, 180, 72, 72);
+    function terrainH(x, z) {
+      const d = Math.hypot(x, z);
+      const k = Math.min(1, Math.max(0, (d - 19) / 16)), sm = k * k * (3 - 2 * k);
+      let h = Math.sin(x * 0.09 + 1.3) * Math.cos(z * 0.08) * 2.6 + Math.sin(x * 0.21 + z * 0.17) * 0.9
+            + Math.cos(x * 0.043 - z * 0.05) * 3.2 + Math.sin(x * 0.5) * Math.cos(z * 0.45) * 0.18;
+      // old impact crater with a raised rim
+      const cd = Math.hypot(x + 44, z - 40);
+      if (cd < 26) { const rim = Math.exp(-Math.pow((cd - 14) / 2.8, 2)) * 3.4, bowl = cd < 14 ? -4.2 * (1 - Math.pow(cd / 14, 2)) : 0; h += rim + bowl; }
+      // flat-topped mesa (ancient delta remnant)
+      const md = Math.hypot(x - 50, z + 34);
+      if (md < 20) { const t = Math.max(0, 1 - md / 16); h += 6.5 * (t * t * (3 - 2 * t)); }
+      // long iron ridge
+      const u = (x + 32) * 0.5 + (z + 38) * 0.86, v = (x + 32) * 0.86 - (z + 38) * 0.5;
+      h += 3.6 * Math.exp(-Math.pow(u / 3.5, 2)) * Math.exp(-Math.pow(v / 20, 2));
+      // dune field
+      const dd = Math.hypot(x - 34, z - 24);
+      h += 1.5 * Math.exp(-Math.pow(dd / 16, 2)) * Math.sin(x * 0.55 + z * 0.22);
+      return Math.max(-4.5, h * sm);
+    }
+    const terrainGeo = new THREE.PlaneGeometry(180, 180, 150, 150);
     terrainGeo.rotateX(-Math.PI / 2);
     const posAttr = terrainGeo.attributes.position;
+    const tCols = new Float32Array(posAttr.count * 3);
     for (let i = 0; i < posAttr.count; i++) {
-      const x = posAttr.getX(i), z = posAttr.getZ(i), dBase = Math.hypot(x, z);
-      if (dBase > 12.2) {
-        const hill = Math.sin(x * 0.14) * Math.cos(z * 0.14) * 1.1 + Math.sin(x * 0.35 + z * 0.25) * 0.35;
-        posAttr.setY(i, Math.max(-0.4, hill * Math.min(1, (dBase - 12.2) / 10)));
-      }
+      const x = posAttr.getX(i), z = posAttr.getZ(i), hh = terrainH(x, z);
+      posAttr.setY(i, hh);
+      const n = (Math.sin(x * 1.7 + z * 0.9) + Math.sin(z * 2.3 - x * 0.4)) * 0.03;
+      const lo = Math.max(0, Math.min(1, (hh + 3) / 9));
+      tCols[i * 3] = 0.8 + lo * 0.2 + n; tCols[i * 3 + 1] = 0.1 + lo * 0.09 + n * 0.4; tCols[i * 3 + 2] = 0.05 + lo * 0.05;
     }
+    terrainGeo.setAttribute('color', new THREE.BufferAttribute(tCols, 3));
     terrainGeo.computeVertexNormals();
-    const terrain = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.92, metalness: 0.05 }));
+    const terrain = new THREE.Mesh(terrainGeo, new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, emissive: 0x3a0a04, emissiveIntensity: 1, roughness: 0.92, metalness: 0.05 }));
     terrain.receiveShadow = true;
     scene.add(terrain);
+    // scattered boulders across the hills
+    (function addRocks() {
+      const rockGeo = new THREE.DodecahedronGeometry(1, 0), rockMat = new THREE.MeshStandardMaterial({ color: 0xa0280f, emissive: 0x2a0602, roughness: 1 });
+      const N = 260, rocks = new THREE.InstancedMesh(rockGeo, rockMat, N), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), c = new THREE.Color();
+      let placed = 0;
+      for (let tries = 0; tries < 2000 && placed < N; tries++) {
+        const x = (Math.random() - 0.5) * 160, z = (Math.random() - 0.5) * 160;
+        if (Math.hypot(x, z) < 17) continue;
+        const sc = 0.25 + Math.pow(Math.random(), 2.2) * 1.5;
+        e.set(Math.random() * 3, Math.random() * 3, Math.random() * 3); q.setFromEuler(e);
+        m4.compose(new THREE.Vector3(x, terrainH(x, z) + sc * 0.25, z), q, new THREE.Vector3(sc * 1.2, sc * 0.8, sc));
+        rocks.setMatrixAt(placed, m4); c.setHSL(0.2 * 0.05 + Math.random() * 0.02, 0.62, 0.2 + Math.random() * 0.12); rocks.setColorAt(placed, c); placed++;
+      }
+      rocks.count = placed; scene.add(rocks);
+    })();
+
 
     // ==================== EXTERIOR 3D MARS BASE ====================
     const baseGroup = new THREE.Group();
@@ -691,6 +971,7 @@
     astroHelmet.position.y = 1.16; astroGroup.add(astroHelmet);
     const astroVisor = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 }));
     astroVisor.position.set(0, 1.16, 0.14); astroGroup.add(astroVisor);
+    astroGroup.scale.setScalar(0.6);
 
     // ==================== 3D BUILDING INTERIORS & PHYSICAL WALL BUTTONS ====================
     const interiorGroup = new THREE.Group();
@@ -743,7 +1024,14 @@
     }
 
     function createPhysicalWallButton(opts) {
-      const { x, y, z, rotY = 0, label, costText, subText, accentHex = 0x38bdf8, getStatus, onPress } = opts;
+      const { x, y, z, rotY = 0, costText, accentHex = 0x38bdf8, onPress, isSwitch } = opts;
+      const fid = currentBuildId;
+      const label = typeof opts.label === 'function' ? opts.label() : opts.label, subText = opts.subText || '';
+      const getStatus = () => {
+        const s0 = opts.getStatus();
+        if (!isSwitch && fid && state.on[fid] === false && !s0.done && !/SHELTER/.test(label)) return Object.assign({}, s0, { disabled: true, off: true });
+        return s0;
+      };
       const unit = new THREE.Group();
       unit.position.set(x, y, z);
       unit.rotation.y = rotY;
@@ -760,29 +1048,31 @@
       const capMat = new THREE.MeshStandardMaterial({ color: accentHex, emissive: accentHex, emissiveIntensity: 0.65, roughness: 0.25, metalness: 0.2 });
       const cap = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.14, 0.32), capMat);
       cap.position.set(0, 1.03, 0.05);
+      cap.userData.noHighlight = true;
       unit.add(cap);
 
       const sign = createWallDisplayMesh(1.48, 0.86, 512, 300, (ctx, w, h) => {
         const st = getStatus();
         ctx.fillStyle = '#070d1c'; ctx.fillRect(0, 0, w, h);
-        ctx.strokeStyle = st.disabled ? '#475569' : '#38bdf8'; ctx.lineWidth = 8; ctx.strokeRect(4, 4, w - 8, h - 8);
+        const can = !st.disabled && !st.done; const sc = opts.capHex ? opts.capHex() : (can ? 0x34d399 : 0x64748b); const tcss = '#' + sc.toString(16).padStart(6, '0'); const dcss = opts.capHex ? (sc === 0x34d399 ? '#064e3b' : '#450a0a') : (can ? '#064e3b' : '#334155'); const txt2 = (opts.capHex || can) ? tcss : '#94a3b8'; ctx.strokeStyle = tcss; ctx.lineWidth = 8; ctx.strokeRect(4, 4, w - 8, h - 8);
 
-        ctx.fillStyle = st.done ? '#064e3b' : (st.disabled ? '#334155' : '#0c4a6e');
+        ctx.fillStyle = dcss;
         ctx.fillRect(16, 16, w - 32, 42);
-        ctx.fillStyle = st.done ? '#34d399' : (st.disabled ? '#94a3b8' : '#38bdf8');
+        ctx.fillStyle = txt2;
         ctx.font = '700 22px Orbitron, sans-serif'; ctx.textAlign = 'left';
-        ctx.fillText(st.done ? 'DONE TODAY' : (st.disabled ? 'UNAVAILABLE' : 'PRESS BUTTON'), 28, 44);
-        ctx.textAlign = 'right'; ctx.fillStyle = '#fb923c'; ctx.fillText(costText, w - 28, 44);
+        ctx.fillText(st.done ? 'DONE TODAY' : (st.disabled ? (st.off ? 'MODULE OFF' : 'UNAVAILABLE') : 'PRESS BUTTON'), 28, 44);
+        ctx.textAlign = 'right'; ctx.fillStyle = txt2; ctx.fillText(costText, w - 28, 44);
 
         ctx.textAlign = 'left'; ctx.fillStyle = '#ffffff'; ctx.font = '700 27px Orbitron, sans-serif';
-        wrapCanvasLines(ctx, label, w - 36).slice(0, 2).forEach((ln, idx) => ctx.fillText(ln, 20, 98 + idx * 34));
+        wrapCanvasLines(ctx, opts.labelFn ? opts.labelFn() : label, w - 36).slice(0, 2).forEach((ln, idx) => ctx.fillText(ln, 20, 98 + idx * 34));
 
         ctx.fillStyle = '#cbd5e1'; ctx.font = '500 22px Space Grotesk, sans-serif';
-        wrapCanvasLines(ctx, subText, w - 36).slice(0, 3).forEach((ln, idx) => ctx.fillText(ln, 20, 178 + idx * 28));
+        wrapCanvasLines(ctx, opts.subFn ? opts.subFn() : subText, w - 36).slice(0, 3).forEach((ln, idx) => ctx.fillText(ln, 20, 178 + idx * 28));
 
         if (st.done) { capMat.color.setHex(0x10b981); capMat.emissive.setHex(0x059669); capMat.emissiveIntensity = 0.45; }
         else if (st.disabled) { capMat.color.setHex(0x475569); capMat.emissive.setHex(0x1e293b); capMat.emissiveIntensity = 0.2; }
         else { capMat.color.setHex(accentHex); capMat.emissive.setHex(accentHex); capMat.emissiveIntensity = 0.7; }
+        { const ch = opts.capHex ? opts.capHex() : (can ? 0x34d399 : 0x475569); capMat.color.setHex(ch); capMat.emissive.setHex(ch); capMat.emissiveIntensity = (opts.capHex || can) ? 0.85 : 0.15; }
       });
       sign.position.set(0, 1.72, -0.26);
       unit.add(sign);
@@ -797,13 +1087,14 @@
             SFX.alarm();
             state.lastWallMessage = st.done
               ? `${label}: Already completed on Sol ${state.sol}.`
-              : `${label}: Cannot activate (check Power, Scrap, H₂O, or Shelter status).`;
+              : (st.off ? `${label}: this module is switched OFF. Flip its POWER switch on the left wall.` : `${label}: Cannot activate (check Power, Scrap, H₂O, or Shelter status).`);
             updateInteriorWallScreens();
             return;
           }
           cap.position.y = 0.96;
           setTimeout(() => { cap.position.y = 1.03; }, 180);
           onPress();
+          afterAction(fid, unit, opts);
           updateTopHUD();
           updateInteriorWallScreens();
         }
@@ -823,6 +1114,12 @@
     };
 
     function buildFacilityInterior(id) {
+      currentBuildId = id;
+      buildFacilityInteriorBase(id);
+      addExtraButtons(id);
+      updateInteriorWallScreens();
+    }
+    function buildFacilityInteriorBase(id) {
       while (interiorGroup.children.length > 2) interiorGroup.remove(interiorGroup.children[2]);
       interiorInteractables = [];
       interiorPlatforms = [];
@@ -1281,7 +1578,7 @@
     }
 
     function getGroundHeight(x, z, feetY) {
-      let bestY = 0.0;
+      let bestY = state.insideBuilding ? 0.0 : terrainH(x, z);
       for (const box of getActivePlatforms()) {
         if (x >= box.minX - 0.28 && x <= box.maxX + 0.28 && z >= box.minZ - 0.28 && z <= box.maxZ + 0.28) {
           if (box.topY <= feetY + 0.28 && box.topY > bestY) bestY = box.topY;
@@ -1296,8 +1593,8 @@
         pos.x = Math.max(-6.5, Math.min(6.5, pos.x));
         pos.z = Math.max(-5.4, Math.min(5.4, pos.z));
       } else {
-        pos.x = Math.max(-28, Math.min(28, pos.x));
-        pos.z = Math.max(-28, Math.min(28, pos.z));
+        pos.x = Math.max(-72, Math.min(72, pos.x));
+        pos.z = Math.max(-72, Math.min(72, pos.z));
       }
 
       const playerBottom = fpsState.feetY + 0.28; // Allows seamless step-up onto the 0.25m foundation deck
@@ -1326,7 +1623,7 @@
     }
 
     function isAnyModalOpen() {
-      return crisisEl.classList.contains('active') || briefEl.classList.contains('active') || endModalEl.classList.contains('active');
+      return ['settings-modal', 'site-modal', 'stats-modal', 'end-cut'].some((id) => document.getElementById(id).classList.contains('active')) || crisisEl.classList.contains('active') || briefEl.classList.contains('active') || endModalEl.classList.contains('active');
     }
 
     function requestFpsPointerLock() {
@@ -1372,7 +1669,7 @@
 
       document.body.classList.add('fps-active', 'inside-building');
       controls.enabled = false;
-      hoverTag.style.display = 'none';
+      hoverTag.style.opacity = '0';
 
       fpsState.feetY = 0;
       fpsState.velY = 0;
@@ -1381,7 +1678,7 @@
       fpsState.yaw = 0;
       fpsState.pitch = -0.02;
 
-      camera.fov = 65;
+      camera.fov = SET.fov;
       camera.updateProjectionMatrix();
       requestFpsPointerLock();
       logEvent(`Entered ${FACILITY_META[id].name}. Press physical 3D wall buttons with [E] or Click, or jump onto equipment with Space!`);
@@ -1397,7 +1694,7 @@
       interiorGroup.visible = false;
       setExteriorVisibility(true);
       document.body.classList.remove('inside-building');
-      hoverTag.style.display = 'none';
+      hoverTag.style.opacity = '0';
 
       const retPos = EXTERIOR_RETURN_POS[prevId] || new THREE.Vector3(-3.4, 0.25, -0.35);
 
@@ -1410,7 +1707,7 @@
         fpsState.pos.set(retPos.x, retPos.y + PLAYER_EYE_HEIGHT, retPos.z);
         fpsState.yaw = Math.PI;
         fpsState.pitch = -0.04;
-        camera.fov = 65;
+        camera.fov = SET.fov;
         camera.updateProjectionMatrix();
         requestFpsPointerLock();
       } else {
@@ -1458,7 +1755,7 @@
         fpsState.yaw = Math.PI;
         fpsState.pitch = -0.04;
 
-        camera.fov = 65;
+        camera.fov = SET.fov;
         camera.updateProjectionMatrix();
         requestFpsPointerLock();
         logEvent('First-Person EVA active! WASD to walk, Spacebar to jump onto crates & roofs, E or Click to enter buildings.');
@@ -1544,11 +1841,11 @@
       const isWalkingMode = state.viewMode === 'fps' || !!state.insideBuilding;
       if (state.mode !== 'game' || !isWalkingMode || isAnyModalOpen()) return;
       if (document.pointerLockElement === renderer.domElement) {
-        fpsState.yaw -= e.movementX * 0.0023;
-        fpsState.pitch = Math.max(-1.18, Math.min(1.18, fpsState.pitch - e.movementY * 0.0021));
+        fpsState.yaw -= e.movementX * 0.0023 * SET.sens;
+        fpsState.pitch = Math.max(-1.18, Math.min(1.18, fpsState.pitch - e.movementY * 0.0021 * SET.sens));
       } else if (fpsState.draggingLook) {
-        fpsState.yaw -= (e.clientX - fpsState.lastMouseX) * 0.004;
-        fpsState.pitch = Math.max(-1.18, Math.min(1.18, fpsState.pitch - (e.clientY - fpsState.lastMouseY) * 0.0035));
+        fpsState.yaw -= (e.clientX - fpsState.lastMouseX) * 0.004 * SET.sens;
+        fpsState.pitch = Math.max(-1.18, Math.min(1.18, fpsState.pitch - (e.clientY - fpsState.lastMouseY) * 0.0035 * SET.sens));
         fpsState.lastMouseX = e.clientX;
         fpsState.lastMouseY = e.clientY;
       }
@@ -1567,7 +1864,7 @@
       return { x: MM_SIZE / 2 + (wx + 2.0) * 5.35, y: MM_SIZE / 2 + 2 + wz * 5.35 };
     }
 
-    function drawMinimap() {
+    function drawMinimapBase() {
       if (state.mode !== 'game') return;
       mmCtx.clearRect(0, 0, MM_SIZE, MM_SIZE);
       mmCtx.fillStyle = 'rgba(7, 12, 24, 0.94)';
@@ -1737,6 +2034,7 @@
       fpsState.pos.set(-3.4, 0.25 + PLAYER_EYE_HEIGHT, -0.55);
       fpsState.feetY = 0.25; fpsState.velY = 0; fpsState.grounded = true;
       refreshBadges();
+      if (!state.started) { state.started = true; recordHist(); spawnScrapGroup(2); updateTopHUD(); }
 
       if (!userMovedCamera) {
         camera.position.copy(GAME_CAM_POS);
@@ -1784,12 +2082,13 @@
     const pointer = new THREE.Vector2();
     const hoverTag = document.getElementById('hover-tag');
     let pointerDownPos = { x: 0, y: 0 };
+    let downTarget = null;
     let hoveredGroup = null;
 
     function setGroupHighlight(group, active) {
       if (!group) return;
       group.traverse((child) => {
-        if (child.isMesh && child.material && child.material.emissive) {
+        if (child.isMesh && child.material && child.material.emissive && !child.userData.noHighlight) {
           if (active) {
             if (!child.userData.savedEmissive) child.userData.savedEmissive = child.material.emissive.clone();
             child.material.emissive.setHex(0x1e3a8a);
@@ -1806,10 +2105,19 @@
       if (data.kind === 'building') enterBuilding(data.facilityId);
       else if (data.kind === 'wall-button') data.press();
       else if (data.kind === 'exit-door') exitBuilding(false);
+      else if (data.kind === 'scrap') claimScrap(data.ref);
+      else if (data.kind === 'poi') openSite(data.site);
     }
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
       pointerDownPos = { x: e.clientX, y: e.clientY };
+      downTarget = null;
+      if (state.mode === 'game' && !state.gameOver && !isAnyModalOpen() && document.pointerLockElement !== renderer.domElement && (state.viewMode === 'fps' || state.insideBuilding)) {
+        pointer.x = (e.clientX / window.innerWidth) * 2 - 1; pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const dh = raycaster.intersectObjects(state.insideBuilding ? interiorInteractables : clickableZones, false);
+        if (dh.length > 0 && dh[0].distance <= 10.5) downTarget = dh[0].object.userData;
+      }
       const isWalkingMode = state.viewMode === 'fps' || !!state.insideBuilding;
       if (state.mode === 'game' && isWalkingMode && !isAnyModalOpen()) {
         fpsState.draggingLook = true;
@@ -1821,7 +2129,7 @@
 
     renderer.domElement.addEventListener('pointermove', (e) => {
       if (state.mode !== 'game' || isAnyModalOpen() || document.pointerLockElement === renderer.domElement) {
-        hoverTag.style.display = 'none';
+        hoverTag.style.opacity = '0';
         return;
       }
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -1837,13 +2145,13 @@
         const data = hits[0].object.userData;
         hoveredGroup = data.visualGroup;
         setGroupHighlight(hoveredGroup, true);
-        hoverTag.style.display = 'block';
+        hoverTag.style.opacity = '1';
         hoverTag.style.left = `${e.clientX}px`;
         hoverTag.style.top = `${e.clientY}px`;
         hoverTag.innerHTML = `${data.label}<span>${data.subtitle}</span>`;
         container.style.cursor = 'pointer';
       } else {
-        hoverTag.style.display = 'none';
+        hoverTag.style.opacity = '0';
         container.style.cursor = state.insideBuilding || state.viewMode === 'fps' ? 'crosshair' : 'grab';
       }
     });
@@ -1851,7 +2159,8 @@
     renderer.domElement.addEventListener('pointerup', (e) => {
       fpsState.draggingLook = false;
       if (state.mode !== 'game' || state.gameOver || isAnyModalOpen()) return;
-      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 6) return;
+      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 6) { downTarget = null; return; }
+      if (downTarget) { const dt0 = downTarget; downTarget = null; triggerTargetedObject(dt0); return; }
 
       if (document.pointerLockElement === renderer.domElement) {
         if (state.fpsTargetedObject) triggerTargetedObject(state.fpsTargetedObject);
@@ -1895,9 +2204,9 @@
     }
 
     state.schedule = shuffle([
-      ...shuffle([...REAL_FLARES]).slice(0, 6).map((e) => ({ type: 'flare', ...e })),
+      ...shuffle([...REAL_FLARES]).slice(0, DIFFS[SET.diff].flares).map((e) => ({ type: 'flare', ...e })),
       ...[1, 2, 3].map(() => ({ type: 'dust', label: 'Mars dust storm', date: 'Mars mission archive', sev: 0 })),
-      ...Array.from({ length: 11 }, () => ({ type: 'quiet', label: 'Quiet Sun', date: '', sev: 0 }))
+      ...Array.from({ length: 17 - DIFFS[SET.diff].flares }, () => ({ type: 'quiet', label: 'Quiet Sun', date: '', sev: 0 }))
     ]);
     state.forecast = state.schedule[0];
 
@@ -1969,6 +2278,14 @@
 
       const c = state.bs.clean, col = c < 40 ? 0x7c4a1d : c < 70 ? 0x2c4f9e : 0x1d4ed8;
       solarPanels.forEach((p) => p.material.color.setHex(col));
+      const nxt = document.getElementById('hud-next');
+      if (nxt && window.__v10ready) {
+        nxt.textContent = `~${nextGen()} kW`;
+        setBar(document.getElementById('pill-next'), (nextGen() / state.maxPower) * 100);
+        refreshLabels();
+      }
+      if (window.__v10ready && state.mode === 'game') recordHist();
+      if (window.__v10ready && state.insideBuilding) updateInteriorWallScreens();
     }
 
     function applyLevelBonus(key) {
@@ -2055,12 +2372,66 @@
           { label: 'Shut down the lab to cool it', tradeoff: '-4 science · +2 kW', msg: 'The lab went dark, but the battery cooled.', fx: { science: -4, power: 2 } }
         ] }
     ];
+    // ---- 10 more random events ----
+    CRISES.push(
+      { title: '☄️ Micrometeoroid Strike', badge: 'Inspired by NASA InSight impact detections', vfx: 'shake',
+        desc: 'A small space rock just punched a hole in an outer panel of the habitat. You hear a hiss.',
+        fact: 'Mars’ thin air does little to stop small meteoroids. NASA’s InSight lander detected several fresh impacts.',
+        choices: [{ label: 'Patch the hole with spare parts', tradeoff: '-2 Scrap', msg: 'Patched in minutes.', fx: { scrap: -2 } },
+          { label: 'Seal off the module and vent it', tradeoff: '-10% O₂ · -10 morale', msg: 'The module is sealed, but you lost air.', fx: { o2: -10, morale: -10 } }] },
+      { title: '🌪️ Dust Devil Sweeps the Solar Array', badge: 'Inspired by Spirit & Opportunity rovers',
+        desc: 'A whirlwind of dust is racing across the plain toward your panels.',
+        fact: 'Dust devils have blown the solar panels of NASA’s Spirit and Opportunity rovers clean, extending their lives.',
+        choices: [{ label: 'Leave the panels open to get cleaned', tradeoff: '+40 panel cleanliness · -2 kW today', msg: 'The dust devil blew the panels mostly clean!', fx: { clean: 40, power: -2 } },
+          { label: 'Fold the panels to protect them', tradeoff: '-2 kW today', msg: 'Panels stayed safe, but no free cleaning.', fx: { power: -2 } }] },
+      { title: '🌋 Marsquake!', badge: 'Inspired by NASA InSight seismometer',
+        desc: 'The ground trembles. Equipment rattles on its shelves and the antenna swings.',
+        fact: 'NASA’s InSight lander recorded more than 1,300 marsquakes during its mission.',
+        choices: [{ label: 'Stop and inspect every seal', tradeoff: '-2 kW · +5 morale', msg: 'Everything checked out. The crew feels safer.', fx: { power: -2, morale: 5 } },
+          { label: 'Keep working', tradeoff: '+4 science · -25 antenna · -15 calibration', msg: 'You got data, but the shaking knocked equipment out of line.', fx: { science: 4, align: -25, calib: -15 } }] },
+      { title: '💨 CO₂ Scrubber Clogged', badge: 'Life support alert',
+        desc: 'Carbon dioxide from the crew’s breathing is building up in the cabin faster than the scrubbers can remove it.',
+        fact: 'During Apollo 13, the crew built a scrubber adapter out of spare parts and duct tape to survive.',
+        choices: [{ label: 'Rig a repair from spare parts', tradeoff: '-2 Scrap', msg: 'A patched scrubber is working again.', fx: { scrap: -2 } },
+          { label: 'Run backup fans', tradeoff: '-3 kW · -4% O₂', msg: 'The fans cleared the air but used power.', fx: { power: -3, o2: -4 } }] },
+      { title: '🍄 Mold in the Crop Trays', badge: 'Inspired by ISS plant experiments',
+        desc: 'Fuzzy mold is spreading across the lettuce trays.',
+        fact: 'In 2016, zinnia flowers grown on the International Space Station developed mold, and astronauts changed the airflow and watering to save them.',
+        choices: [{ label: 'Trim and dispose of the moldy plants', tradeoff: '-8% food · +25 crop health', msg: 'Lost some food, but the rest is healthy.', fx: { food: -8, crop: 25 } },
+          { label: 'Run the dehumidifier', tradeoff: '-3 kW · +15 crop health', msg: 'Drier air slowed the mold.', fx: { power: -3, crop: 15 } }] },
+      { title: '💻 Rover Software Glitch', badge: 'Real effect: communication delay',
+        desc: 'Your rover keeps rebooting. Earth is millions of kilometers away, so any fix has to travel by radio.',
+        fact: 'In 2004, engineers on Earth fixed a memory problem on NASA’s Spirit rover from millions of kilometers away.',
+        choices: [{ label: 'Wait for Earth to send a fix', tradeoff: '-4 science', msg: 'The fix arrived, but you lost research time.', fx: { science: -4 } },
+          { label: 'Reboot it by hand', tradeoff: '-2 kW · -15 calibration', msg: 'It works again, but the instruments need recalibrating.', fx: { power: -2, calib: -15 } }] },
+      { title: '🥶 Deep Freeze Night', badge: 'Real Mars climate',
+        desc: 'Tonight is brutally cold. Heaters struggle to keep the habitat warm.',
+        fact: 'The average temperature on Mars is about -60 °C (-80 °F), and nights get far colder.',
+        choices: [{ label: 'Run all the heaters', tradeoff: '-4 kW', msg: 'The habitat stayed warm and cozy.', fx: { power: -4 } },
+          { label: 'Bundle up and save power', tradeoff: '-15 morale · -4% food', msg: 'It was a miserable night, but power was saved.', fx: { morale: -15, food: -4 } }] },
+      { title: '🚁 Scout Helicopter Ready', badge: 'Inspired by the Ingenuity helicopter',
+        desc: 'Your small scout helicopter can fly over the crater to photograph rocks you cannot reach by rover.',
+        fact: 'The Ingenuity helicopter made 72 flights on Mars between 2021 and 2024, the first powered flights on another planet.',
+        choices: [{ label: 'Launch the scout', tradeoff: '-2 kW · +6 science', msg: 'Stunning aerial photos came back!', fx: { power: -2, science: 6 } },
+          { label: 'Keep it grounded', tradeoff: '+1 kW · -2 science', msg: 'You saved power but missed a chance.', fx: { power: 1, science: -2 } }] },
+      { title: '🏞️ Ancient River Delta Spotted', badge: 'Inspired by Perseverance at Jezero',
+        desc: 'Layered rock in the crater wall looks like an ancient river delta, a likely place to find signs of past life.',
+        fact: 'Jezero Crater once held a lake, and Perseverance has been studying its river delta for signs of ancient microbes.',
+        choices: [{ label: 'Drill a rock core sample', tradeoff: '-3 kW · +8 science · -10 calibration', msg: 'A precious sample is in the tube!', fx: { power: -3, science: 8, calib: -10 } },
+          { label: 'Photograph it from a distance', tradeoff: '-1 kW · +3 science', msg: 'Good photos, no drilling.', fx: { power: -1, science: 3 } }] },
+      { title: '🛰️ Orbiter Relay Window', badge: 'Real effect: relay satellites',
+        desc: 'A relay satellite is passing overhead. Data sent now will reach Earth much faster than through the dish alone.',
+        fact: 'NASA’s Mars orbiters act as relays, passing rover data to Earth at much higher speeds than direct links.',
+        choices: [{ label: 'Send a big data package', tradeoff: '-3 kW · +6 science · +1 Scrap', msg: 'Earth received everything in minutes.', fx: { power: -3, science: 6, scrap: 1 } },
+          { label: 'Send a small status update', tradeoff: '-1 kW · +2 science', msg: 'A quick check-in saved power.', fx: { power: -1, science: 2 } }] }
+    );
 
     function applyFx(fx) {
       for (const [k, v] of Object.entries(fx)) {
         if (k === 'dose') state.dose = Math.max(0, state.dose + v);
         else if (k === 'science') state.science = Math.max(0, Math.min(state.scienceGoal, state.science + v));
         else if (k === 'power' || k === 'scrap') state[k] = Math.max(0, state[k] + v);
+        else if (state.bs && k in state.bs) state.bs[k] = Math.max(0, Math.min(100, state.bs[k] + v));
         else state[k] = Math.max(0, Math.min(100, state[k] + v));
       }
     }
@@ -2114,7 +2485,8 @@
       const ev = state.forecast;
       let msg = '';
       if (ev.type === 'flare') {
-        const add = ev.sev * (state.sheltered ? 2 : 7);
+        const add = Math.round(ev.sev * (state.sheltered ? 2 : 7) * DF().dose);
+        if (state.sheltered) state.stats.flaresSheltered++; else state.stats.flaresExposed++;
         state.dose += add;
         if (state.sheltered) msg = `Crew sheltered from the ${ev.label}. Dose +${add}%. `;
         else { state.science = Math.max(0, state.science - 6); msg = `${ev.label} hit the crew outside! Dose +${add}%, electronics glitched (-6 science). `; }
@@ -2130,13 +2502,14 @@
       state.dose += 1;
       msg += decayBuildingStats(ev);
 
-      state.o2 = Math.max(0, state.o2 - (state.moxieBoosted ? 5 : 8));
-      state.h2o = Math.max(0, state.h2o - 6);
-      state.food = Math.max(0, state.food - 5);
+      state.o2 = Math.max(0, state.o2 - (state.moxieBoosted ? 5 : 8) * DF().drain);
+      state.h2o = Math.max(0, state.h2o - 6 * DF().drain);
+      state.food = Math.max(0, state.food - 5 * DF().drain);
 
       const dusty = ev.type === 'dust';
       state.power = (state.panelsDeployed && !dusty) ? Math.round(state.maxPower * (0.6 + 0.4 * state.bs.clean / 100)) : 5;
 
+      msg += onNewSol(dusty);
       const missionOver = state.sol > state.maxSols;
       state.forecast = state.schedule[state.sol - 1] || { type: 'quiet', label: 'Quiet Sun', sev: 0, date: '' };
       if (state.forecast.type !== 'quiet') SFX.alarm();
@@ -2156,12 +2529,12 @@
       } else if (missionOver) {
         endGame(false, `You survived all ${state.maxSols} sols with ${state.science}/${state.scienceGoal} science. Try balancing power differently!`);
       } else {
-        if (state.sol < state.maxSols && Math.random() < 0.75) setTimeout(triggerCrisis, 450);
+        if (state.sol < state.maxSols && Math.random() < DF().ev) setTimeout(triggerCrisis, 450);
         nextSolBtn.innerHTML = state.sol === state.maxSols ? 'Finish Mission &#9654;' : `Advance to Sol ${state.sol + 1} &#9654;`;
       }
     });
 
-    function endGame(victory, message) {
+    function endGameBase(victory, message) {
       state.gameOver = true;
       releasePointerLock();
       let stars = 0;
@@ -2169,8 +2542,6 @@
       if (state.dose < 50) stars++;
       if (state.o2 > 30 && state.h2o > 30 && state.food > 30) stars++;
       const ups = Object.values(state.levels).reduce((a, b) => a + b - 1, 0);
-      victory ? SFX.win() : SFX.lose();
-
       const takeaway = state.dose >= 60
         ? 'Real-world takeaway: radiation adds up over time. That is why NASA plans shelters and limits how long crews work outside on Mars.'
         : 'Real-world takeaway: every system on a Mars base shares one limited power supply, so something always has to wait.';
@@ -2179,6 +2550,7 @@
       document.getElementById('modal-body').textContent = `${message} Grade: ${'★'.repeat(stars)}${'☆'.repeat(3 - stars)}. Surprises handled: ${state.crisesHandled}. Upgrades: ${ups}. ${takeaway}`;
       endModalEl.classList.add('active');
     }
+    window.__endGameBase = endGameBase;
 
     // ==================== UPGRADE BEACONS, ROVER & MODAL BUTTONS ====================
     const badgePos = { habitation: [-2.2, 3.9, -2.9], solar: [-0.3, 1.5, 1.6], research: [-4.1, 2.5, 2.0], silo: [5.8, 5.9, 1.8], comms: [0.7, 2.3, 4.1] };
@@ -2207,21 +2579,20 @@
     scene.add(rover);
 
     function updateRover(t, dt) {
-      const game = state.mode === 'game' && !state.insideBuilding;
+      const game = (state.mode === 'game' || state.mode === 'ending') && !state.insideBuilding;
       rover.visible = game;
-      const a = t * 0.12, dx = -Math.sin(a) * 14, dz = Math.cos(a) * 10;
-      rover.position.set(Math.cos(a) * 14, 0.15, Math.sin(a) * 10);
-      rover.rotation.y = Math.atan2(dx, dz);
+      if (state.mode === 'game' || state.mode === 'ending') moveRover(t, dt);
+      updateWorld(t, dt);
 
       const dust = game && ((state.forecast && state.forecast.type === 'dust') || state.sol <= state.dustUntil);
-      const targetFog = state.insideBuilding ? 0.004 : (dust ? 0.032 : 0.011);
+      const targetFog = state.insideBuilding ? 0.004 : (dust ? 0.032 : 0.0085);
       scene.fog.density += (targetFog - scene.fog.density) * Math.min(1, dt * 2.2);
 
       const flare = game && state.forecast && state.forecast.type === 'flare';
       sunHalo.scale.setScalar(flare ? 1.6 + Math.sin(t * 6) * 0.3 : 1);
       for (const id in lvlBadges) if (lvlBadges[id].visible) lvlBadges[id].position.y = badgePos[id][1] + Math.sin(t * 3) * 0.08;
 
-      if (state.shake > 0.01 && !state.insideBuilding) {
+      if (state.shake > 0.01 && !state.insideBuilding && SET.shake) {
         baseGroup.position.set((Math.random() - 0.5) * state.shake, 0, (Math.random() - 0.5) * state.shake);
         state.shake *= Math.pow(0.92, dt * 60);
       } else {
@@ -2232,13 +2603,1053 @@
     document.getElementById('brief-close').addEventListener('click', () => { SFX.click(); briefEl.classList.remove('active'); requestFpsPointerLock(); });
     document.getElementById('help-btn').addEventListener('click', () => { SFX.click(); releasePointerLock(); briefEl.classList.add('active'); });
     const soundBtn = document.getElementById('sound-btn');
-    soundBtn.addEventListener('click', () => { SFX.muted = !SFX.muted; soundBtn.textContent = SFX.muted ? 'Sound: Off' : 'Sound: On'; SFX.click(); });
+    soundBtn.addEventListener('click', () => { SET.sfx = !SET.sfx; saveSettings(); applySettings(); SFX.click(); });
 
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
+
+
+    // ==================== v10.2: DETAILED BUILDINGS ====================
+    // Reflection environment so metal surfaces look like metal (dim Mars-dusk gradient + a sun glint)
+    (function buildEnvironment() {
+      try {
+        const c = document.createElement('canvas'); c.width = 4; c.height = 256;
+        const cx = c.getContext('2d'), gr = cx.createLinearGradient(0, 0, 0, 256);
+        gr.addColorStop(0, '#1b2a4a'); gr.addColorStop(0.42, '#3a2a3a'); gr.addColorStop(0.5, '#a0482a'); gr.addColorStop(0.58, '#5a2412'); gr.addColorStop(1, '#2a0e07');
+        cx.fillStyle = gr; cx.fillRect(0, 0, 4, 256);
+        const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+        const envScene = new THREE.Scene();
+        envScene.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide })));
+        const glint = new THREE.Mesh(new THREE.SphereGeometry(5, 12, 8), new THREE.MeshBasicMaterial({ color: 0xfff1d6 }));
+        glint.position.set(30, 26, -34); envScene.add(glint);
+        const pm = new THREE.PMREMGenerator(renderer);
+        scene.environment = pm.fromScene(envScene, 0.04).texture;
+        pm.dispose();
+      } catch (_) {}
+    })();
+
+    const DET = { beacons: [], cups: [], dishAz: null, dishEl: null, glows: [] };
+    const dm = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: o.rough ?? 0.4, metalness: o.metal ?? 0.5, emissive: o.em ?? 0x000000, emissiveIntensity: o.emI ?? 0, side: o.side ?? THREE.FrontSide, transparent: !!o.opacity, opacity: o.opacity ?? 1 });
+    function dmesh(parent, geo, mat, x, y, z, o = {}) {
+      const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z);
+      if (o.rx) m.rotation.x = o.rx; if (o.ry) m.rotation.y = o.ry; if (o.rz) m.rotation.z = o.rz;
+      m.castShadow = !!o.cast; m.receiveShadow = true; parent.add(m); return m;
+    }
+    function strut(parent, a, b, r, color) {
+      const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2], len = Math.hypot(dx, dy, dz);
+      const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, len, 8), dm(color, { metal: 0.7, rough: 0.35 }));
+      m.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(dx / len, dy / len, dz / len));
+      parent.add(m); return m;
+    }
+    function frameRect(parent, cx, cy, cz, w, h, t, d, color, plane) {
+      // plane 'xy' (face looking along z) or 'zy' (face looking along x)
+      const pieces = plane === 'zy'
+        ? [[d, t, w, cx, cy + h / 2, cz], [d, t, w, cx, cy - h / 2, cz], [d, h, t, cx, cy, cz - w / 2], [d, h, t, cx, cy, cz + w / 2]]
+        : [[w, t, d, cx, cy + h / 2, cz], [w, t, d, cx, cy - h / 2, cz], [t, h, d, cx - w / 2, cy, cz], [t, h, d, cx + w / 2, cy, cz]];
+      pieces.forEach((p) => addBox(parent, p[0], p[1], p[2], p[3], p[4], p[5], color, { cast: false, metal: 0.6, rough: 0.35 }));
+    }
+    function beacon(parent, x, y, z, color) {
+      const m = dmesh(parent, new THREE.SphereGeometry(0.09, 12, 10), dm(color, { em: color, emI: 1, metal: 0.1 }), x, y, z);
+      DET.beacons.push(m); return m;
+    }
+    function halfDome(parent, r, x, y, z, color, o = {}) {
+      return dmesh(parent, new THREE.SphereGeometry(r, 32, 14, 0, Math.PI * 2, 0, Math.PI / 2), dm(color, { metal: o.metal ?? 0.55, rough: o.rough ?? 0.3 }), x, y, z, { cast: true });
+    }
+    const STEEL = 0xcbd5e1, DARKSTEEL = 0x334155, HAZ = 0xfbbf24;
+
+    // ---------------- deck: panel seams, edge lights, corner light poles ----------------
+    for (let i = -5; i <= 5; i++) addBox(baseGroup, 16.4, 0.01, 0.035, 0, 0.255, i * 1.0, 0x0f172a, { cast: false, metal: 0.2, rough: 0.9 });
+    for (let i = -8; i <= 8; i++) addBox(baseGroup, 0.035, 0.01, 11.4, i * 1.0, 0.255, 0, 0x0f172a, { cast: false, metal: 0.2, rough: 0.9 });
+    for (let i = -7; i <= 7; i++) for (const zz of [-5.62, 5.62]) addBox(baseGroup, 0.22, 0.05, 0.08, i * 1.1, 0.27, zz, 0xfbbf24, { cast: false, emissive: 0xfbbf24, emInt: 0.9 });
+    for (const [px, pz] of [[-8.0, -5.4], [8.0, -5.4], [8.0, 5.4], [-8.0, 5.4]]) {
+      addCyl(baseGroup, 0.05, 0.06, 2.6, px, 1.55, pz, 0x94a3b8, { seg: 10, cast: false });
+      addBox(baseGroup, 0.32, 0.12, 0.22, px, 2.9, pz, 0x1e293b, { cast: false });
+      addBox(baseGroup, 0.26, 0.05, 0.16, px, 2.82, pz, 0xfff7d6, { cast: false, emissive: 0xfff1b8, emInt: 1.2 });
+    }
+
+    // ---------------- HABITATION MODULE ----------------
+    (function detailHab() {
+      const h = habGroup;
+      const skip = [[-3.98, -2.82], [-1.98, -1.02], [-0.33, 0.63], [1.32, 2.28]];
+      for (let i = 0; i < 24; i++) {
+        const x = -6.7 + i * 0.4;
+        if (skip.some((s) => x > s[0] - 0.05 && x < s[1] + 0.05)) continue;
+        addBox(h, 0.07, 2.3, 0.07, x, 1.45, -1.075, 0x3866c9, { cast: false, metal: 0.55, rough: 0.35 });
+      }
+      for (const y of [0.55, 2.5]) addBox(h, 9.7, 0.1, 0.14, -2.2, y, -1.07, 0x1e3a8a, { cast: false, metal: 0.6 });
+      for (let i = 0; i < 24; i++) addBox(h, 0.4, 0.13, 0.1, -6.8 + i * 0.4, 0.36, -1.1, i % 2 ? 0x111827 : HAZ, { cast: false, rough: 0.6 });
+      for (let w = 0; w < 3; w++) {
+        const wx = -1.5 + w * 1.65;
+        frameRect(h, wx, 1.55, -1.12, 1.1, 0.7, 0.06, 0.12, STEEL, 'xy');
+        addBox(h, 0.04, 0.62, 0.1, wx, 1.55, -1.12, STEEL, { cast: false });
+      }
+      frameRect(h, -3.4, 1.12, -1.12, 1.45, 2.0, 0.1, 0.14, STEEL, 'xy');
+      const wheel = dmesh(h, new THREE.TorusGeometry(0.2, 0.035, 10, 24), dm(0xe2e8f0, { metal: 0.8 }), -3.4, 1.15, -1.18);
+      addBox(h, 0.4, 0.04, 0.04, -3.4, 1.15, -1.18, 0xe2e8f0, { cast: false }); addBox(h, 0.04, 0.4, 0.04, -3.4, 1.15, -1.18, 0xe2e8f0, { cast: false });
+      addBox(h, 0.5, 0.1, 0.1, -3.4, 2.28, -1.12, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 1.0 });
+      // roof: seams, vents, HVAC, domes with caps
+      for (let i = 0; i < 8; i++) addBox(h, 0.04, 0.02, 3.55, -6.5 + i * 1.2, 2.66, -2.9, 0x1e3a8a, { cast: false });
+      addBox(h, 1.3, 0.5, 0.9, 0.9, 2.9, -4.0, 0x94a3b8, { metal: 0.5 });
+      for (let i = 0; i < 6; i++) addBox(h, 1.1, 0.03, 0.04, 0.9, 2.74 + i * 0.07, -3.56, 0x475569, { cast: false });
+      addCyl(h, 0.28, 0.28, 0.12, 0.9, 3.19, -4.0, 0x334155, { seg: 18, cast: false });
+      halfDome(h, 0.58, -3.3, 3.07, -3.1, 0xe2e8f0); halfDome(h, 0.58, -1.6, 3.07, -3.1, 0xe2e8f0);
+      for (const dx of [-3.3, -1.6]) { dmesh(h, new THREE.TorusGeometry(0.58, 0.03, 8, 32), dm(0x94a3b8, { metal: 0.8 }), dx, 3.08, -3.1, { rx: Math.PI / 2 }); }
+      // mast + beacon + whip
+      addCyl(h, 0.045, 0.06, 2.4, 2.1, 3.85, -4.2, 0xe2e8f0, { seg: 10, cast: false });
+      addCyl(h, 0.012, 0.012, 1.2, 2.1, 5.65, -4.2, 0xcbd5e1, { seg: 6, cast: false });
+      beacon(h, 2.1, 5.05, -4.2, 0xef4444);
+      // roof floodlights front corners
+      for (const fx of [-6.75, 2.35]) { addCyl(h, 0.04, 0.05, 0.8, fx, 3.05, -1.35, 0x94a3b8, { seg: 8, cast: false }); addBox(h, 0.34, 0.16, 0.2, fx, 3.5, -1.3, 0x1e293b, { cast: false }); addBox(h, 0.28, 0.1, 0.05, fx, 3.5, -1.2, 0xfff7d6, { cast: false, emissive: 0xfff1b8, emInt: 1.2 }); }
+      // rear pipework + tank
+      dmesh(h, new THREE.CylinderGeometry(0.1, 0.1, 8.6, 14), dm(0x94a3b8, { metal: 0.7 }), -2.2, 1.0, -4.8, { rz: Math.PI / 2 });
+      dmesh(h, new THREE.CylinderGeometry(0.1, 0.1, 8.6, 14), dm(0x64748b, { metal: 0.7 }), -2.2, 1.45, -4.8, { rz: Math.PI / 2 });
+      for (let i = 0; i < 7; i++) addBox(h, 0.08, 0.7, 0.12, -6.0 + i * 1.3, 1.2, -4.76, 0x475569, { cast: false });
+    })();
+
+    // ---------------- SOLAR ARRAY ----------------
+    (function detailSolar() {
+      const s = solarGroup;
+      solarPanels.forEach((p) => {
+        for (let i = 1; i < 5; i++) addBox(p, 0.012, 0.012, 1.34, -0.625 + i * 0.25, 0.04, 0, 0x0b1f5c, { cast: false, rough: 0.3, metal: 0.8 });
+        for (let j = 1; j < 6; j++) addBox(p, 1.24, 0.012, 0.012, 0, 0.04, -0.675 + j * 0.225, 0x0b1f5c, { cast: false, rough: 0.3, metal: 0.8 });
+        addBox(p, 1.3, 0.1, 0.04, 0, 0, 0.69, 0xe2e8f0, { cast: false, metal: 0.8 }); addBox(p, 1.3, 0.1, 0.04, 0, 0, -0.69, 0xe2e8f0, { cast: false, metal: 0.8 });
+        addBox(p, 0.04, 0.1, 1.38, 0.64, 0, 0, 0xe2e8f0, { cast: false, metal: 0.8 }); addBox(p, 0.04, 0.1, 1.38, -0.64, 0, 0, 0xe2e8f0, { cast: false, metal: 0.8 });
+        const sx = p.position.x, sz = p.position.z;
+        addCyl(s, 0.045, 0.06, 0.34, sx, 0.5, sz + 0.55, 0x94a3b8, { seg: 10, cast: false });
+      });
+      // inverter cabinet + conduit + transformer
+      addBox(s, 0.5, 0.6, 0.36, -2.15, 0.64, 0.38, 0x475569, { metal: 0.5 });
+      addBox(s, 0.44, 0.52, 0.02, -2.15, 0.64, 0.57, 0x334155, { cast: false });
+      addBox(s, 0.05, 0.05, 0.03, -2.0, 0.8, 0.59, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 1.2 });
+      addBox(s, 0.05, 0.05, 0.03, -2.0, 0.7, 0.59, 0xfbbf24, { cast: false, emissive: 0xfbbf24, emInt: 1.0 });
+      for (let i = 0; i < 4; i++) addBox(s, 0.3, 0.02, 0.02, -2.25, 0.5 + i * 0.045, 0.59, 0x111827, { cast: false });
+      dmesh(s, new THREE.CylinderGeometry(0.035, 0.035, 3.8, 8), dm(0x111827, { metal: 0.2, rough: 0.7 }), -0.2, 0.46, 0.18, { rz: Math.PI / 2 });
+      addCyl(s, 0.22, 0.22, 0.52, 1.55, 0.6, 0.42, 0x64748b, { seg: 18 });
+      for (let i = 0; i < 4; i++) dmesh(s, new THREE.TorusGeometry(0.225, 0.02, 6, 20), dm(0x94a3b8, { metal: 0.8 }), 1.55, 0.42 + i * 0.1, 0.42, { rx: Math.PI / 2 });
+      // weather mast with spinning cups
+      addCyl(s, 0.025, 0.03, 1.2, 1.78, 1.05, 2.95, 0xe2e8f0, { seg: 8, cast: false });
+      const cups = new THREE.Group(); cups.position.set(1.78, 1.66, 2.95); s.add(cups);
+      for (let k = 0; k < 3; k++) { const a = (k * Math.PI * 2) / 3; strut(cups, [0, 0, 0], [Math.cos(a) * 0.17, 0, Math.sin(a) * 0.17], 0.01, 0xe2e8f0); dmesh(cups, new THREE.SphereGeometry(0.05, 10, 8), dm(0xf97316, { metal: 0.3 }), Math.cos(a) * 0.17, 0, Math.sin(a) * 0.17); }
+      DET.cups.push(cups);
+      beacon(s, -2.4, 0.5, 3.05, 0xef4444);
+    })();
+
+    // ---------------- RESEARCH CENTER ----------------
+    (function detailResearch() {
+      const r = researchGroup;
+      frameRect(r, -4.1, 0.98, 3.58, 0.85, 1.2, 0.06, 0.1, STEEL, 'xy');
+      addBox(r, 0.7, 1.08, 0.04, -4.1, 0.96, 3.58, 0x0f172a, { cast: false });
+      addBox(r, 0.5, 0.06, 0.05, -4.1, 1.62, 3.6, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 1.0 });
+      for (const wx of [-4.75, -3.45]) { frameRect(r, wx, 1.1, 3.58, 0.42, 0.42, 0.045, 0.1, STEEL, 'xy'); addBox(r, 0.36, 0.36, 0.04, wx, 1.1, 3.57, 0x7dd3fc, { cast: false, emissive: 0x38bdf8, emInt: 0.6, rough: 0.1 }); }
+      for (const wz of [1.0, 2.0, 3.0]) { frameRect(r, -5.18, 1.1, wz, 0.5, 0.46, 0.045, 0.1, STEEL, 'zy'); addBox(r, 0.04, 0.4, 0.44, -5.17, 1.1, wz, 0x7dd3fc, { cast: false, emissive: 0x38bdf8, emInt: 0.6, rough: 0.1 }); }
+      addBox(r, 2.2, 0.08, 3.2, -4.1, 1.72, 2.0, 0xa16207, { cast: false, metal: 0.6 });
+      addBox(r, 2.14, 0.1, 0.1, -4.1, 0.38, 3.56, 0x111827, { cast: false });
+      // telescope dome
+      addCyl(r, 0.55, 0.55, 0.1, -4.1, 2.06, 1.4, 0x64748b, { seg: 28 });
+      halfDome(r, 0.5, -4.1, 2.11, 1.4, 0xf1f5f9, { metal: 0.4, rough: 0.25 });
+      addBox(r, 0.14, 0.58, 0.09, -4.1, 2.36, 1.83, 0x0b1220, { cast: false, rx: -0.75 });
+      dmesh(r, new THREE.CylinderGeometry(0.06, 0.08, 0.7, 14), dm(0xe2e8f0, { metal: 0.8 }), -4.1, 2.52, 1.92, { rx: -0.9 });
+      // instruments on the main roof
+      dmesh(r, new THREE.CylinderGeometry(0.1, 0.1, 0.95, 16), dm(0x94a3b8, { metal: 0.85 }), -4.55, 1.9, 2.8, { rx: Math.PI / 2 });
+      dmesh(r, new THREE.CircleGeometry(0.09, 16), dm(0xf87171, { em: 0xf87171, emI: 1.2 }), -4.55, 1.9, 3.28);
+      addBox(r, 0.28, 0.12, 0.28, -4.55, 1.78, 2.8, 0x475569, { cast: false });
+      addBox(r, 0.04, 0.9, 0.04, -3.35, 2.2, 3.15, 0x94a3b8, { cast: false }); addBox(r, 0.04, 0.9, 0.04, -3.05 + 0.1, 2.2, 3.15, 0x94a3b8, { cast: false }); addBox(r, 0.36, 0.04, 0.04, -3.25, 2.62, 3.15, 0x94a3b8, { cast: false });
+      strut(r, [-3.35, 1.75, 3.15], [-3.25, 2.62, 3.15], 0.012, 0xcbd5e1);
+      beacon(r, -3.35, 2.68, 3.15, 0xfacc15);
+      const cups = new THREE.Group(); cups.position.set(-3.5, 2.35, 0.8); r.add(cups); addCyl(r, 0.02, 0.02, 0.8, -3.5, 1.95, 0.8, 0xe2e8f0, { seg: 6, cast: false });
+      for (let k = 0; k < 3; k++) { const a = (k * Math.PI * 2) / 3; strut(cups, [0, 0, 0], [Math.cos(a) * 0.15, 0, Math.sin(a) * 0.15], 0.01, 0xe2e8f0); dmesh(cups, new THREE.SphereGeometry(0.045, 10, 8), dm(0xfacc15), Math.cos(a) * 0.15, 0, Math.sin(a) * 0.15); }
+      DET.cups.push(cups);
+    })();
+
+    // ---------------- FOOD STORAGE SILO ----------------
+    (function detailSilo() {
+      const s = siloGroup;
+      for (let w = 0; w < 3; w++) {
+        const wx = 4.2 + w * 1.2;
+        frameRect(s, wx, 1.35, 3.82, 0.95, 0.9, 0.06, 0.1, STEEL, 'xy');
+        addBox(s, 0.88, 0.84, 0.04, wx, 1.35, 3.8, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 0.7, opacity: 0.85, rough: 0.1 });
+        for (let p = 0; p < 3; p++) { dmesh(s, new THREE.SphereGeometry(0.11, 10, 8), dm(0x166534, { rough: 0.9, metal: 0 }), wx - 0.25 + p * 0.25, 1.15, 3.7); addCyl(s, 0.01, 0.01, 0.3, wx - 0.25 + p * 0.25, 0.98, 3.7, 0x14532d, { seg: 5, cast: false }); }
+        addBox(s, 0.8, 0.04, 0.05, wx, 1.72, 3.7, 0xf0abfc, { cast: false, emissive: 0xe879f9, emInt: 1.0 });
+      }
+      for (let i = 0; i < 9; i++) addBox(s, 0.42, 0.14, 0.05, 3.65 + i * 0.42, 0.37, 3.83, i % 2 ? 0x111827 : HAZ, { cast: false });
+      // roller door on west face
+      addBox(s, 0.1, 1.55, 1.5, 3.48, 1.05, 2.85, 0x64748b, { cast: false, metal: 0.6 });
+      for (let i = 0; i < 8; i++) addBox(s, 0.05, 0.03, 1.5, 3.42, 0.4 + i * 0.19, 2.85, 0x334155, { cast: false });
+      frameRect(s, 3.42, 1.05, 2.85, 1.6, 1.62, 0.08, 0.1, STEEL, 'zy');
+      // corner pillars
+      for (const [px, pz] of [[3.5, -1.0], [7.3, -1.0], [3.5, 3.8], [7.3, 3.8]]) addBox(s, 0.16, 2.12, 0.16, px, 1.3, pz, 0x64748b, { cast: false, metal: 0.7 });
+      addBox(s, 3.9, 0.08, 4.9, 5.4, 2.38, 1.4, 0x64748b, { cast: false });
+      // roof grow-light skylights
+      for (const sx of [3.9, 6.95]) addBox(s, 0.5, 0.05, 3.4, sx, 2.42, 1.4, 0x86efac, { cast: false, emissive: 0x4ade80, emInt: 0.9, opacity: 0.9 });
+      // tank: rings, dome, hatch, ladder, pipe, auger
+      for (const y of [2.8, 3.5, 4.2, 4.9, 5.4]) dmesh(s, new THREE.TorusGeometry(0.865, 0.03, 8, 40), dm(0x94a3b8, { metal: 0.85 }), 5.8, y, 1.8, { rx: Math.PI / 2 });
+      halfDome(s, 0.85, 5.8, 5.55, 1.8, 0xf1f5f9, { metal: 0.5 });
+      addCyl(s, 0.2, 0.2, 0.18, 5.8, 6.45, 1.8, 0x64748b, { seg: 14, cast: false });
+      dmesh(s, new THREE.TorusGeometry(0.22, 0.03, 8, 20), dm(0xe2e8f0, { metal: 0.8 }), 5.8, 6.4, 1.8, { rx: Math.PI / 2 });
+      addCyl(s, 0.05, 0.05, 0.7, 6.3, 6.15, 1.6, 0x94a3b8, { seg: 8, cast: false });
+      const ladder = (ang) => {
+        const rx0 = 5.8 + Math.cos(ang) * 0.9, rz0 = 1.8 + Math.sin(ang) * 0.9, tx = -Math.sin(ang), tz = Math.cos(ang);
+        for (const o of [-0.13, 0.13]) addCyl(s, 0.014, 0.014, 3.1, rx0 + tx * o, 3.95, rz0 + tz * o, 0xcbd5e1, { seg: 6, cast: false });
+        for (let i = 0; i < 12; i++) addBox(s, 0.28, 0.02, 0.02, rx0, 2.55 + i * 0.25, rz0, 0xcbd5e1, { cast: false, ry: 0 }).rotation.y = Math.atan2(-tz, tx);
+      };
+      ladder(Math.atan2(0.66, -0.75));
+      dmesh(s, new THREE.CylinderGeometry(0.11, 0.11, 1.5, 14), dm(0x94a3b8, { metal: 0.7 }), 5.05, 2.62, 1.8, { rz: Math.PI / 2 });
+      addCyl(s, 0.11, 0.11, 0.3, 4.3, 2.5, 1.8, 0x94a3b8, { seg: 14, cast: false });
+      strut(s, [3.4, 0.5, 1.3], [2.6, 1.55, 1.3], 0.05, 0x64748b);
+      beacon(s, 5.8, 6.62, 1.8, 0xef4444);
+    })();
+
+    // ---------------- COMMS: real parabolic radar dish ----------------
+    (function detailComms() {
+      const c = commsGroup;
+      antenna.visible = false;
+      addCyl(c, 0.62, 0.7, 0.14, 0.7, 0.97, 4.1, 0x475569, { seg: 32 });
+      for (let i = 0; i < 8; i++) { const a = (i * Math.PI) / 4; addBox(c, 0.12, 0.1, 0.12, 0.7 + Math.cos(a) * 0.58, 1.07, 4.1 + Math.sin(a) * 0.58, 0x94a3b8, { cast: false }); }
+      const az = new THREE.Group(); az.position.set(0.7, 1.04, 4.1); c.add(az); DET.dishAz = az;
+      addCyl(az, 0.42, 0.5, 0.26, 0, 0.13, 0, 0x64748b, { seg: 28 });
+      addCyl(az, 0.17, 0.2, 1.0, 0, 0.75, 0, 0xe2e8f0, { seg: 20, metal: 0.7 });
+      addBox(az, 0.98, 0.12, 0.28, 0, 1.3, 0, 0x94a3b8, { metal: 0.7 });
+      for (const sx of [-0.46, 0.46]) addBox(az, 0.09, 0.65, 0.22, sx, 1.65, 0, 0x94a3b8, { metal: 0.7 });
+      const el = new THREE.Group(); el.position.set(0, 1.85, 0); az.add(el); DET.dishEl = el;
+      dmesh(el, new THREE.CylinderGeometry(0.06, 0.06, 1.05, 12), dm(0xe2e8f0, { metal: 0.9 }), 0, 0, 0, { rz: Math.PI / 2 });
+      const R = 2.25, th = Math.asin(1.2 / R);
+      const capGeo = new THREE.SphereGeometry(R, 64, 16, 0, Math.PI * 2, Math.PI - th, th); capGeo.translate(0, R, 0);
+      const dish = new THREE.Mesh(capGeo, dm(0xf1f5f9, { metal: 0.55, rough: 0.28, side: THREE.DoubleSide })); dish.castShadow = true; dish.receiveShadow = true; el.add(dish);
+      const ribs = new THREE.Mesh(capGeo, new THREE.MeshBasicMaterial({ color: 0x64748b, wireframe: true, transparent: true, opacity: 0.45 })); ribs.scale.setScalar(1.004); el.add(ribs);
+      const rimY = R - R * Math.cos(th);
+      dmesh(el, new THREE.TorusGeometry(R * Math.sin(th), 0.03, 8, 64), dm(0xcbd5e1, { metal: 0.8 }), 0, rimY, 0, { rx: Math.PI / 2 });
+      addCyl(el, 0.28, 0.34, 0.3, 0, -0.1, 0, 0x64748b, { seg: 20 });
+      const f = R / 2;
+      for (let k = 0; k < 3; k++) { const a = Math.PI / 2 + (k * Math.PI * 2) / 3; strut(el, [Math.cos(a) * 1.18, rimY, Math.sin(a) * 1.18], [Math.cos(a) * 0.05, f, Math.sin(a) * 0.05], 0.022, 0xcbd5e1); }
+      addCyl(el, 0.07, 0.07, 0.3, 0, f + 0.08, 0, 0xe2e8f0, { seg: 14, cast: false });
+      dmesh(el, new THREE.ConeGeometry(0.17, 0.26, 20, 1, true), dm(0xfbbf24, { metal: 0.6, side: THREE.DoubleSide }), 0, f - 0.12, 0, { rx: Math.PI });
+      dmesh(el, new THREE.SphereGeometry(0.05, 10, 8), dm(0xef4444, { em: 0xef4444, emI: 1 }), 0, f + 0.26, 0);
+      // equipment shelter, mast, cables
+      addBox(c, 1.15, 0.8, 0.85, 2.7, 0.65, 4.9, 0x94a3b8, { metal: 0.45 });
+      addBox(c, 0.4, 0.62, 0.04, 2.45, 0.62, 5.34, 0x334155, { cast: false });
+      addBox(c, 0.3, 0.2, 0.05, 3.05, 0.78, 5.34, 0x1e293b, { cast: false }); addBox(c, 0.22, 0.12, 0.03, 3.05, 0.78, 5.37, 0x22c55e, { cast: false, emissive: 0x22c55e, emInt: 0.9 });
+      for (let i = 0; i < 5; i++) addBox(c, 1.0, 0.025, 0.03, 2.7, 0.9 + i * 0.0, 5.34, 0x64748b, { cast: false });
+      halfDome(c, 0.18, 2.45, 1.05, 4.7, 0xf1f5f9);
+      dmesh(c, new THREE.CylinderGeometry(0.04, 0.04, 2.0, 8), dm(0x111827, { metal: 0.2, rough: 0.7 }), 1.7, 0.3, 4.6, { rz: Math.PI / 2 });
+      for (let i = 0; i < 6; i++) addCyl(c, 0.05, 0.05, 0.5, 3.4, 0.5 + i * 0.5, 5.3, i % 2 ? 0xffffff : 0xef4444, { seg: 8, cast: false });
+      strut(c, [3.4, 0.25, 5.3], [3.4, 3.25, 5.3], 0.012, 0x94a3b8);
+      beacon(c, 3.4, 3.3, 5.3, 0xef4444);
+      // cryo tanks: bands, lids and valves
+      tankSpecs.forEach((tk) => {
+        for (const yy of [0.5, tk.h * 0.5, tk.h - 0.05]) dmesh(c, new THREE.TorusGeometry(0.325, 0.025, 8, 24), dm(0x1e293b, { metal: 0.8 }), tk.x, 0.25 + yy, tk.z, { rx: Math.PI / 2 });
+        addBox(c, 0.12, 0.16, 0.12, tk.x + 0.33, 0.55, tk.z, 0xef4444, { cast: false });
+        dmesh(c, new THREE.CylinderGeometry(0.03, 0.03, 0.8, 8), dm(0x94a3b8, { metal: 0.8 }), tk.x - 0.34, 0.65, tk.z + 0.4, { rx: Math.PI / 2 });
+      });
+    })();
+
+    function updateDetails(t) {
+      if (DET.dishAz) { DET.dishAz.rotation.y = Math.sin(t * 0.25) * 1.1; DET.dishEl.rotation.x = 0.85 + Math.sin(t * 0.35) * 0.12; }
+      DET.cups.forEach((g, i) => { g.rotation.y = t * (3 + i); });
+      DET.beacons.forEach((b, i) => { b.material.emissiveIntensity = ((t * 1.3 + i * 0.37) % 1) < 0.18 ? 1.6 : 0.12; });
+    }
+
+    // ==================== v10.3: DETAILED ROVER & LANDER ====================
+    const ROVER_SCALE = 1.25, ROVER_WHEELS = [];
+    (function detailRover() {
+      while (rover.children.length) rover.remove(rover.children[0]);
+      const GOLD = 0xd4a017, WHITE = 0xe5e7eb;
+      addBox(rover, 1.0, 0.3, 0.62, 0, 0.52, 0, WHITE, { metal: 0.35, rough: 0.4 });
+      addBox(rover, 0.9, 0.035, 0.56, 0, 0.69, 0, 0x94a3b8, { cast: false, metal: 0.6 });
+      for (const sz of [-0.315, 0.315]) addBox(rover, 0.98, 0.22, 0.02, 0, 0.52, sz, GOLD, { cast: false, metal: 0.85, rough: 0.3 });
+      addBox(rover, 0.3, 0.15, 0.44, 0.58, 0.55, 0, 0x475569, { metal: 0.5 });
+      // RTG power unit with cooling fins
+      dmesh(rover, new THREE.CylinderGeometry(0.1, 0.1, 0.5, 16), dm(0x475569, { metal: 0.7 }), -0.66, 0.58, 0, { rz: Math.PI / 2, cast: true });
+      for (let i = 0; i < 5; i++) dmesh(rover, new THREE.TorusGeometry(0.105, 0.012, 6, 16), dm(0x94a3b8, { metal: 0.8 }), -0.82 + i * 0.1, 0.58, 0, { ry: Math.PI / 2 });
+      // mast with camera head
+      addCyl(rover, 0.025, 0.03, 0.55, 0.36, 1.0, 0.14, 0xcbd5e1, { seg: 10, cast: false });
+      addBox(rover, 0.13, 0.1, 0.24, 0.36, 1.3, 0.14, 0x1e293b, { cast: false, metal: 0.6 });
+      for (const ez of [0.07, 0.21]) dmesh(rover, new THREE.CylinderGeometry(0.035, 0.035, 0.05, 12), dm(0x0b1220, { metal: 0.9, rough: 0.1, em: 0x38bdf8, emI: 0.25 }), 0.44, 1.3, ez, { rz: Math.PI / 2 });
+      // robotic arm + drill turret
+      strut(rover, [0.5, 0.64, -0.2], [0.78, 0.6, -0.22], 0.022, 0xcbd5e1);
+      strut(rover, [0.78, 0.6, -0.22], [0.92, 0.42, -0.2], 0.022, 0xcbd5e1);
+      dmesh(rover, new THREE.CylinderGeometry(0.08, 0.08, 0.1, 16), dm(0x64748b, { metal: 0.8 }), 0.94, 0.38, -0.2, { rx: Math.PI / 2 });
+      addCyl(rover, 0.015, 0.015, 0.16, 0.94, 0.27, -0.2, 0xe2e8f0, { seg: 6, cast: false });
+      // antennas
+      dmesh(rover, new THREE.CylinderGeometry(0.13, 0.13, 0.015, 20), dm(0xf1f5f9, { metal: 0.6 }), -0.2, 0.86, -0.18, { rz: 0.5 });
+      strut(rover, [-0.2, 0.7, -0.18], [-0.2, 0.84, -0.18], 0.012, 0x94a3b8);
+      addCyl(rover, 0.01, 0.01, 0.36, -0.36, 0.88, 0.2, 0xcbd5e1, { seg: 6, cast: false });
+      beacon(rover, -0.36, 1.08, 0.2, 0x38bdf8);
+      // rocker-bogie suspension + six grooved wheels
+      for (const sz of [-1, 1]) {
+        strut(rover, [-0.5, 0.2, sz * 0.5], [0.5, 0.2, sz * 0.5], 0.02, 0x94a3b8);
+        for (const wx of [-0.5, 0, 0.5]) {
+          strut(rover, [wx * 0.45, 0.5, sz * 0.31], [wx, 0.2, sz * 0.5], 0.02, 0x94a3b8);
+          const spin = new THREE.Group(); spin.position.set(wx, 0.17, sz * 0.52); rover.add(spin); ROVER_WHEELS.push(spin);
+          dmesh(spin, new THREE.CylinderGeometry(0.17, 0.17, 0.14, 24), dm(0xc9ced6, { metal: 0.8, rough: 0.35 }), 0, 0, 0, { rx: Math.PI / 2, cast: true });
+          dmesh(spin, new THREE.CylinderGeometry(0.09, 0.09, 0.16, 16), dm(0x64748b, { metal: 0.8 }), 0, 0, 0, { rx: Math.PI / 2 });
+          for (let g = 0; g < 14; g++) { const a = (g / 14) * Math.PI * 2; const cl = addBox(spin, 0.045, 0.03, 0.15, Math.cos(a) * 0.178, Math.sin(a) * 0.178, 0, 0x1f2937, { cast: false, rough: 0.8, metal: 0.2 }); cl.rotation.z = a; }
+        }
+      }
+      rover.scale.setScalar(ROVER_SCALE);
+    })();
+
+    (function detailLander() {
+      const L = landerGroup, lr = (y) => 1.18 - 0.5 * ((y - 0.5) / 2.9);
+      // bands, tiles and stripes
+      for (const [y, col] of [[0.75, 0x1f2937], [1.25, 0xf97316], [1.45, 0x1e3a8a], [2.35, 0xf97316], [2.55, 0x94a3b8], [3.1, 0x1e3a8a]]) {
+        dmesh(L, new THREE.TorusGeometry(lr(y) + 0.008, y === 0.75 ? 0.07 : 0.028, 8, 48), dm(col, { metal: 0.6, rough: 0.35 }), 0, y, 0, { rx: Math.PI / 2 });
+      }
+      addCyl(L, 1.2, 1.22, 0.42, 0, 0.72, 0, 0x1f2937, { seg: 40, rough: 0.8, metal: 0.2 });
+      // vertical panel seams
+      for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; addBox(L, 0.02, 2.45, 0.02, Math.cos(a) * 0.93, 2.0, Math.sin(a) * 0.93, 0xcbd5e1, { cast: false }).rotation.z = Math.cos(a) * 0.09; }
+      // cockpit window frame and hatch
+      dmesh(L, new THREE.TorusGeometry(0.33, 0.04, 10, 24), dm(0xe2e8f0, { metal: 0.8 }), 0.62, 2.55, 0.62, { ry: Math.PI / 4 });
+      frameRect(L, 1.0, 1.35, 0, 0.7, 1.3, 0.05, 0.08, 0xe2e8f0, 'zy');
+      // fins
+      for (let k = 0; k < 4; k++) {
+        const a = (k * Math.PI) / 2, fin = addBox(L, 0.08, 0.9, 0.55, Math.cos(a) * 1.28, 0.85, Math.sin(a) * 1.28, 0xe2e8f0, { metal: 0.6 });
+        fin.rotation.y = -a; fin.rotation.z = Math.cos(a) * 0.12;
+      }
+      // RCS pods near the nose
+      for (let k = 0; k < 4; k++) { const a = (k * Math.PI) / 2 + Math.PI / 4; addBox(L, 0.16, 0.12, 0.16, Math.cos(a) * 0.78, 3.2, Math.sin(a) * 0.78, 0x475569, { cast: false }); }
+      // nose antenna
+      addCyl(L, 0.012, 0.02, 0.9, 0, 4.7, 0, 0xcbd5e1, { seg: 6, cast: false });
+      beacon(L, 0, 5.18, 0, 0xef4444);
+      // engine cluster
+      for (const [ex, ez, s] of [[0, 0, 1.5], [0.5, 0, 1], [-0.5, 0, 1], [0, 0.5, 1], [0, -0.5, 1]]) {
+        dmesh(L, new THREE.ConeGeometry(0.2 * s, 0.4 * s, 20, 1, true), dm(0x57534e, { metal: 0.9, rough: 0.3, side: THREE.DoubleSide }), ex, 0.28, ez, { rx: Math.PI });
+      }
+      // leg braces, joints and foot plates
+      landerLegs.forEach((leg) => {
+        strut(leg, [-0.05, 0.4, 0], [0.45, -0.55, 0], 0.03, 0x94a3b8);
+        dmesh(leg, new THREE.SphereGeometry(0.07, 10, 8), dm(0x64748b, { metal: 0.8 }), 0.02, 0.15, 0);
+        dmesh(leg, new THREE.CylinderGeometry(0.34, 0.38, 0.05, 20), dm(0x475569, { metal: 0.6 }), 0.68, -1.15, 0);
+      });
+    })();
+
+    // ==================== v10 ADDITIONS ====================
+    const $ = (id) => document.getElementById(id);
+    const STANDBY = { habitation: 2, silo: 1, research: 2, comms: 1 };
+    const MODNAME = { habitation: 'Habitat', solar: 'Solar Array', research: 'Research Lab', silo: 'Food Silo', comms: 'Comms Dish' };
+    const MODEMO = { habitation: '🏠', solar: '☀️', research: '🔬', silo: '🌱', comms: '📡' };
+    const FAC_IDS = ['habitation', 'solar', 'research', 'silo', 'comms'];
+    const wrapAng = (a) => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
+
+
+    // ---------- black sky with stars, a tiny red horizon haze and Mars' two moons ----------
+    const skyGroup = new THREE.Group();
+    (function buildSky() {
+      const c = document.createElement('canvas'); c.width = 4; c.height = 512;
+      const cx = c.getContext('2d'), gr = cx.createLinearGradient(0, 0, 0, 512);
+      gr.addColorStop(0, '#000000'); gr.addColorStop(0.44, '#000000'); gr.addColorStop(0.485, '#3a0d06'); gr.addColorStop(0.5, '#6e1c0c'); gr.addColorStop(1, '#2a0804');
+      cx.fillStyle = gr; cx.fillRect(0, 0, 4, 512);
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace;
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(230, 32, 24), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false, depthWrite: false }));
+      dome.renderOrder = -10; skyGroup.add(dome);
+      const phobos = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xb3a79b, fog: false }));
+      phobos.scale.set(7.5, 5.8, 6.2); skyGroup.add(phobos);
+      const deimos = new THREE.Mesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshBasicMaterial({ color: 0xd8cdbf, fog: false }));
+      deimos.scale.set(3.6, 3, 3.2); skyGroup.add(deimos);
+      skyGroup.userData = { phobos, deimos };
+      scene.add(skyGroup);
+    })();
+    function updateSky(t) {
+      skyGroup.position.copy(camera.position);
+      const u = skyGroup.userData, R = 190;
+      const a1 = 2.2 + t * 0.012, a2 = 0.5 + t * 0.005;
+      u.phobos.position.set(Math.cos(a1) * R * 0.85, 55 + Math.sin(t * 0.03) * 8, Math.sin(a1) * R * 0.85);
+      u.deimos.position.set(Math.cos(a2) * R * 0.9, 95, Math.sin(a2) * R * 0.9);
+      u.phobos.rotation.y = t * 0.05; u.deimos.rotation.y = t * 0.03;
+    }
+
+    function standbyTotal() { let s = 0; for (const k in STANDBY) if (state.on[k]) s += STANDBY[k]; return s; }
+    function nextGen() {
+      const ev = state.forecast || { type: 'quiet' }, dust = ev.type === 'dust';
+      let base = 5;
+      if (state.panelsDeployed && !dust) base = Math.round(state.maxPower * (0.6 + 0.4 * Math.max(0, state.bs.clean - 8) / 100));
+      return Math.max(0, base - standbyTotal());
+    }
+
+    let toastTimer = null;
+    function toast(msg) {
+      const el = $('toast'); if (!el) return;
+      el.textContent = msg; el.classList.add('show');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    // ---------- history & statistics ----------
+    function histEntry() {
+      return {
+        sol: state.sol, o2: state.o2, h2o: state.h2o, food: state.food, dose: state.dose,
+        sci: (state.science / state.scienceGoal) * 100, pwr: (state.power / state.maxPower) * 100,
+        rawPower: state.power, rawSci: state.science, scrap: state.scrap
+      };
+    }
+    function recordHist() {
+      const e = histEntry();
+      const last = state.hist[state.hist.length - 1];
+      if (last && last.sol === e.sol) state.hist[state.hist.length - 1] = e; else state.hist.push(e);
+      state.stats.peakDose = Math.max(state.stats.peakDose, state.dose);
+    }
+
+    // ---------- floating building labels ----------
+    const LBL_POS = { habitation: [-3.0, 4.9, -2.9], solar: [-0.3, 2.9, 1.6], research: [-4.1, 3.5, 2.0], silo: [5.5, 6.9, 1.8], comms: [0.7, 3.9, 4.1] };
+    const labelSprites = {};
+    function makeSprite(w, h, sx, sy) {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+      s.scale.set(sx, sy, 1); s.renderOrder = 10;
+      return { s, c, tex };
+    }
+    function roundRectPath(ctx, x, y, w, h, r) {
+      ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+    }
+    FAC_IDS.forEach((id) => {
+      const L = makeSprite(800, 240, 4.3, 1.29);
+      L.s.position.set(...LBL_POS[id]); baseGroup.add(L.s); labelSprites[id] = L;
+    });
+    function drawLabel(id) {
+      const L = labelSprites[id], ctx = L.c.getContext('2d'), w = 400, h = 120;
+      ctx.setTransform(2, 0, 0, 2, 0, 0); ctx.clearRect(0, 0, w, h);
+      const hasSw = id !== 'solar', on = state.on[id] !== false;
+      const col = !hasSw ? '#38bdf8' : (on ? '#34d399' : '#f87171');
+      roundRectPath(ctx, 6, 6, w - 12, h - 12, 22); ctx.fillStyle = 'rgba(7,12,24,0.9)'; ctx.fill();
+      ctx.lineWidth = 4; ctx.strokeStyle = col; ctx.stroke();
+      const warn = state.bs[FACILITY_META[id].statKey] < 40;
+      ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff'; ctx.font = '700 30px Orbitron, Space Grotesk, sans-serif';
+      ctx.fillText(`${MODEMO[id]} ${MODNAME[id]}${warn ? ' ⚠' : ''}`, w / 2, 52);
+      ctx.fillStyle = col; ctx.font = '700 22px Space Grotesk, sans-serif';
+      const sub = hasSw ? (on ? `ON · uses ${STANDBY[id]} kW/sol` : 'OFF · saving power') : 'Power source';
+      ctx.fillText(`${sub} · LV${state.levels[id]}`, w / 2, 90);
+      L.tex.needsUpdate = true;
+    }
+    let lblSig = '';
+    function refreshLabels() {
+      const sig = FAC_IDS.map((id) => `${id}:${state.on[id]}:${state.levels[id]}:${state.bs[FACILITY_META[id].statKey] < 40}`).join('|') + SET.labels;
+      if (sig === lblSig) return;
+      lblSig = sig;
+      FAC_IDS.forEach((id) => { labelSprites[id].s.visible = SET.labels; drawLabel(id); });
+    }
+
+    // ---------- scrap pickups ----------
+    const scrapPickups = [];
+    function makeScrapPiece(x, z) {
+      const g = new THREE.Group();
+      g.position.set(x, terrainH(x, z), z);
+      for (let k = 0; k < 3; k++) {
+        const m = new THREE.Mesh(
+          new THREE.BoxGeometry(0.3 + Math.random() * 0.3, 0.1 + Math.random() * 0.16, 0.26 + Math.random() * 0.3),
+          new THREE.MeshStandardMaterial({ color: k === 1 ? 0xcbd5e1 : 0x94a3b8, metalness: 0.8, roughness: 0.35 })
+        );
+        m.position.set((Math.random() - 0.5) * 0.5, 0.12 + k * 0.1, (Math.random() - 0.5) * 0.5);
+        m.rotation.set(Math.random(), Math.random() * 3, Math.random());
+        g.add(m);
+      }
+      const ring = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.95, 32), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.85, side: THREE.DoubleSide }));
+      ring.rotation.x = -Math.PI / 2; ring.position.y = 0.07; g.add(ring);
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 6, 8), new THREE.MeshBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.4 }));
+      beam.position.y = 3; g.add(beam);
+      const hit = new THREE.Mesh(new THREE.SphereGeometry(1.4, 8, 8), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.y = 0.6;
+      hit.userData = { kind: 'scrap', label: '🔩 Scrap Metal', subtitle: 'Click to claim +1 scrap', visualGroup: g, ref: g };
+      g.add(hit);
+      g.userData = { hit, ring, beam, ph: Math.random() * 6 };
+      scene.add(g); clickableZones.push(hit); scrapPickups.push(g);
+      return g;
+    }
+    function spawnScrapGroup(n) {
+      n = n || (1 + Math.floor(Math.random() * 3));
+      n = Math.min(n, Math.max(0, 14 - scrapPickups.length));
+      if (n <= 0) return 0;
+      let cx = 0, cz = 0;
+      for (let tries = 0; tries < 20; tries++) {
+        const a = Math.random() * Math.PI * 2, r = 13 + Math.random() * 26;
+        cx = Math.cos(a) * r; cz = Math.sin(a) * r;
+        if (Math.hypot(cx - PAD_POS.x, cz - PAD_POS.z) > 5 && !(Math.abs(cx) < 11 && Math.abs(cz) < 8)) break;
+      }
+      for (let i = 0; i < n; i++) makeScrapPiece(cx + (Math.random() - 0.5) * 4, cz + (Math.random() - 0.5) * 4);
+      return n;
+    }
+    function claimScrap(g) {
+      const i = scrapPickups.indexOf(g);
+      if (i < 0) return;
+      scrapPickups.splice(i, 1); scene.remove(g);
+      const hi = clickableZones.indexOf(g.userData.hit); if (hi >= 0) clickableZones.splice(hi, 1);
+      if (hoveredGroup === g) hoveredGroup = null;
+      state.fpsTargetedObject = null; hoverTag.style.opacity = '0';
+      state.scrap += 1; state.stats.scrapFound += 1;
+      SFX.pickup(); toast('🔩 +1 Scrap claimed!');
+      updateTopHUD();
+    }
+
+    // ---------- Mars sites (hills you can explore & send the rover to) ----------
+    const SITES = [
+      { id: 'dunes', name: 'Sand Dune Field', emoji: '🏜️', x: 34, z: 24, days: 2, sci: 4, scrap: 0,
+        desc: 'Rippled dunes of dark sand that the wind is still moving today.',
+        fact: 'NASA’s Curiosity rover studied the Bagnold Dunes up close, the first active sand dunes studied on another planet.' },
+      { id: 'ridge', name: 'Iron-Rich Ridge', emoji: '⛰️', x: -32, z: -38, days: 3, sci: 7, scrap: 1,
+        desc: 'A long rusty-red ridge. Perfect for rock samples!',
+        fact: 'Mars looks red because its dust and rocks contain iron oxide, basically rust.' },
+      { id: 'crater', name: 'Old Impact Crater', emoji: '🕳️', x: -44, z: 40, days: 3, sci: 8, scrap: 1,
+        desc: 'A big bowl left by an asteroid long ago, with a raised rim around it.',
+        fact: 'Jezero Crater, where Perseverance works, is an ancient impact crater about 45 km wide that once held a lake.' },
+      { id: 'delta', name: 'Ancient River Delta Mesa', emoji: '🏞️', x: 50, z: -34, days: 4, sci: 11, scrap: 2,
+        desc: 'A flat-topped mesa of layered rock, the remains of an old river delta.',
+        fact: 'Perseverance has studied the layered delta at Jezero looking for signs of ancient microbial life.' }
+    ];
+    const siteGroups = [];
+    SITES.forEach((s) => {
+      const g = new THREE.Group();
+      g.position.set(s.x, terrainH(s.x, s.z), s.z);
+      const beacon = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 16, 10), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.35 }));
+      beacon.position.y = 8; g.add(beacon);
+      const orb = new THREE.Mesh(new THREE.OctahedronGeometry(0.9), new THREE.MeshBasicMaterial({ color: 0x67e8f9 }));
+      orb.position.y = 16.5; g.add(orb);
+      const ring = new THREE.Mesh(new THREE.RingGeometry(2.4, 3.0, 40), new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.6, side: THREE.DoubleSide }));
+      ring.rotation.x = -Math.PI / 2; ring.position.y = 0.15; g.add(ring);
+      const L = makeSprite(840, 200, 6.4, 1.52);
+      const ctx = L.c.getContext('2d'); ctx.setTransform(2, 0, 0, 2, 0, 0);
+      roundRectPath(ctx, 6, 6, 408, 88, 20); ctx.fillStyle = 'rgba(7,12,24,0.9)'; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = '#22d3ee'; ctx.stroke();
+      ctx.textAlign = 'center'; ctx.fillStyle = '#e0f2fe'; ctx.font = '700 28px Space Grotesk, sans-serif';
+      ctx.fillText(`${s.emoji} ${s.name}`, 210, 58); L.tex.needsUpdate = true;
+      L.s.position.y = 19.2; g.add(L.s);
+      const hit = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 18, 12), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.y = 9;
+      hit.userData = { kind: 'poi', site: s, label: `${s.emoji} ${s.name}`, subtitle: 'Click to explore or send the rover', visualGroup: null };
+      g.add(hit);
+      g.userData = { orb, ring, hit };
+      scene.add(g); clickableZones.push(hit); siteGroups.push(g);
+    });
+
+    function siteModalClose() { $('site-modal').classList.remove('active'); requestFpsPointerLock(); }
+    function openSite(s) {
+      if (state.gameOver || state.mode !== 'game') return;
+      releasePointerLock();
+      const ex = state.expedition, first = !state.surveyed[s.id];
+      const reward = first ? s.sci : Math.ceil(s.sci * 0.4);
+      const dist = Math.round(Math.hypot(s.x, s.z));
+      $('site-title').textContent = `${s.emoji} ${s.name}`;
+      $('site-desc').textContent = `${s.desc} (about ${dist} m from base)`;
+      $('site-fact').textContent = 'Real science: ' + s.fact;
+      const box = $('site-choices'); box.innerHTML = '';
+      const mk = (title, cost, ok, fn) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'action-btn'; b.disabled = !ok;
+        b.innerHTML = `<div class="action-btn-top"><span>${title}</span></div><div class="action-cost">${cost}</div>`;
+        b.addEventListener('click', () => { SFX.click(); fn(); }); box.appendChild(b);
+      };
+      const busy = !!ex, noPow = state.power < 2;
+      mk('🚙 Send the rover here',
+        busy ? `Rover is already on a trip to ${ex.site.name}.` : (noPow ? 'Needs 2 kW today (not enough!)' : `-2 kW · back in ${s.days} sols with about +${reward} science${first && s.scrap ? ` and +${s.scrap} scrap` : ''}${first ? ' (first-visit bonus!)' : ' (smaller reward: already surveyed)'}`),
+        !busy && !noPow, () => launchRover(s));
+      const near = state.viewMode === 'fps' && !state.insideBuilding && Math.hypot(fpsState.pos.x - s.x, fpsState.pos.z - s.z) < 9;
+      const doneFoot = !!(state.footDone && state.footDone[s.id] === state.sol);
+      mk('🥾 Survey on foot (EVA)',
+        near ? (doneFoot ? 'Already surveyed on foot this sol.' : '+2 science · +2% radiation dose (you are outside!)') : 'Switch to First-Person [V] and walk up to the beacon to survey on foot.',
+        near && !doneFoot && !state.sheltered, () => {
+          if (!state.footDone) state.footDone = {};
+          state.footDone[s.id] = state.sol;
+          state.science = Math.min(state.scienceGoal, state.science + 2);
+          state.dose += 2 * DF().dose;
+          state.stats.footSurveys++;
+          logEvent(`You hiked to the ${s.name} and collected samples by hand (+2 science, small dose).`, s.fact);
+          toast('🥾 Survey done: +2 science'); updateTopHUD(); recordHist(); openSite(s);
+        });
+      mk('Close', '', true, siteModalClose);
+      $('site-modal').classList.add('active');
+    }
+    function launchRover(s) {
+      state.power -= 2;
+      state.expedition = { site: s, returnSol: state.sol + s.days, phase: 'out', leg: 'orbit', due: false };
+      SFX.rover();
+      logEvent(`🚙 The rover left for the ${s.name}. It will be back on Sol ${state.sol + s.days}.`, 'Real rovers drive slowly and carefully, and data takes minutes to reach Earth, so scientists plan drives a day ahead.');
+      toast(`🚙 Rover heading to ${s.name}`);
+      updateTopHUD(); siteModalClose();
+    }
+    function deliverRover() {
+      const ex = state.expedition; if (!ex) return;
+      const s = ex.site, first = !state.surveyed[s.id];
+      state.surveyed[s.id] = true;
+      const sci = first ? s.sci : Math.ceil(s.sci * 0.4), scr = first ? s.scrap : 0;
+      state.science = Math.min(state.scienceGoal, state.science + sci);
+      state.scrap += scr; state.stats.expeditions++; state.stats.roverSci += sci;
+      state.expedition = null;
+      const txt = `🚙 Rover is back from the ${s.name}: +${sci} science${scr ? `, +${scr} scrap` : ''}!`;
+      state.lastWallMessage = txt; logEvent(txt, s.fact); toast(txt); SFX.upgrade();
+      updateTopHUD(); recordHist();
+      if (state.insideBuilding) updateInteriorWallScreens();
+    }
+
+    // ---------- rover movement (hill-following, expedition aware) ----------
+    const rv = { a: 0, x: 18, z: 0 };
+    const patrolPt = (a) => ({ x: Math.cos(a) * 18, z: Math.sin(a) * 14 });
+    const siteAng = (s) => Math.atan2(s.z / 14, s.x / 18);
+    function moveRover(t, dt) {
+      const ex = state.expedition;
+      let nx = rv.x, nz = rv.z;
+      const chase = (tx, tz, speed) => {
+        const dx = tx - nx, dz = tz - nz, d = Math.hypot(dx, dz);
+        if (d < 0.0001) return 0;
+        const st = Math.min(d, speed * dt); nx += (dx / d) * st; nz += (dz / d) * st; return d - st;
+      };
+      if (!ex) {
+        rv.a += dt * 0.1;
+        const p = patrolPt(rv.a);
+        if (Math.hypot(p.x - nx, p.z - nz) > 1.2) chase(p.x, p.z, 8); else { nx = p.x; nz = p.z; }
+      } else if (ex.phase === 'out') {
+        if (ex.leg === 'orbit') {
+          const diff = wrapAng(siteAng(ex.site) - rv.a);
+          rv.a += Math.sign(diff) * Math.min(Math.abs(diff), 0.8 * dt);
+          const p = patrolPt(rv.a); nx = p.x; nz = p.z;
+          if (Math.abs(diff) < 0.02) ex.leg = 'straight';
+        } else if (chase(ex.site.x, ex.site.z, 7) < 1.2) {
+          ex.phase = 'there'; SFX.rover(); toast(`🚙 Rover arrived at ${ex.site.name}`);
+        }
+      } else if (ex.phase === 'there') {
+        if (ex.due || state.sol >= ex.returnSol) ex.phase = 'back';
+      } else if (ex.phase === 'back') {
+        const p = patrolPt(siteAng(ex.site));
+        if (chase(p.x, p.z, 8) < 1.2) { rv.a = siteAng(ex.site); deliverRover(); }
+      }
+      const vx = nx - rv.x, vz = nz - rv.z;
+      { const md = Math.hypot(vx, vz) / (0.17 * ROVER_SCALE); if (md > 0) ROVER_WHEELS.forEach((w) => { w.rotation.z -= md; }); }
+      if (vx * vx + vz * vz > 1e-8) {
+        const target = Math.atan2(-vz, vx);
+        rover.rotation.y += wrapAng(target - rover.rotation.y) * Math.min(1, dt * 6);
+      }
+      rv.x = nx; rv.z = nz;
+      rover.position.set(nx, terrainH(nx, nz) + 0.15, nz);
+    }
+
+    // ---------- little crew walkers ----------
+    function makeCrew(hex) {
+      const g = new THREE.Group();
+      const suit = new THREE.Mesh(new THREE.CapsuleGeometry(0.17, 0.34, 6, 12), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }));
+      suit.position.y = 0.48; g.add(suit);
+      addBox(g, 0.22, 0.32, 0.14, 0, 0.52, -0.18, 0xcbd5e1);
+      addBox(g, 0.34, 0.07, 0.3, 0, 0.42, 0, hex);
+      const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.19, 14, 14), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+      helmet.position.y = 0.9; g.add(helmet);
+      const visor = new THREE.Mesh(new THREE.SphereGeometry(0.13, 12, 12), new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 }));
+      visor.position.set(0, 0.9, 0.1); g.add(visor);
+      g.visible = false; scene.add(g);
+      return { mesh: g, busy: false, queue: [], wait: 0, x: 0, z: 0, ph: Math.random() * 6, face: null };
+    }
+    const CREW_COLORS = [0xf97316, 0x22c55e, 0x3b82f6, 0xe879f9];
+    const crewExt = [0, 1, 2].map((i) => makeCrew(CREW_COLORS[i]));
+    const crewInt = [0, 1].map((i) => makeCrew(CREW_COLORS[i + 2]));
+    const CREW_HOME = { x: -3.4, z: -0.5 };
+    const CREW_ROUTES = {
+      habitation: [[-4.6, -0.4]],
+      solar: [[-0.3, -0.4]],
+      research: [[-2.78, -0.4], [-2.78, 4.3], [-4.1, 4.3]],
+      comms: [[3.35, -0.4], [3.35, 5.0], [0.7, 5.5]],
+      silo: [[3.35, -0.4], [3.35, 4.7], [5.4, 4.7]]
+    };
+    function sendCrewExterior(fid) {
+      const route = CREW_ROUTES[fid]; if (!route) return;
+      const m = crewExt.find((c) => !c.busy) || crewExt[0];
+      m.busy = true; m.x = CREW_HOME.x; m.z = CREW_HOME.z; m.face = null;
+      const q = route.map((p) => ({ x: p[0], z: p[1], wait: 0 }));
+      q[q.length - 1].wait = 4.2;
+      for (let i = route.length - 2; i >= 0; i--) q.push({ x: route[i][0], z: route[i][1], wait: 0 });
+      q.push({ x: CREW_HOME.x, z: CREW_HOME.z, wait: 0 });
+      m.queue = q; m.wait = 0;
+    }
+    function sendCrewInterior(unit) {
+      const m = crewInt.find((c) => !c.busy); if (!m) return;
+      const r = unit.rotation.y, ux = unit.position.x, uz = unit.position.z;
+      const tx = ux + Math.sin(r) * 1.05 + Math.cos(r) * 0.95, tz = uz + Math.cos(r) * 1.05 - Math.sin(r) * 0.95;
+      m.busy = true; m.x = 0; m.z = 5.0;
+      m.queue = [{ x: 0, z: 4.2, wait: 0 }, { x: Math.max(-5.8, Math.min(5.8, tx)), z: Math.max(-4.8, Math.min(4.8, tz)), wait: 2.6, face: [ux, uz] }, { x: 0, z: 4.2, wait: 0 }, { x: 0, z: 5.1, wait: 0 }];
+      m.wait = 0; m.face = null;
+    }
+    function updateCrew(dt, t) {
+      const showExt = !state.insideBuilding && (state.mode === 'game' || state.mode === 'ending');
+      for (const m of crewExt) {
+        if (!m.busy) { m.mesh.visible = false; continue; }
+        stepCrew(m, dt, t, false);
+        m.mesh.visible = showExt;
+      }
+      for (const m of crewInt) {
+        if (!state.insideBuilding) { m.busy = false; m.queue = []; m.mesh.visible = false; continue; }
+        if (!m.busy) { m.mesh.visible = false; continue; }
+        stepCrew(m, dt, t, true);
+        m.mesh.visible = true;
+      }
+    }
+    function stepCrew(m, dt, t, inside) {
+      let hop = 0;
+      if (m.wait > 0) {
+        m.wait -= dt; hop = Math.abs(Math.sin(t * 7 + m.ph)) * 0.09;
+        if (m.face) m.mesh.rotation.y = Math.atan2(m.face[0] - m.x, m.face[1] - m.z);
+      } else if (m.queue.length) {
+        const q = m.queue[0], dx = q.x - m.x, dz = q.z - m.z, d = Math.hypot(dx, dz);
+        const st = Math.min(d, 2.8 * dt);
+        if (d > 0.001) { m.x += (dx / d) * st; m.z += (dz / d) * st; m.mesh.rotation.y = Math.atan2(dx, dz); }
+        hop = Math.abs(Math.sin(t * 9 + m.ph)) * 0.05;
+        if (d - st < 0.02) { m.wait = q.wait || 0; m.face = q.face || null; m.queue.shift(); }
+      } else { m.busy = false; m.mesh.visible = false; return; }
+      const gy = inside ? getGroundHeight(m.x, m.z, 1.0) : getGroundHeight(m.x, m.z, 0.6);
+      m.mesh.position.set(m.x, gy + hop, m.z);
+    }
+    function afterAction(fid, unit, opts) {
+      if (opts.isSwitch) return;
+      state.stats.actions++;
+      if (FAC_IDS.includes(fid)) { sendCrewExterior(fid); sendCrewInterior(unit); toast(`👩‍🚀 Crew heading to the ${MODNAME[fid]}`); }
+    }
+
+    // ---------- per-sol hook (called inside "Advance" button) ----------
+    function onNewSol(dusty) {
+      let m = '';
+      const stand = standbyTotal();
+      if (stand > 0) { state.power = Math.max(0, state.power - stand); m += `Modules left ON used ${stand} kW. `; }
+      const g = [];
+      if (state.on.habitation) { state.o2 = Math.min(100, state.o2 + 5); state.h2o = Math.min(100, state.h2o + 3); g.push('+5% O₂, +3% H₂O'); }
+      if (state.on.silo) { state.food = Math.min(100, state.food + 5); g.push('+5% food'); }
+      if (state.on.research) { state.science = Math.min(state.scienceGoal, state.science + 1); g.push('+1 science'); }
+      if (state.on.comms) { state.science = Math.min(state.scienceGoal, state.science + 1); g.push('+1 science (uplink)'); }
+      if (g.length) m += `Modules running on their own gave ${g.join(', ')}. `;
+      const ex = state.expedition;
+      if (ex) {
+        if (state.sol >= ex.returnSol) { ex.due = true; m += '🚙 Rover is driving home with samples. '; }
+        else m += `🚙 Rover is exploring the ${ex.site.name} (back on Sol ${ex.returnSol}). `;
+      }
+      const n = spawnScrapGroup();
+      if (n) m += `🔩 ${n} piece${n > 1 ? 's' : ''} of scrap appeared on the map. `;
+      recordHist();
+      return m;
+    }
+
+    // ---------- extra wall buttons for every module ----------
+    function addExtraButtons(id) {
+      const meta = FACILITY_META[id];
+      const use = (key) => { state.used[key] = true; };
+      const done = (msg, log) => { state.lastWallMessage = msg; logEvent(log || msg); };
+      if (STANDBY[id]) {
+        createPhysicalWallButton({
+          x: -6.55, y: 0, z: 3.4, rotY: Math.PI / 2, isSwitch: true,
+          label: 'MODULE POWER', labelFn: () => `${meta.name.split(' ')[0]} POWER: ${state.on[id] ? 'ON' : 'OFF'}`,
+          costText: `-${STANDBY[id]} kW/sol`, subText: '',
+          subFn: () => state.on[id] ? 'Running by itself: small free gains each sol, but uses standby power.' : 'Saving power. Buttons in this module are locked until you switch it back ON.',
+          accentHex: 0x34d399, capHex: () => (state.on[id] ? 0x34d399 : 0xf87171),
+          getStatus: () => ({ disabled: false, done: false }),
+          onPress: () => {
+            state.on[id] = !state.on[id]; SFX.toggle();
+            done(`${meta.name} switched ${state.on[id] ? 'ON' : 'OFF'}. ${state.on[id] ? `It will use ${STANDBY[id]} kW per sol.` : `You save ${STANDBY[id]} kW per sol.`}`);
+            refreshLabels();
+          }
+        });
+      }
+      const B = (o) => createPhysicalWallButton(Object.assign({ y: 0, rotY: Math.PI, z: 5.55, accentHex: 0xfbbf24 }, o));
+      if (id === 'habitation') {
+        B({ x: -3.6, label: 'PRINT RADIATION SHIELD', costText: '-3 Scrap', subText: 'Stack scrap-metal panels around the sleep area. Lowers crew radiation dose by 12.',
+          getStatus: () => ({ disabled: state.scrap < 3 || state.dose <= 0, done: !!state.used.shield }),
+          onPress: () => { use('shield'); state.scrap -= 3; state.dose = Math.max(0, state.dose - 12); done('Scrap shielding built. Crew radiation dose -12%.'); } });
+        B({ x: 3.6, label: 'BUILD WATER RECYCLER', costText: '-2 Scrap, -1 kW', subText: 'Recycle sweat and wash water. +14% H₂O and +4% O₂.',
+          getStatus: () => ({ disabled: state.scrap < 2 || state.power < 1, done: !!state.used.recycler }),
+          onPress: () => { use('recycler'); state.scrap -= 2; state.power -= 1; state.h2o = Math.min(100, state.h2o + 14); state.o2 = Math.min(100, state.o2 + 4); done('Recycler running: H₂O +14%, O₂ +4%.'); } });
+      }
+      if (id === 'solar') {
+        B({ x: -3.6, label: 'BUILD EXTRA PANEL WING', labelFn: () => `EXTRA PANEL WING (${state.wings}/3)`, costText: '-3 Scrap', subText: 'Bolt scrap-built panels onto the array: +1 kW maximum power forever (up to 3 wings).',
+          getStatus: () => ({ disabled: state.scrap < 3 || state.wings >= 3, done: !!state.used.wing }),
+          onPress: () => { use('wing'); state.scrap -= 3; state.wings += 1; state.maxPower += 1; state.power += 1; done(`Panel wing built! Max power is now ${state.maxPower} kW.`); } });
+        B({ x: 3.6, label: 'SCRAP BATTERY CELLS', costText: '-2 Scrap', subText: 'Build extra storage cells: battery bank holds +2 kW more and gets +2 kW right now.',
+          getStatus: () => ({ disabled: state.scrap < 2 || state.batteryCap >= 20, done: !!state.used.cells }),
+          onPress: () => { use('cells'); state.scrap -= 2; state.batteryCap += 2; state.battery = Math.min(state.batteryCap, state.battery + 2); done(`Battery bank upgraded to ${state.batteryCap} kW capacity.`); } });
+      }
+      if (id === 'research') {
+        B({ x: -3.6, label: 'BUILD SAMPLE DRILL', costText: '-2 Scrap, -2 kW', subText: 'A scrap-built drill reaches fresh rock underground. Gains science.',
+          getStatus: () => ({ disabled: state.scrap < 2 || state.power < 2 || state.sheltered, done: !!state.used.drill }),
+          onPress: () => { use('drill'); state.scrap -= 2; state.power -= 2; const g = sciGain(6); state.science = Math.min(state.scienceGoal, state.science + g); done(`Drill sample analysed: +${g} science.`); } });
+        B({ x: 3.6, label: 'REBUILD SENSORS', costText: '-2 Scrap', subText: 'Swap worn sensors for new ones: instruments back to 100% calibration and +2 science.',
+          getStatus: () => ({ disabled: state.scrap < 2, done: !!state.used.sensors }),
+          onPress: () => { use('sensors'); state.scrap -= 2; state.bs.calib = 100; state.science = Math.min(state.scienceGoal, state.science + 2); done('New sensors installed: calibration 100%, +2 science.'); } });
+      }
+      if (id === 'silo') {
+        B({ x: -3.6, label: 'BUILD GROW-LIGHT RIG', costText: '-2 Scrap, -1 kW', subText: 'LED grow lights from scrap speed up the plants: +12% food and +30 crop health.',
+          getStatus: () => ({ disabled: state.scrap < 2 || state.power < 1, done: !!state.used.rig }),
+          onPress: () => { use('rig'); state.scrap -= 2; state.power -= 1; state.food = Math.min(100, state.food + 12); state.bs.crop = Math.min(100, state.bs.crop + 30); done('Grow-lights online: food +12%, crop health +30.'); } });
+        B({ x: 3.6, label: 'SOIL REMEDIATION KIT', costText: '-1 Scrap', subText: 'Wash toxic perchlorate salts out of the Martian soil: crop health back to 100.',
+          getStatus: () => ({ disabled: state.scrap < 1, done: !!state.used.soil }),
+          onPress: () => { use('soil'); state.scrap -= 1; state.bs.crop = 100; done('Soil washed. Crop health 100%.'); } });
+      }
+      if (id === 'comms') {
+        B({ x: -3.6, label: 'BUILD HIGH-GAIN FEED', costText: '-2 Scrap, -1 kW', subText: 'A better antenna feed: dish alignment +40 and +5 science.',
+          getStatus: () => ({ disabled: state.scrap < 2 || state.power < 1 || state.labsOff, done: !!state.used.feed }),
+          onPress: () => { use('feed'); state.scrap -= 2; state.power -= 1; state.bs.align = Math.min(100, state.bs.align + 40); const g = sciGain(5); state.science = Math.min(state.scienceGoal, state.science + g); done(`High-gain feed fitted: alignment +40, +${g} science.`); } });
+        B({ x: 3.6, label: 'LAUNCH A CUBESAT', costText: '-3 Scrap, -2 kW', subText: 'Hand-built mini satellite relays data to Earth: +8 science.',
+          getStatus: () => ({ disabled: state.scrap < 3 || state.power < 2 || state.labsOff, done: !!state.used.cubesat }),
+          onPress: () => { use('cubesat'); state.scrap -= 3; state.power -= 2; const g = sciGain(8); state.science = Math.min(state.scienceGoal, state.science + g); done(`CubeSat launched! +${g} science.`); } });
+      }
+    }
+
+    // ---------- NASA facts & ending cutscene ----------
+    const MARS_FACTS = [
+      ['🛬', 'Landing at Jezero', 'NASA’s Perseverance rover landed in Jezero Crater on February 18, 2021. Scientists picked it because it once held a lake and a river delta, a great place to look for signs of ancient life.'],
+      ['💨', 'Making air on Mars', 'The MOXIE experiment on Perseverance made oxygen from Mars’ carbon-dioxide air 16 times between 2021 and 2023, about 122 grams in total. It proved future crews could make their own oxygen.'],
+      ['🌅', 'A day on Mars is a “sol”', 'One sol lasts 24 hours, 39 minutes and 35 seconds, a little longer than an Earth day. A Mars year lasts about 687 Earth days.'],
+      ['⚖️', 'Light on your feet', 'Gravity on Mars is only about 38% of Earth’s. A 70 kg astronaut would feel like they weigh about 27 kg, which is why you can jump so high!'],
+      ['☢️', 'Radiation is real', 'Curiosity’s RAD instrument measured roughly 0.6 to 0.7 millisieverts of radiation per day on the surface. Over a long mission that adds up, so crews need shielding.'],
+      ['🚁', 'Flying on Mars', 'The Ingenuity helicopter made the first powered, controlled flight on another planet on April 19, 2021, and went on to fly 72 times before the mission ended in 2024.'],
+      ['🌪️', 'Opportunity’s long life', 'Opportunity landed in 2004 for a 90-sol mission and kept working for about 14 years, until a global dust storm in 2018 blocked the sunlight its solar panels needed.'],
+      ['📡', 'Slow messages', 'Radio signals take between about 3 and 22 minutes to travel one way between Earth and Mars, so a crew can’t wait for Mission Control to answer every question.'],
+      ['🏔️', 'Olympus Mons', 'Mars has the tallest volcano known in the solar system: Olympus Mons rises about 22 km above its surroundings, roughly two and a half times the height of Mount Everest above sea level.'],
+      ['🧊', 'Ice on Mars', 'In 2008 NASA’s Phoenix lander dug up bright water ice just under the soil near the Martian north pole. Future crews could use ice for water and rocket fuel.'],
+      ['🌡️', 'Brrr!', 'The average temperature on Mars is around −60 °C (−80 °F), and its thin air is about 95% carbon dioxide with less than 1% of Earth’s surface pressure. Spacesuits and habitats are a must.'],
+      ['🌋', 'Marsquakes', 'NASA’s InSight lander listened to the inside of Mars from 2018 to 2022 and recorded more than 1,300 marsquakes, helping scientists map the planet’s crust, mantle and core.']
+    ];
+    let ecTimer = null, ecIdx = 0, ecSlides = [], ecInfo = null;
+    function countUp(el, to, dur) {
+      const t0 = performance.now(), dec = el.dataset.dec ? +el.dataset.dec : 0;
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / dur), v = to * (1 - Math.pow(1 - k, 3));
+        el.textContent = v.toFixed(dec) + (el.dataset.suf || '');
+        if (k < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    function buildEndSlides(info) {
+      const S = state.stats, tile = (emo, label, val, suf, dec) => `<div class="ec-tile"><div class="ec-emo">${emo}</div><div class="ec-val" data-count="${val}" data-suf="${suf || ''}" data-dec="${dec || 0}">0</div><div class="ec-lbl">${label}</div></div>`;
+      const facts = shuffle([...MARS_FACTS]).slice(0, 3);
+      const slides = [];
+      slides.push(`<div class="drawer-tag">${info.victory ? 'MISSION ACCOMPLISHED' : 'MISSION OVER'} // YOUR JOURNEY</div>
+        <h2>${info.victory ? '🎉 Jezero Base Thrived!' : '🛰️ Mission Report'}</h2>
+        <p class="ec-msg">${info.message}</p>
+        <div class="ec-grid">
+          ${tile('🌅', 'Sols on Mars', Math.min(state.sol, state.maxSols))}
+          ${tile('🔬', 'Science collected', state.science)}
+          ${tile('☢️', 'Highest radiation dose (lower is safer)', Math.round(S.peakDose), '%')}
+          ${tile('🔩', 'Scrap claimed', S.scrapFound)}
+          ${tile('🛠️', 'Actions done', S.actions)}
+          ${tile('⚠️', 'Surprises handled', state.crisesHandled)}
+          ${tile('🚙', 'Rover trips', S.expeditions)}
+          ${tile('🛡️', 'Solar flares sheltered from', S.flaresSheltered)}
+        </div>`);
+      facts.forEach((f, i) => slides.push(`<div class="drawer-tag">NASA MARS FACT ${i + 1} / 3</div>
+        <div class="ec-bigemo">${f[0]}</div><h2>${f[1]}</h2><p class="ec-fact">${f[2]}</p><p class="ec-src">Source: NASA / JPL mission science</p>`));
+      slides.push(`<div class="drawer-tag">FINAL GRADE</div>
+        <div class="ec-stars">${'★'.repeat(info.stars)}<span>${'★'.repeat(3 - info.stars)}</span></div>
+        <h2>${info.victory ? 'Great job, Commander!' : 'Every mission teaches something.'}</h2>
+        <p class="ec-fact">${info.takeaway}</p>`);
+      return slides;
+    }
+    function showEndSlide(i) {
+      ecIdx = i; clearTimeout(ecTimer);
+      const card = $('ec-card'); card.classList.remove('in'); void card.offsetWidth;
+      card.innerHTML = ecSlides[i]; card.classList.add('in');
+      card.querySelectorAll('[data-count]').forEach((el) => countUp(el, +el.dataset.count, 1400));
+      $('ec-next').textContent = i === ecSlides.length - 1 ? 'See Results ▶' : 'Next ▶';
+      $('ec-dots').innerHTML = ecSlides.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('');
+      if (i < ecSlides.length - 1) ecTimer = setTimeout(() => showEndSlide(i + 1), i === 0 ? 11000 : 9000);
+    }
+    function finishEnding() {
+      clearTimeout(ecTimer);
+      $('end-cut').classList.remove('active');
+      endGameBase(ecInfo.victory, ecInfo.message);
+    }
+    $('ec-next').addEventListener('click', () => { SFX.click(); if (ecIdx >= ecSlides.length - 1) finishEnding(); else showEndSlide(ecIdx + 1); });
+    $('ec-skip').addEventListener('click', () => { SFX.click(); finishEnding(); });
+
+    function endGame(victory, message) {
+      if (state.mode === 'ending') return;
+      state.gameOver = true;
+      recordHist();
+      let stars = 0;
+      if (victory) stars++;
+      if (state.dose < 50) stars++;
+      if (state.o2 > 30 && state.h2o > 30 && state.food > 30) stars++;
+      const takeaway = state.dose >= 60
+        ? 'Real-world takeaway: radiation adds up over time. That is why NASA plans shelters and limits how long crews work outside on Mars.'
+        : 'Real-world takeaway: every system on a Mars base shares one limited power supply, so something always has to wait.';
+      ecInfo = { victory, message, stars, takeaway };
+      releasePointerLock();
+      try {
+        [crisisEl, briefEl, $('settings-modal'), $('site-modal')].forEach((e) => e && e.classList.remove('active'));
+        if (state.insideBuilding) exitBuilding(true);
+        if (state.viewMode === 'fps') setViewMode('orbit');
+      } catch (_) {}
+      state.mode = 'ending';
+      document.body.classList.add('mode-ending');
+      document.body.classList.remove('fps-active', 'inside-building');
+      controls.enabled = false; camera.fov = 46; camera.updateProjectionMatrix();
+      astroGroup.visible = true; astroGroup.position.set(-3.4, 0.25, -0.55);
+      hoverTag.style.opacity = '0';
+      victory ? SFX.win() : SFX.lose();
+      ecSlides = buildEndSlides(ecInfo);
+      $('end-cut').classList.add('active');
+      showEndSlide(0);
+    }
+
+    // ---------- statistics panel ----------
+    const STAT_SERIES = [
+      { k: 'o2', name: 'O₂', color: '#38bdf8', dash: [] },
+      { k: 'h2o', name: 'H₂O', color: '#2dd4bf', dash: [7, 4] },
+      { k: 'food', name: 'Food', color: '#a3e635', dash: [2, 3] },
+      { k: 'dose', name: 'Radiation dose', color: '#fb923c', dash: [] },
+      { k: 'sci', name: 'Science (% of goal)', color: '#c084fc', dash: [10, 3, 2, 3] },
+      { k: 'pwr', name: 'Power (% of max)', color: '#fbbf24', dash: [1, 4] }
+    ];
+    const statShow = { o2: true, h2o: true, food: true, dose: true, sci: true, pwr: false };
+    function drawStatsChart() {
+      const cv = $('stats-canvas'), ctx = cv.getContext('2d');
+      const Wd = cv.clientWidth || 640, Hd = 270, dpr2 = Math.min(window.devicePixelRatio || 1, 2);
+      cv.width = Wd * dpr2; cv.height = Hd * dpr2; ctx.setTransform(dpr2, 0, 0, dpr2, 0, 0);
+      ctx.clearRect(0, 0, Wd, Hd);
+      const L = 40, R = 14, T = 12, Bm = 28, pw = Wd - L - R, ph = Hd - T - Bm, H = state.hist;
+      ctx.font = '11px Space Grotesk, sans-serif'; ctx.textAlign = 'right'; ctx.lineWidth = 1;
+      for (let v = 0; v <= 100; v += 25) {
+        const y = T + ph - (v / 100) * ph;
+        ctx.strokeStyle = 'rgba(148,163,184,0.18)'; ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(L + pw, y); ctx.stroke();
+        ctx.fillStyle = '#94a3b8'; ctx.fillText(v + '%', L - 6, y + 4);
+      }
+      if (H.length < 1) return;
+      const minSol = H[0].sol, maxSol = Math.max(H[H.length - 1].sol, minSol + 1);
+      const X = (s) => L + ((s - minSol) / (maxSol - minSol)) * pw, Y = (v) => T + ph - (Math.max(0, Math.min(100, v)) / 100) * ph;
+      ctx.textAlign = 'center'; ctx.fillStyle = '#94a3b8';
+      const stepX = Math.max(1, Math.ceil((maxSol - minSol) / 10));
+      for (let s = minSol; s <= maxSol; s += stepX) ctx.fillText('Sol ' + s, X(s), Hd - 8);
+      STAT_SERIES.forEach((S) => {
+        if (!statShow[S.k]) return;
+        ctx.strokeStyle = S.color; ctx.fillStyle = S.color; ctx.lineWidth = 2.4; ctx.setLineDash(S.dash);
+        ctx.beginPath(); H.forEach((e, i) => { const x = X(e.sol), y = Y(e[S.k]); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+        ctx.setLineDash([]);
+        H.forEach((e) => { ctx.beginPath(); ctx.arc(X(e.sol), Y(e[S.k]), 2.6, 0, Math.PI * 2); ctx.fill(); });
+      });
+    }
+    function renderStats() {
+      const H = state.hist, S = state.stats;
+      $('stats-legend').innerHTML = STAT_SERIES.map((s) => `<button type="button" class="chip ${statShow[s.k] ? 'on' : ''}" data-ser="${s.k}"><svg width="26" height="8"><line x1="1" y1="4" x2="25" y2="4" stroke="${s.color}" stroke-width="3" stroke-dasharray="${s.dash.join(' ')}"/></svg> ${s.name}</button>`).join('');
+      const agg = (k) => { const v = H.map((e) => e[k]); return { fin: v[v.length - 1], min: Math.min(...v), max: Math.max(...v), avg: v.reduce((a, b) => a + b, 0) / v.length }; };
+      const MEAN = { o2: 'Air supply. 0% = mission over. Higher is better.', h2o: 'Water supply. 0% = mission over. Higher is better.', food: 'Food supply. 0% = mission over. Higher is better.', dose: 'Radiation absorbed. 100% = crew must go home. LOWER is better.' };
+      const rows = [['O₂', 'o2'], ['H₂O', 'h2o'], ['Food', 'food'], ['Radiation dose', 'dose']].map(([n, k]) => {
+        const a = H.length ? agg(k) : { fin: 0, min: 0, max: 0, avg: 0 };
+        return `<tr><td>${n}</td><td>${Math.round(a.fin)}%</td><td>${Math.round(a.min)}%</td><td>${Math.round(a.max)}%</td><td>${Math.round(a.avg)}%</td><td class="mean">${MEAN[k]}</td></tr>`;
+      }).join('');
+      const pw = H.length ? agg('rawPower') : { avg: 0, max: 0 };
+      $('stats-table').innerHTML = `<table><thead><tr><th>Measure</th><th>Final</th><th>Lowest</th><th>Highest</th><th>Average</th><th style="text-align:left">What it means</th></tr></thead><tbody>${rows}</tbody></table>`;
+      $('stats-note').innerHTML = 'Each dot is the state of the base at the end of one sol. <b>Final</b> = last value, <b>Lowest/Highest</b> = the worst and best it ever got, <b>Average</b> = typical level across the mission. Science is shown as a % of your goal and power as a % of your maximum so every line fits one chart. Click a legend chip to show or hide a line.';
+      $('stats-totals').innerHTML = [
+        ['🔬 Science (points / goal)', `${state.science} / ${state.scienceGoal}`], ['⚡ Average power you had per sol', `${pw.avg.toFixed(1)} kW`], ['🔩 Scrap pieces claimed', S.scrapFound],
+        ['🛠️ Wall buttons pressed', S.actions], ['⚠️ Surprise events handled', state.crisesHandled], ['🚙 Rover trips (science gained)', `${S.expeditions} (+${S.roverSci})`],
+        ['🥾 On-foot surveys', S.footSurveys], ['🛡️ Solar flares: sheltered / caught outside', `${S.flaresSheltered} / ${S.flaresExposed}`], ['⬆️ Module upgrades', Object.values(state.levels).reduce((a, b) => a + b - 1, 0)]
+      ].map((r) => `<div class="st-tile"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+      drawStatsChart();
+    }
+    function openStats() { releasePointerLock(); $('stats-modal').classList.add('active'); renderStats(); }
+    $('stats-legend').addEventListener('click', (e) => { const b = e.target.closest('[data-ser]'); if (!b) return; statShow[b.dataset.ser] = !statShow[b.dataset.ser]; SFX.click(); renderStats(); });
+    $('stats-close').addEventListener('click', () => { SFX.click(); $('stats-modal').classList.remove('active'); if (state.mode === 'game') requestFpsPointerLock(); });
+    $('stats-btn').addEventListener('click', () => { SFX.click(); openStats(); });
+    window.addEventListener('resize', () => { if ($('stats-modal').classList.contains('active')) drawStatsChart(); });
+
+    // ---------- settings menu ----------
+    function applyFov() { if (state.insideBuilding || state.viewMode === 'fps') { camera.fov = SET.fov; camera.updateProjectionMatrix(); } }
+    function applySettings(initial) {
+      const bg = $('brief-goal'); if (bg) bg.textContent = state.scienceGoal + ' Science';
+      $('minimap-wrap').style.display = SET.minimap ? '' : 'none';
+      lblSig = ''; refreshLabels();
+      SFX.muted = !SET.sfx; SFX.vol = SET.sfxVol;
+      const sb = $('sound-btn'); if (sb) sb.textContent = SET.sfx ? 'Sound: On' : 'Sound: Off';
+      MUSIC.setVol(SET.musicVol);
+      if (SET.music) { if (!initial) MUSIC.start(); } else MUSIC.stop();
+      applyFov();
+    }
+    function setDifficulty(k) {
+      SET.diff = k; state.diff = k; state.scienceGoal = DIFFS[k].goal;
+      const dp = DIFFS[k].pw - state.diffPower; state.diffPower = DIFFS[k].pw; state.maxPower += dp; state.power = Math.max(0, state.power + dp);
+      state.science = Math.min(state.science, state.scienceGoal);
+      const bg = $('brief-goal'); if (bg) bg.textContent = state.scienceGoal + ' Science';
+      updateTopHUD();
+    }
+    let restartArmed = false;
+    function renderSettings() {
+      const row = (t, sub, inner) => `<div class="set-row"><div><b>${t}</b><span>${sub}</span></div><div class="set-ctl">${inner}</div></div>`;
+      const tog = (key) => `<button type="button" class="chip ${SET[key] ? 'on' : ''}" data-tog="${key}">${SET[key] ? 'ON' : 'OFF'}</button>`;
+      const sl = (key, min, max, step) => `<input type="range" data-sl="${key}" min="${min}" max="${max}" step="${step}" value="${SET[key]}">`;
+      const diffs = Object.keys(DIFFS).map((k) => `<button type="button" class="chip ${state.diff === k ? 'on' : ''}" data-diff="${k}">${DIFFS[k].name}</button>`).join('');
+      $('settings-body').innerHTML =
+        row('🎚️ Difficulty', `${DIFFS[state.diff].blurb} (Number of solar flares changes on the next new game.)`, `<div class="chips">${diffs}</div>`) +
+        row('🎵 Music', 'Calm space ambience', tog('music') + sl('musicVol', 0, 1, 0.05)) +
+        row('🔊 Sound effects', 'Clicks, alarms, pickups', tog('sfx') + sl('sfxVol', 0, 1, 0.05)) +
+        row('🏷️ Building labels', 'Floating names and ON/OFF status', tog('labels')) +
+        row('🗺️ Minimap', 'Radar in the corner', tog('minimap')) +
+        row('📳 Screen shake', 'Shaking during quakes and strikes', tog('shake')) +
+        row('🖱️ Look sensitivity', 'First-person mouse speed', sl('sens', 0.4, 2.5, 0.1)) +
+        row('👁️ Field of view', 'First-person camera width', sl('fov', 50, 95, 1)) +
+        `<div class="set-gloss"><b>Quick glossary</b><br>
+          <b>Sol</b> = one Mars day · <b>kW</b> = kilowatt, a unit of power · <b>Dose</b> = radiation your crew has absorbed ·
+          <b>O₂</b> oxygen · <b>H₂O</b> water · <b>Standby</b> = power a switched-ON module uses even when idle ·
+          <b>Scrap</b> = salvaged metal that pays for upgrades and special builds · <b>EVA</b> = a walk outside the base.</div>
+         <div class="set-btns">
+          <button type="button" class="action-btn" data-act="stats"><div class="action-btn-top"><span>📊 Mission statistics so far</span></div></button>
+          <button type="button" class="action-btn" data-act="brief"><div class="action-btn-top"><span>❓ How to play</span></div></button>
+          <button type="button" class="action-btn" data-act="restart"><div class="action-btn-top"><span id="restart-label">${restartArmed ? '⚠️ Click again to restart' : '🔄 Restart mission'}</span></div></button>
+         </div>`;
+    }
+    function openSettings() { releasePointerLock(); restartArmed = false; renderSettings(); $('settings-modal').classList.add('active'); }
+    function closeSettings() { $('settings-modal').classList.remove('active'); saveSettings(); if (state.mode === 'game') requestFpsPointerLock(); }
+    $('settings-btn').addEventListener('click', () => { SFX.click(); openSettings(); });
+    $('settings-close').addEventListener('click', () => { SFX.click(); closeSettings(); });
+    $('settings-body').addEventListener('click', (e) => {
+      const t = e.target.closest('[data-tog],[data-diff],[data-act]'); if (!t) return;
+      SFX.click();
+      if (t.dataset.tog) { SET[t.dataset.tog] = !SET[t.dataset.tog]; applySettings(); saveSettings(); renderSettings(); }
+      else if (t.dataset.diff) { setDifficulty(t.dataset.diff); saveSettings(); renderSettings(); }
+      else if (t.dataset.act === 'stats') { openStats(); }
+      else if (t.dataset.act === 'brief') { closeSettings(); briefEl.classList.add('active'); }
+      else if (t.dataset.act === 'restart') { if (restartArmed) window.location.reload(); restartArmed = true; renderSettings(); }
+    });
+    $('settings-body').addEventListener('input', (e) => {
+      const k = e.target.dataset.sl; if (!k) return;
+      SET[k] = +e.target.value; applySettings(); saveSettings();
+    });
+
+    // ---------- minimap overlay ----------
+    function drawMinimap() {
+      drawMinimapBase();
+      if (state.mode !== 'game' || state.insideBuilding) return;
+      const edge = (wx, wz) => {
+        const p = worldToMini(wx, wz);
+        const x = Math.max(7, Math.min(MM_SIZE - 7, p.x)), y = Math.max(7, Math.min(MM_SIZE - 7, p.y));
+        return { x, y, out: x !== p.x || y !== p.y };
+      };
+      for (const g of scrapPickups) {
+        const p = edge(g.position.x, g.position.z);
+        mmCtx.globalAlpha = p.out ? 0.65 : 1; mmCtx.fillStyle = '#fbbf24';
+        mmCtx.fillRect(p.x - 2.5, p.y - 2.5, 5, 5); mmCtx.globalAlpha = 1;
+      }
+      for (const s of SITES) {
+        const p = edge(s.x, s.z);
+        mmCtx.fillStyle = '#22d3ee'; mmCtx.beginPath(); mmCtx.moveTo(p.x, p.y - 5); mmCtx.lineTo(p.x + 4, p.y); mmCtx.lineTo(p.x, p.y + 5); mmCtx.lineTo(p.x - 4, p.y); mmCtx.closePath(); mmCtx.fill();
+      }
+      const rp = edge(rv.x, rv.z);
+      mmCtx.beginPath(); mmCtx.arc(rp.x, rp.y, 3.2, 0, Math.PI * 2); mmCtx.fillStyle = '#ffffff'; mmCtx.fill(); mmCtx.strokeStyle = '#f97316'; mmCtx.lineWidth = 1.5; mmCtx.stroke();
+    }
+
+    // ---------- per-frame world updates ----------
+    function updateWorld(t, dt) {
+      skyGroup.visible = !state.insideBuilding; updateSky(t);
+      const vis = (state.mode === 'game' || state.mode === 'ending') && !state.insideBuilding;
+      for (const g of scrapPickups) {
+        g.visible = vis;
+        const u = g.userData, k = 1 + 0.18 * Math.sin(t * 4 + u.ph);
+        u.ring.scale.set(k, k, k); u.beam.material.opacity = 0.3 + 0.15 * Math.sin(t * 3 + u.ph);
+        g.rotation.y += dt * 0.4;
+      }
+      for (const g of siteGroups) {
+        g.visible = vis;
+        g.userData.orb.rotation.y += dt * 1.2; g.userData.orb.position.y = 16.5 + Math.sin(t * 2) * 0.35;
+        const k = 1 + 0.1 * Math.sin(t * 3); g.userData.ring.scale.set(k, k, k);
+      }
+      const lv = SET.labels && state.mode !== 'cutscene';
+      for (const id of FAC_IDS) labelSprites[id].s.visible = lv;
+      updateCrew(dt, t);
+      updateDetails(t);
+    }
+    const TIPS = { 'pill-o2': 'Oxygen. Drops each sol. 0% = mission over.', 'pill-h2o': 'Water. Drops each sol. 0% = mission over.', 'pill-food': 'Food. Drops each sol. 0% = mission over.', 'pill-dose': 'Radiation absorbed by the crew. Only goes up. 100% = mission over.', 'pill-pwr': 'Power available today (kW). Every action spends it.', 'pill-batt': 'Stored power you can save for later.', 'pill-next': 'Estimated power tomorrow after standby costs.' };
+    for (const k in TIPS) { const e = $(k); if (e) e.title = TIPS[k]; }
+    window.__v10ready = true;
+    applySettings(true);
 
     // ==================== MAIN 3D ANIMATION LOOP ====================
     const clock = new THREE.Clock();
@@ -2373,7 +3784,7 @@
               hoveredGroup = data.visualGroup;
               setGroupHighlight(hoveredGroup, true);
               fpsReticleEl.classList.add('locked-target');
-              fpsPromptEl.textContent = `[E] OR CLICK // ${data.label}`;
+              { const tx = `[E] OR CLICK // ${data.label}`; if (fpsPromptEl.textContent !== tx) fpsPromptEl.textContent = tx; }
               fpsPromptEl.classList.add('visible');
             } else {
               state.fpsTargetedObject = null;
@@ -2384,7 +3795,7 @@
             state.fpsTargetedObject = (!isAnyModalOpen() && hits.length > 0 && hits[0].distance <= 9.5) ? hits[0].object.userData : null;
             fpsReticleEl.classList.toggle('locked-target', !!state.fpsTargetedObject);
             if (state.fpsTargetedObject) {
-              fpsPromptEl.textContent = `[E] OR CLICK // ${state.fpsTargetedObject.label}`;
+              { const tx = `[E] OR CLICK // ${state.fpsTargetedObject.label}`; if (fpsPromptEl.textContent !== tx) fpsPromptEl.textContent = tx; }
               fpsPromptEl.classList.add('visible');
             } else fpsPromptEl.classList.remove('visible');
           }
@@ -2395,6 +3806,11 @@
         }
       }
 
+      if (state.mode === 'ending') {
+        const ea = t * 0.12;
+        camera.position.set(Math.cos(ea) * 27, 9.5 + Math.sin(t * 0.2) * 1.6, Math.sin(ea) * 27);
+        camera.lookAt(-1, 2.2, 0);
+      }
       if (state.insideBuilding) {
         for (const prop of interiorAnimProps) {
           if (prop.rotY) prop.mesh.rotation.y += prop.rotY * dt;
