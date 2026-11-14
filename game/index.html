@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASTRONUGGETS // 3D Mars Outpost Command</title>
+  <title>ASTRONUGGETS // Mars Arrival & 3D CAD Outpost Command</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -37,18 +37,18 @@
       cursor: grabbing;
     }
 
-    /* Top Telemetry & Resource HUD */
+    /* ==================== SHARED NAV & CAD BUTTONS ==================== */
     .top-hud {
       position: fixed;
       top: 1rem;
       left: 1rem;
       right: 1rem;
-      z-index: 10;
+      z-index: 20;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
+      gap: 0.65rem;
       pointer-events: none;
     }
 
@@ -56,27 +56,27 @@
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
       pointer-events: auto;
     }
 
     .hud-pill {
-      background: rgba(11, 17, 32, 0.82);
+      background: rgba(11, 17, 32, 0.85);
       border: 1px solid rgba(56, 189, 248, 0.35);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-radius: 12px;
-      padding: 0.45rem 0.85rem;
-      font-size: 0.78rem;
+      padding: 0.42rem 0.8rem;
+      font-size: 0.76rem;
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
 
     .hud-pill strong {
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #38bdf8;
     }
 
@@ -86,15 +86,15 @@
 
     .nav-btn {
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.11em;
       text-transform: uppercase;
       text-decoration: none;
       color: #e0f2fe;
-      background: rgba(15, 23, 42, 0.85);
+      background: rgba(15, 23, 42, 0.88);
       border: 1px solid rgba(56, 189, 248, 0.45);
-      padding: 0.52rem 0.95rem;
+      padding: 0.5rem 0.9rem;
       border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -107,18 +107,259 @@
     }
 
     .cad-upload-btn {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.22));
-      border-color: #38bdf8;
-      color: #bae6fd;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #030712;
+      border: none;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
     }
 
-    /* Hover Tooltip for 3D Buildings */
+    .cad-upload-btn:hover {
+      color: #030712;
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.85);
+    }
+
+    /* Hide gameplay-only telemetry during the cutscene */
+    body.mode-cutscene .game-only {
+      display: none !important;
+    }
+
+    body.mode-game .cutscene-only {
+      display: none !important;
+    }
+
+    /* ==================== CUTSCENE OVERLAY UI ==================== */
+    .cutscene-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4.4rem 1.25rem 1.35rem;
+      pointer-events: none;
+    }
+
+    .transmission-card {
+      pointer-events: auto;
+      width: 100%;
+      max-width: 820px;
+      background: rgba(9, 14, 28, 0.84);
+      border: 1px solid rgba(56, 189, 248, 0.38);
+      border-radius: 18px;
+      padding: 0.95rem 1.65rem;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 16px 45px rgba(0, 0, 0, 0.68);
+      text-align: center;
+    }
+
+    .card-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .phase-badge {
+      display: inline-block;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.64rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 0.26rem 0.9rem;
+      border-radius: 999px;
+    }
+
+    .precharge-banner {
+      display: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: #34d399;
+      background: rgba(6, 78, 59, 0.5);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      padding: 0.26rem 0.85rem;
+      border-radius: 999px;
+    }
+
+    .scene-title {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.08rem, 2.4vw, 1.68rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      margin-bottom: 0.45rem;
+      background: linear-gradient(135deg, #ffffff 15%, #bae6fd 50%, #38bdf8 80%, #818cf8 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .dialogue-box {
+      min-height: 44px;
+      font-size: clamp(0.88rem, 1.35vw, 0.98rem);
+      line-height: 1.5;
+      color: #cbd5e1;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .cursor-bar {
+      display: inline-block;
+      width: 3px;
+      height: 1.05em;
+      background: #38bdf8;
+      vertical-align: middle;
+      margin-left: 4px;
+      box-shadow: 0 0 8px #38bdf8;
+      animation: blink 0.8s infinite;
+    }
+
+    .cutscene-controls {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .step-dots {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .dot {
+      width: 30px;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(226, 232, 240, 0.35);
+      transition: all 0.3s ease;
+    }
+
+    .dot.active {
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.85);
+      width: 48px;
+    }
+
+    .dot.completed {
+      background: rgba(56, 189, 248, 0.75);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .primary-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.8rem 1.9rem;
+      border-radius: 999px;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #030712;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      box-shadow: 0 0 26px rgba(56, 189, 248, 0.6);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .primary-cta:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 0 40px rgba(56, 189, 248, 0.9);
+    }
+
+    .secondary-cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.78rem 1.45rem;
+      border-radius: 999px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #e0f2fe;
+      background: rgba(11, 17, 32, 0.84);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+
+    .secondary-cta:hover {
+      border-color: #38bdf8;
+      background: rgba(30, 41, 59, 0.94);
+      transform: translateY(-2px);
+    }
+
+    /* Non-blocking CAD Prompt Banner when no CAD file has been loaded yet */
+    .cad-prompt-banner {
+      position: fixed;
+      bottom: 5.3rem;
+      left: 1rem;
+      z-index: 18;
+      max-width: 390px;
+      background: rgba(9, 14, 28, 0.9);
+      border: 1px dashed rgba(56, 189, 248, 0.7);
+      border-radius: 16px;
+      padding: 0.9rem 1.1rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65);
+    }
+
+    .cad-prompt-banner.hidden {
+      display: none;
+    }
+
+    .cad-prompt-banner h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      margin-bottom: 0.3rem;
+      letter-spacing: 0.08em;
+    }
+
+    .cad-prompt-banner p {
+      font-size: 0.8rem;
+      line-height: 1.45;
+      color: #cbd5e1;
+      margin-bottom: 0.65rem;
+    }
+
+    .cad-prompt-banner code {
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.15);
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    /* ==================== GAMEPLAY HOVER & FACILITY DRAWER ==================== */
     #hover-tag {
       position: fixed;
-      z-index: 20;
+      z-index: 25;
       pointer-events: none;
       display: none;
-      background: rgba(8, 13, 26, 0.92);
+      background: rgba(8, 13, 26, 0.94);
       border: 1px solid #38bdf8;
       border-radius: 10px;
       padding: 0.45rem 0.8rem;
@@ -126,7 +367,7 @@
       font-size: 0.72rem;
       letter-spacing: 0.1em;
       color: #ffffff;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.45);
       transform: translate(14px, -50%);
     }
 
@@ -139,16 +380,15 @@
       margin-top: 2px;
     }
 
-    /* Slide-in Facility Command Menu */
     .facility-drawer {
       position: fixed;
-      top: 5.1rem;
+      top: 5rem;
       right: 1rem;
       bottom: 5.4rem;
       width: min(390px, calc(100vw - 2rem));
-      z-index: 15;
-      background: rgba(9, 14, 28, 0.88);
-      border: 1px solid rgba(56, 189, 248, 0.4);
+      z-index: 22;
+      background: rgba(9, 14, 28, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.42);
       border-radius: 20px;
       padding: 1.35rem;
       backdrop-filter: blur(16px);
@@ -252,7 +492,7 @@
     .action-btn {
       width: 100%;
       text-align: left;
-      background: rgba(15, 23, 42, 0.9);
+      background: rgba(15, 23, 42, 0.92);
       border: 1px solid rgba(56, 189, 248, 0.35);
       border-radius: 12px;
       padding: 0.75rem 0.95rem;
@@ -292,13 +532,13 @@
       color: #94a3b8;
     }
 
-    /* Bottom Controls & Event Ticker */
+    /* Bottom Gameplay Telemetry Bar */
     .bottom-hud {
       position: fixed;
       bottom: 1rem;
       left: 1rem;
       right: 1rem;
-      z-index: 10;
+      z-index: 20;
       display: flex;
       flex-wrap: wrap;
       justify-content: space-between;
@@ -309,7 +549,7 @@
 
     .event-log {
       pointer-events: auto;
-      background: rgba(11, 17, 32, 0.84);
+      background: rgba(11, 17, 32, 0.86);
       border: 1px solid rgba(56, 189, 248, 0.3);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -317,7 +557,7 @@
       padding: 0.65rem 1rem;
       font-size: 0.84rem;
       color: #e0f2fe;
-      max-width: 660px;
+      max-width: 680px;
       flex: 1;
     }
 
@@ -336,28 +576,6 @@
       gap: 0.65rem;
     }
 
-    .next-sol-btn {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 0.82rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #030712;
-      background: linear-gradient(135deg, #38bdf8, #818cf8);
-      border: none;
-      border-radius: 999px;
-      padding: 0.82rem 1.65rem;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.55);
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .next-sol-btn:hover {
-      transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 0 38px rgba(56, 189, 248, 0.85);
-    }
-
-    /* End-of-Mission Modal */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -397,9 +615,13 @@
       line-height: 1.6;
       margin-bottom: 1.5rem;
     }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
   </style>
 
-  <!-- Three.js ES Module Import Map -->
   <script type="importmap">
     {
       "imports": {
@@ -409,34 +631,84 @@
     }
   </script>
 </head>
-<body>
+<body class="mode-cutscene">
   <div id="viewport"></div>
-  <div id="hover-tag">HABITATION MODULE<span>Click to open control menu</span></div>
+  <div id="hover-tag">CAD FACILITY<span>Click to open menu</span></div>
 
-  <!-- Top Resource & Navigation HUD -->
+  <!-- Top Navigation, Telemetry (Game Mode) & CAD Loader -->
   <header class="top-hud">
     <div class="hud-group">
       <a href="/" class="nav-btn">&#8592; Home</a>
-      <div class="hud-pill">SOL <strong id="hud-sol">1 / 20</strong></div>
-      <div class="hud-pill" id="pill-o2">O₂ <strong id="hud-o2">88%</strong></div>
-      <div class="hud-pill" id="pill-h2o">H₂O <strong id="hud-h2o">85%</strong></div>
-      <div class="hud-pill" id="pill-food">FOOD <strong id="hud-food">82%</strong></div>
-      <div class="hud-pill" id="pill-pwr">POWER <strong id="hud-pwr">14 kW</strong></div>
-      <div class="hud-pill good">SCIENCE <strong id="hud-sci">0 / 100</strong></div>
-      <div class="hud-pill">SCRAP <strong id="hud-scrap">4</strong></div>
+      <div class="hud-pill cutscene-only">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#38bdf8;box-shadow:0 0 8px #38bdf8;"></span>
+        <strong>ASTRONUGGETS // ARRIVAL FEED</strong>
+      </div>
+
+      <!-- Gameplay Telemetry Pills -->
+      <div class="hud-pill game-only">SOL <strong id="hud-sol">1 / 20</strong></div>
+      <div class="hud-pill game-only" id="pill-o2">O₂ <strong id="hud-o2">88%</strong></div>
+      <div class="hud-pill game-only" id="pill-h2o">H₂O <strong id="hud-h2o">85%</strong></div>
+      <div class="hud-pill game-only" id="pill-food">FOOD <strong id="hud-food">82%</strong></div>
+      <div class="hud-pill game-only" id="pill-pwr">POWER <strong id="hud-pwr">14 kW</strong></div>
+      <div class="hud-pill good game-only">SCIENCE <strong id="hud-sci">0 / 100</strong></div>
+      <div class="hud-pill game-only">SCRAP <strong id="hud-scrap">4</strong></div>
     </div>
 
     <div class="hud-group">
-      <button type="button" class="nav-btn" id="reset-cam-btn">Reset View</button>
-      <label class="nav-btn cad-upload-btn" for="cad-file-input" title="Import .glb, .gltf, or .stl CAD model">
-        + Load CAD (.glb / .stl)
+      <button type="button" class="nav-btn game-only" id="replay-cutscene-btn">Replay Cutscene</button>
+      <button type="button" class="nav-btn" id="rotate-cad-btn" title="Rotate CAD 90 degrees if Z-up">Rotate CAD 90°</button>
+      <button type="button" class="nav-btn" id="reset-cam-btn">Reset Camera</button>
+      <label class="nav-btn cad-upload-btn" for="cad-file-input">
+        + Load Your CAD
       </label>
-      <input type="file" id="cad-file-input" accept=".glb,.gltf,.stl" style="display:none" />
+      <input type="file" id="cad-file-input" accept=".glb,.gltf,.stl,.obj" style="display:none" />
     </div>
   </header>
 
-  <!-- Interactive Slide-In Facility Menu (Opens when clicking any 3D building) -->
-  <aside class="facility-drawer" id="facility-drawer" aria-live="polite">
+  <!-- ==================== STAGE 1: 3D ARRIVAL CUTSCENE OVERLAY ==================== -->
+  <section class="cutscene-layer cutscene-only" id="cutscene-layer">
+    <div class="transmission-card" aria-live="polite">
+      <div class="card-top-row">
+        <div class="phase-badge" id="phase-badge">TRANSMISSION 01 // ORBITAL APPROACH</div>
+        <div class="precharge-banner" id="precharge-banner"></div>
+      </div>
+      <h1 class="scene-title" id="scene-title">MARS INSERTION // JEZERO OUTPOST</h1>
+      <p class="dialogue-box">
+        <span id="dialogue-text"></span><span class="cursor-bar"></span>
+      </p>
+    </div>
+
+    <div class="cutscene-controls">
+      <div class="step-dots" id="step-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="primary-cta" id="next-scene-btn">
+          Next &#9654;
+        </button>
+        <button type="button" class="secondary-cta" id="skip-intro-btn">
+          Skip Intro
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Non-Blocking CAD Drop Prompt (Shows only if mars_base.glb is not yet loaded) -->
+  <div class="cad-prompt-banner" id="cad-prompt-banner">
+    <h3>LOAD YOUR 3D CAD BASE</h3>
+    <p>
+      Drag &amp; drop your <code>.glb</code>, <code>.stl</code>, or <code>.obj</code> file anywhere on screen—or put <code>mars_base.glb</code> in your <code>/play</code> folder.
+    </p>
+    <label class="nav-btn cad-upload-btn" for="cad-file-input" style="display:inline-block;">
+      Choose CAD File
+    </label>
+  </div>
+
+  <!-- ==================== STAGE 2: CLICKABLE CAD FACILITY DRAWER ==================== -->
+  <aside class="facility-drawer game-only" id="facility-drawer" aria-live="polite">
     <div>
       <div class="drawer-header">
         <div>
@@ -451,29 +723,29 @@
     </div>
 
     <div style="margin-top: 1.2rem; font-size: 0.75rem; color: #64748b; text-align: center;">
-      Tip: Hold Right-Click or Left-Click &amp; Drag to orbit 360° &bull; Scroll to Zoom
+      Hold Right-Click or Left-Click &amp; Drag to orbit 360° &bull; Scroll to Zoom
     </div>
   </aside>
 
-  <!-- Bottom Mission Log & Advance Sol Button -->
-  <footer class="bottom-hud">
+  <!-- Bottom Gameplay Event Log & Next Sol Controls -->
+  <footer class="bottom-hud game-only">
     <div class="event-log" id="event-log">
-      <span class="tag">COMMS //</span> Drag with Right-Click or Left-Click to inspect all sides of Jezero Base. Click any facility to manage systems!
+      <span class="tag">COMMAND //</span> Hold Right-Click or Left-Click &amp; Drag to view all sides of your CAD base. Click any building to operate!
     </div>
     <div class="bottom-actions">
-      <button type="button" class="next-sol-btn" id="next-sol-btn">
+      <button type="button" class="primary-cta" id="next-sol-btn">
         Advance to Sol 2 &#9654;
       </button>
     </div>
   </footer>
 
-  <!-- End of Mission Debrief Modal -->
+  <!-- End of Mission Modal -->
   <div class="modal-backdrop" id="end-modal">
     <div class="modal-card">
       <div class="drawer-tag" id="modal-tag">MISSION DEBRIEF</div>
       <h2 id="modal-title">MISSION COMPLETE</h2>
       <p id="modal-body"></p>
-      <button type="button" class="next-sol-btn" onclick="window.location.reload()">
+      <button type="button" class="primary-cta" onclick="window.location.reload()">
         Run New Simulation &#8635;
       </button>
     </div>
@@ -484,12 +756,21 @@
     import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+    import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
-    // ==================== GAME SIMULATION STATE ====================
+    // ==================== GAME & CUTSCENE STATE ====================
     const carriedEnergy = Number(sessionStorage.getItem('astronuggets_deflector_energy') || 0);
     const bonusScrap = carriedEnergy >= 50 ? 2 : (carriedEnergy > 0 ? 1 : 0);
 
+    if (carriedEnergy > 0) {
+      const banner = document.getElementById('precharge-banner');
+      banner.style.display = 'inline-block';
+      banner.textContent = `CAPACITOR CARRIED: ${carriedEnergy}% (+${bonusScrap} BONUS SCRAP)`;
+    }
+
     const state = {
+      mode: 'cutscene', // 'cutscene' -> 'game'
+      cutsceneScene: 0,
       sol: 1,
       maxSols: 20,
       o2: 88,
@@ -504,21 +785,29 @@
       solarStormActive: false,
       shieldCharged: false,
       moxieBoosted: false,
-      eclssOptimized: false,
       selectedFacility: null,
-      gameOver: false
+      gameOver: false,
+      cadLoaded: false
+    };
+
+    const FACILITY_META = {
+      habitation: { label: 'HABITATION MODULE', subtitle: 'Click to manage O₂, H₂O & Shielding' },
+      solar: { label: 'SOLAR PANEL ARRAY', subtitle: 'Click to manage kW Grid & Dust Protection' },
+      research: { label: 'YELLOW RESEARCH CENTER', subtitle: 'Click to run Science & Tech Upgrades' },
+      silo: { label: 'FOOD STORAGE SILO', subtitle: 'Click to harvest Hydroponic Rations & Scrap' },
+      comms: { label: 'COMMS DISH & CRYO TANKS', subtitle: 'Click to transmit Telemetry & Scan Weather' }
     };
 
     // ==================== THREE.JS SCENE, CAMERA & ORBIT CONTROLS ====================
     const container = document.getElementById('viewport');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x060914);
-    scene.fog = new THREE.FogExp2(0x2a1208, 0.011);
+    scene.background = new THREE.Color(0x050814);
+    scene.fog = new THREE.FogExp2(0x281007, 0.01);
 
-    const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 300);
-    const DEFAULT_CAM_POS = new THREE.Vector3(-12, 13.5, 17.5);
-    const DEFAULT_TARGET = new THREE.Vector3(0, 1.2, 0);
-    camera.position.copy(DEFAULT_CAM_POS);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 300);
+    const GAME_CAM_POS = new THREE.Vector3(-12.5, 12.5, 16.5);
+    const GAME_TARGET = new THREE.Vector3(0, 1.2, 0);
+    camera.position.set(-16.5, 11.5, 18.5);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -526,43 +815,46 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.15;
+    renderer.toneMappingExposure = 1.2;
     container.appendChild(renderer.domElement);
 
-    // OrbitControls: Hold Right-Click OR Left-Click & Drag to rotate around all sides!
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.copy(DEFAULT_TARGET);
+    controls.target.set(-3.5, 2.5, 0.5);
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
-    controls.maxPolarAngle = Math.PI * 0.47; // Prevent camera from clipping under Mars ground
-    controls.minDistance = 6;
-    controls.maxDistance = 42;
+    controls.maxPolarAngle = Math.PI * 0.48;
+    controls.minDistance = 4;
+    controls.maxDistance = 48;
     controls.mouseButtons = {
       LEFT: THREE.MOUSE.ROTATE,
       MIDDLE: THREE.MOUSE.DOLLY,
       RIGHT: THREE.MOUSE.ROTATE
     };
-
-    // Prevent browser right-click context menu so right-click drag is seamless
     renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
 
+    let userMovedCamera = false;
+    controls.addEventListener('start', () => {
+      userMovedCamera = true;
+    });
+
     document.getElementById('reset-cam-btn').addEventListener('click', () => {
-      camera.position.copy(DEFAULT_CAM_POS);
-      controls.target.copy(DEFAULT_TARGET);
+      userMovedCamera = false;
+      camera.position.copy(GAME_CAM_POS);
+      controls.target.copy(GAME_TARGET);
       controls.update();
     });
 
-    // ==================== LIGHTING & MARTIAN SUN ====================
-    const ambientLight = new THREE.HemisphereLight(0x93c5fd, 0x7c2d12, 0.75);
-    scene.add(ambientLight);
+    // ==================== LIGHTING, MARTIAN SUN & TERRAIN ====================
+    const hemiLight = new THREE.HemisphereLight(0xbae6fd, 0x7c2d12, 0.9);
+    scene.add(hemiLight);
 
-    const sunLight = new THREE.DirectionalLight(0xffedd5, 2.4);
-    sunLight.position.set(22, 24, -18);
+    const sunLight = new THREE.DirectionalLight(0xfff7ed, 2.5);
+    sunLight.position.set(22, 26, -18);
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 2;
-    sunLight.shadow.camera.far = 75;
+    sunLight.shadow.camera.far = 80;
     const d = 18;
     sunLight.shadow.camera.left = -d;
     sunLight.shadow.camera.right = d;
@@ -571,7 +863,11 @@
     sunLight.shadow.bias = -0.0005;
     scene.add(sunLight);
 
-    // Glowing Martian Sun Sphere in the Sky
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.65);
+    fillLight.position.set(-18, 12, 18);
+    scene.add(fillLight);
+
+    // Glowing Martian Sun in the Sky
     const sunMesh = new THREE.Mesh(
       new THREE.SphereGeometry(2.2, 24, 24),
       new THREE.MeshBasicMaterial({ color: 0xfef08a })
@@ -580,7 +876,7 @@
     scene.add(sunMesh);
 
     const sunHalo = new THREE.Mesh(
-      new THREE.SphereGeometry(4.2, 24, 24),
+      new THREE.SphereGeometry(4.5, 24, 24),
       new THREE.MeshBasicMaterial({ color: 0xfb923c, transparent: true, opacity: 0.25 })
     );
     sunHalo.position.copy(sunMesh.position);
@@ -588,9 +884,8 @@
 
     // Starfield
     const starGeo = new THREE.BufferGeometry();
-    const starCount = 900;
-    const starPositions = new Float32Array(starCount * 3);
-    for (let i = 0; i < starCount; i++) {
+    const starPositions = new Float32Array(900 * 3);
+    for (let i = 0; i < 900; i++) {
       const r = 95 + Math.random() * 50;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI * 0.45;
@@ -599,408 +894,633 @@
       starPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    const starField = new THREE.Points(
+    scene.add(new THREE.Points(
       starGeo,
       new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.45, transparent: true, opacity: 0.85 })
-    );
-    scene.add(starField);
+    ));
 
-    // ==================== PROCEDURAL MARTIAN TERRAIN ====================
+    // Martian Regolith Terrain
     const terrainGeo = new THREE.PlaneGeometry(180, 180, 72, 72);
     terrainGeo.rotateX(-Math.PI / 2);
     const posAttr = terrainGeo.attributes.position;
     for (let i = 0; i < posAttr.count; i++) {
       const x = posAttr.getX(i);
       const z = posAttr.getZ(i);
-      const distFromBase = Math.hypot(x, z);
-      // Keep flat under the baseplate (radius < 12), add rolling craters/dunes outside
-      if (distFromBase > 11.5) {
+      const dist = Math.hypot(x, z);
+      if (dist > 12.5) {
         const hill = Math.sin(x * 0.14) * Math.cos(z * 0.14) * 1.1 + Math.sin(x * 0.35 + z * 0.25) * 0.35;
-        posAttr.setY(i, Math.max(-0.4, hill * Math.min(1, (distFromBase - 11.5) / 10)));
+        posAttr.setY(i, Math.max(-0.4, hill * Math.min(1, (dist - 12.5) / 10)));
       }
     }
     terrainGeo.computeVertexNormals();
-
-    const terrainMat = new THREE.MeshStandardMaterial({
-      color: 0x9a3412,
-      roughness: 0.92,
-      metalness: 0.05
-    });
-    const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+    const terrain = new THREE.Mesh(
+      terrainGeo,
+      new THREE.MeshStandardMaterial({ color: 0x9a3412, roughness: 0.92, metalness: 0.05 })
+    );
     terrain.receiveShadow = true;
     scene.add(terrain);
 
-    // ==================== MARS BASE 3D ARCHITECTURE (MATCHING YOUR CAD LAYOUT) ====================
-    const baseGroup = new THREE.Group();
-    scene.add(baseGroup);
-
-    // Base Foundation Deck (Matches grey CAD baseplate)
-    const deck = new THREE.Mesh(
-      new THREE.BoxGeometry(16.5, 0.25, 11.5),
-      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7, metalness: 0.35 })
+    // West Landing Pad Target Ring
+    const PAD_POS = new THREE.Vector3(-10.8, 0.03, 2.8);
+    const padOuter = new THREE.Mesh(
+      new THREE.RingGeometry(1.75, 2.1, 36),
+      new THREE.MeshBasicMaterial({ color: 0xfb923c, side: THREE.DoubleSide })
     );
-    deck.position.y = 0.125;
-    deck.receiveShadow = true;
-    baseGroup.add(deck);
+    padOuter.rotation.x = -Math.PI / 2;
+    padOuter.position.copy(PAD_POS);
+    scene.add(padOuter);
 
-    // Cyan Perimeter Trim around Baseplate
-    const trim = new THREE.Mesh(
-      new THREE.BoxGeometry(16.62, 0.08, 11.62),
-      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    const padInner = new THREE.Mesh(
+      new THREE.RingGeometry(0.95, 1.15, 36),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide })
     );
-    trim.position.y = 0.05;
-    baseGroup.add(trim);
+    padInner.rotation.x = -Math.PI / 2;
+    padInner.position.set(PAD_POS.x, 0.04, PAD_POS.z);
+    scene.add(padInner);
 
-    // Interactive Clickable Registry
-    const clickableZones = [];
-    const customCadContainer = new THREE.Group();
-    baseGroup.add(customCadContainer);
-    const defaultBuildingsGroup = new THREE.Group();
-    baseGroup.add(defaultBuildingsGroup);
-
-    function registerFacility(id, label, subtitle, hitSize, hitPos, visualGroup = null) {
-      const hitMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(hitSize[0], hitSize[1], hitSize[2]),
-        new THREE.MeshBasicMaterial({ visible: false })
-      );
-      hitMesh.position.set(hitPos[0], hitPos[1], hitPos[2]);
-      hitMesh.userData = { facilityId: id, label, subtitle, visualGroup };
-      baseGroup.add(hitMesh);
-      clickableZones.push(hitMesh);
-    }
-
-    // 1. HABITATION MODULE (Top-Left Large Blue Building in CAD)
-    const habGroup = new THREE.Group();
-    const habMain = new THREE.Mesh(
-      new THREE.BoxGeometry(9.6, 2.4, 3.6),
-      new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.45, metalness: 0.25 })
-    );
-    habMain.position.set(-2.2, 1.45, -2.9);
-    habMain.castShadow = true;
-    habMain.receiveShadow = true;
-    habGroup.add(habMain);
-
-    // Raised Left Skylight Bulkhead (from CAD)
-    const habBulkhead = new THREE.Mesh(
-      new THREE.BoxGeometry(2.3, 0.65, 3.1),
-      new THREE.MeshStandardMaterial({ color: 0x60a5fa, roughness: 0.4, metalness: 0.25 })
-    );
-    habBulkhead.position.set(-5.6, 2.95, -2.9);
-    habBulkhead.castShadow = true;
-    habGroup.add(habBulkhead);
-
-    // Twin Circular Roof ECLSS Vents (from CAD)
-    for (const vx of [-3.3, -1.6]) {
-      const vent = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.55, 0.68, 0.45, 24),
-        new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.35, metalness: 0.4 })
-      );
-      vent.position.set(vx, 2.85, -3.1);
-      vent.castShadow = true;
-      habGroup.add(vent);
-    }
-
-    // Glowing Habitation Windows & Cyan EVA Airlock Door
-    for (let w = 0; w < 3; w++) {
-      const win = new THREE.Mesh(
-        new THREE.BoxGeometry(0.95, 0.55, 0.1),
-        new THREE.MeshBasicMaterial({ color: 0xfef08a })
-      );
-      win.position.set(-1.5 + w * 1.65, 1.55, -1.08);
-      habGroup.add(win);
-    }
-    const airlockDoor = new THREE.Mesh(
-      new THREE.BoxGeometry(1.15, 1.65, 0.14),
-      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
-    );
-    airlockDoor.position.set(-3.4, 1.1, -1.08);
-    habGroup.add(airlockDoor);
-
-    defaultBuildingsGroup.add(habGroup);
-    registerFacility('habitation', 'HABITATION MODULE', 'Click to manage O₂, H₂O & Crew', [9.8, 3.2, 3.8], [-2.2, 1.7, -2.9], habGroup);
-
-    // 2. SOLAR PANEL ARRAY (Center Dark-Blue Pad in CAD)
-    const solarGroup = new THREE.Group();
-    const solarPad = new THREE.Mesh(
-      new THREE.BoxGeometry(4.4, 0.18, 3.2),
-      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6, metalness: 0.5 })
-    );
-    solarPad.position.set(-0.3, 0.34, 1.6);
-    solarPad.receiveShadow = true;
-    solarGroup.add(solarPad);
-
-    const solarPanels = [];
-    for (let r = 0; r < 2; r++) {
-      for (let c = 0; c < 3; c++) {
-        const panel = new THREE.Mesh(
-          new THREE.BoxGeometry(1.25, 0.08, 1.35),
-          new THREE.MeshStandardMaterial({
-            color: 0x1d4ed8,
-            emissive: 0x1e3a8a,
-            emissiveIntensity: 0.45,
-            roughness: 0.25,
-            metalness: 0.75
-          })
-        );
-        panel.position.set(-1.65 + c * 1.38, 0.58, 0.85 + r * 1.5);
-        panel.rotation.x = 0.26;
-        panel.castShadow = true;
-        solarGroup.add(panel);
-        solarPanels.push(panel);
-      }
-    }
-    defaultBuildingsGroup.add(solarGroup);
-    registerFacility('solar', 'SOLAR PANEL ARRAY', 'Click to route kW & protect from dust', [4.5, 1.2, 3.3], [-0.3, 0.7, 1.6], solarGroup);
-
-    // 3. YELLOW RESEARCH CENTER (Bottom-Left Yellow/Orange Block in CAD)
-    const researchGroup = new THREE.Group();
-    const labBody = new THREE.Mesh(
-      new THREE.BoxGeometry(2.1, 1.45, 3.1),
-      new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.42, metalness: 0.25 })
-    );
-    labBody.position.set(-4.1, 0.98, 2.0);
-    labBody.castShadow = true;
-    labBody.receiveShadow = true;
-    researchGroup.add(labBody);
-
-    const labSensor = new THREE.Mesh(
-      new THREE.BoxGeometry(1.1, 0.35, 1.1),
-      new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xca8a04, emissiveIntensity: 0.35 })
-    );
-    labSensor.position.set(-4.1, 1.85, 1.4);
-    researchGroup.add(labSensor);
-
-    defaultBuildingsGroup.add(researchGroup);
-    registerFacility('research', 'RESEARCH CENTER', 'Click to run experiments & tech upgrades', [2.2, 2.1, 3.2], [-4.1, 1.1, 2.0], researchGroup);
-
-    // 4. FOOD STORAGE SILO & DEPOT (Right Building + Tall Cylinder in CAD)
-    const siloGroup = new THREE.Group();
-    const depot = new THREE.Mesh(
-      new THREE.BoxGeometry(3.8, 2.1, 4.8),
-      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5, metalness: 0.35 })
-    );
-    depot.position.set(5.4, 1.3, 1.4);
-    depot.castShadow = true;
-    depot.receiveShadow = true;
-    siloGroup.add(depot);
-
-    // Blue Airlock Connector Cube + Tunnel (from CAD)
-    const connector = new THREE.Mesh(
-      new THREE.BoxGeometry(1.3, 1.2, 1.4),
-      new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4, metalness: 0.3 })
-    );
-    connector.position.set(2.55, 0.85, 1.2);
-    connector.castShadow = true;
-    siloGroup.add(connector);
-
-    const tunnel = new THREE.Mesh(
-      new THREE.BoxGeometry(0.6, 0.65, 0.65),
-      new THREE.MeshStandardMaterial({ color: 0x64748b })
-    );
-    tunnel.position.set(3.35, 0.75, 1.2);
-    siloGroup.add(tunnel);
-
-    // Tall Vertical Food Silo sitting ON TOP of Depot Roof
-    const tallSilo = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.85, 0.85, 3.2, 28),
-      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.65 })
-    );
-    tallSilo.position.set(5.8, 3.95, 1.8);
-    tallSilo.castShadow = true;
-    siloGroup.add(tallSilo);
-
-    const rearVent = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.45, 0.45, 1.1, 20),
-      new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.35, metalness: 0.5 })
-    );
-    rearVent.position.set(5.0, 2.9, 0.2);
-    rearVent.castShadow = true;
-    siloGroup.add(rearVent);
-
-    defaultBuildingsGroup.add(siloGroup);
-    registerFacility('silo', 'FOOD STORAGE SILO', 'Click to harvest hydroponic rations', [4.2, 5.6, 5.0], [5.3, 2.8, 1.4], siloGroup);
-
-    // 5. FOREGROUND COMMS DISH & CRYO TANKS (from CAD)
-    const commsGroup = new THREE.Group();
-    const dishBase = new THREE.Mesh(
-      new THREE.CylinderGeometry(1.15, 1.15, 0.65, 28),
-      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.5 })
-    );
-    dishBase.position.set(0.7, 0.58, 4.1);
-    dishBase.castShadow = true;
-    commsGroup.add(dishBase);
-
-    const antenna = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.06, 0.06, 1.3, 12),
-      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
-    );
-    antenna.position.set(0.7, 1.4, 4.1);
-    commsGroup.add(antenna);
-
-    // 3 Vertical Cryo Tanks on front-left (Silver, Blue, Gold from CAD)
-    const tankSpecs = [
-      { x: -6.3, z: 1.5, h: 2.5, col: 0xcbd5e1 },
-      { x: -6.1, z: 2.3, h: 2.2, col: 0x3b82f6 },
-      { x: -5.9, z: 3.1, h: 1.9, col: 0xeab308 }
-    ];
-    for (const tk of tankSpecs) {
-      const mesh = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.32, 0.32, tk.h, 20),
-        new THREE.MeshStandardMaterial({ color: tk.col, roughness: 0.35, metalness: 0.55 })
-      );
-      mesh.position.set(tk.x, 0.25 + tk.h / 2, tk.z);
-      mesh.castShadow = true;
-      commsGroup.add(mesh);
-    }
-
-    defaultBuildingsGroup.add(commsGroup);
-    registerFacility('comms', 'DEEP-SPACE COMMS DISH', 'Click to transmit science & scan weather', [2.6, 2.2, 2.2], [0.7, 1.1, 4.1], commsGroup);
-
-    // ==================== LANDED SPACESHIP & PATROLLING ASTRONAUT ====================
+    // ==================== 3D SPACESHIP LANDER & ASTRONAUT (FOR CUTSCENE) ====================
     const landerGroup = new THREE.Group();
-    landerGroup.position.set(-11.2, 0.1, 3.2);
+    landerGroup.position.set(PAD_POS.x, 16, PAD_POS.z);
     scene.add(landerGroup);
 
-    const hull = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.65, 1.15, 2.8, 24),
-      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.45 })
+    const landerHull = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.68, 1.18, 2.9, 28),
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.32, metalness: 0.45 })
     );
-    hull.position.y = 1.9;
-    hull.castShadow = true;
-    landerGroup.add(hull);
+    landerHull.position.y = 1.95;
+    landerHull.castShadow = true;
+    landerGroup.add(landerHull);
 
-    const nose = new THREE.Mesh(
-      new THREE.ConeGeometry(0.65, 0.9, 24),
-      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.6 })
+    const landerNose = new THREE.Mesh(
+      new THREE.ConeGeometry(0.68, 0.95, 28),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.25, metalness: 0.6 })
     );
-    nose.position.y = 3.75;
-    landerGroup.add(nose);
+    landerNose.position.y = 3.85;
+    landerNose.castShadow = true;
+    landerGroup.add(landerNose);
 
+    // Cockpit Viewport
+    const cockpitWin = new THREE.Mesh(
+      new THREE.SphereGeometry(0.32, 16, 16),
+      new THREE.MeshBasicMaterial({ color: 0x7dd3fc })
+    );
+    cockpitWin.position.set(0.62, 2.55, 0.62);
+    landerGroup.add(cockpitWin);
+
+    // 4 Articulating Landing Struts
+    const landerLegs = [];
     for (let l = 0; l < 4; l++) {
       const ang = (l * Math.PI) / 2 + Math.PI / 4;
-      const leg = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.07, 0.07, 1.4, 8),
-        new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
+      const legPivot = new THREE.Group();
+      legPivot.position.set(Math.cos(ang) * 0.95, 0.95, Math.sin(ang) * 0.95);
+      legPivot.rotation.y = -ang;
+
+      const strut = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.065, 0.065, 1.45, 10),
+        new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.6, roughness: 0.3 })
       );
-      leg.position.set(Math.cos(ang) * 1.15, 0.65, Math.sin(ang) * 1.15);
-      leg.rotation.z = -Math.cos(ang) * 0.45;
-      leg.rotation.x = Math.sin(ang) * 0.45;
-      landerGroup.add(leg);
+      strut.position.set(0.35, -0.5, 0);
+      strut.rotation.z = 0.48;
+      strut.castShadow = true;
+      legPivot.add(strut);
+
+      const footPad = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.22, 0.26, 0.08, 14),
+        new THREE.MeshStandardMaterial({ color: 0x334155 })
+      );
+      footPad.position.set(0.68, -1.12, 0);
+      legPivot.add(footPad);
+
+      landerGroup.add(legPivot);
+      landerLegs.push(legPivot);
     }
 
-    // Animated EVA Astronaut walking along the base perimeter
-    const astroGroup = new THREE.Group();
-    const astroBody = new THREE.Mesh(
-      new THREE.CapsuleGeometry(0.22, 0.45, 8, 16),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 })
+    // Extending Cyan Boarding Ramp
+    const boardingRamp = new THREE.Mesh(
+      new THREE.BoxGeometry(2.1, 0.08, 0.55),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, emissive: 0x0284c7, emissiveIntensity: 0.5 })
     );
-    astroBody.position.y = 0.65;
-    astroBody.castShadow = true;
-    astroGroup.add(astroBody);
+    boardingRamp.position.set(1.55, 0.48, 0);
+    boardingRamp.rotation.z = -0.35;
+    boardingRamp.scale.set(0.01, 1, 1);
+    boardingRamp.visible = false;
+    landerGroup.add(boardingRamp);
+
+    // Retro-Thruster Exhaust Flame Cone
+    const thrusterFlame = new THREE.Mesh(
+      new THREE.ConeGeometry(0.65, 2.8, 20),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.85 })
+    );
+    thrusterFlame.rotation.x = Math.PI;
+    thrusterFlame.position.y = -1.05;
+    landerGroup.add(thrusterFlame);
+
+    const thrusterInner = new THREE.Mesh(
+      new THREE.ConeGeometry(0.35, 1.8, 16),
+      new THREE.MeshBasicMaterial({ color: 0xfef08a, transparent: true, opacity: 0.95 })
+    );
+    thrusterInner.rotation.x = Math.PI;
+    thrusterInner.position.y = -0.65;
+    landerGroup.add(thrusterInner);
+
+    // Martian Dust Plume Particles during Landing
+    const dustGroup = new THREE.Group();
+    scene.add(dustGroup);
+    const dustPuffs = [];
+    for (let i = 0; i < 28; i++) {
+      const puff = new THREE.Mesh(
+        new THREE.SphereGeometry(0.35, 10, 10),
+        new THREE.MeshBasicMaterial({ color: 0xd97706, transparent: true, opacity: 0 })
+      );
+      dustGroup.add(puff);
+      dustPuffs.push({ mesh: puff, life: 0, vx: 0, vy: 0, vz: 0 });
+    }
+
+    // 3D Astronaut Walking from Lander into CAD Habitation Module
+    const astroGroup = new THREE.Group();
+    astroGroup.visible = false;
+    scene.add(astroGroup);
+
+    const astroSuit = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.22, 0.46, 8, 16),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 })
+    );
+    astroSuit.position.y = 0.65;
+    astroSuit.castShadow = true;
+    astroGroup.add(astroSuit);
+
+    const astroPack = new THREE.Mesh(
+      new THREE.BoxGeometry(0.28, 0.42, 0.2),
+      new THREE.MeshStandardMaterial({ color: 0xcbd5e1 })
+    );
+    astroPack.position.set(0, 0.72, -0.22);
+    astroGroup.add(astroPack);
 
     const astroHelmet = new THREE.Mesh(
       new THREE.SphereGeometry(0.24, 16, 16),
       new THREE.MeshStandardMaterial({ color: 0xffffff })
     );
-    astroHelmet.position.y = 1.15;
+    astroHelmet.position.y = 1.16;
     astroGroup.add(astroHelmet);
 
-    const visor = new THREE.Mesh(
+    const astroVisor = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 16, 16),
       new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 })
     );
-    visor.position.set(0, 1.15, 0.14);
-    astroGroup.add(visor);
-    scene.add(astroGroup);
+    astroVisor.position.set(0, 1.16, 0.14);
+    astroGroup.add(astroVisor);
 
-    // ==================== CUSTOM CAD FILE IMPORTER (.GLB / .GLTF / .STL) ====================
-    const cadInput = document.getElementById('cad-file-input');
+    // ==================== CUTSCENE SCRIPT & TYPEWRITER CONTROLLER ====================
+    const cutsceneScenes = [
+      {
+        badge: 'TRANSMISSION 01 // ORBITAL APPROACH',
+        title: 'MARS INSERTION // JEZERO OUTPOST',
+        text: 'Welcome, Cadet. Descending toward Jezero Base under the Martian sun—our CAD outpost is visible ahead with Habitation, Solar Array, Research Lab, and Food Silo.'
+      },
+      {
+        badge: 'TRANSMISSION 02 // RETRO-PROPULSION TOUCHDOWN',
+        title: 'CONTROLLED DESCENT ON WEST LANDING PAD',
+        text: 'Landing struts locked and retro-thrusters throttled down for a gentle touchdown. Every Sol on Mars consumes O₂, H₂O, food, and electrical power.'
+      },
+      {
+        badge: 'TRANSMISSION 03 // HABITATION AIRLOCK ENTRY',
+        title: 'ENTERING YOUR MARS BASE',
+        text: 'EVA ramp extended! Your astronaut crosses the regolith into the Habitation Module—prepare to take direct 3D command of every facility.'
+      }
+    ];
+
+    const phaseBadgeEl = document.getElementById('phase-badge');
+    const sceneTitleEl = document.getElementById('scene-title');
+    const dialogueTextEl = document.getElementById('dialogue-text');
+    const nextSceneBtn = document.getElementById('next-scene-btn');
+    const skipIntroBtn = document.getElementById('skip-intro-btn');
+    const stepDots = document.querySelectorAll('.dot');
+
+    let charIndex = 0;
+    let isTyping = false;
+    let typeInterval = null;
+
+    const cutAnim = {
+      shipY: 16.5,
+      legOpen: 0,
+      rampOpen: 0,
+      astroProgress: 0
+    };
+
+    function updateCutsceneDots(idx) {
+      stepDots.forEach((dot, i) => {
+        dot.classList.remove('active', 'completed');
+        if (i < idx) dot.classList.add('completed');
+        if (i === idx) dot.classList.add('active');
+      });
+    }
+
+    function loadCutsceneStep(idx) {
+      state.cutsceneScene = idx;
+      const sc = cutsceneScenes[idx];
+      phaseBadgeEl.textContent = sc.badge;
+      sceneTitleEl.textContent = sc.title;
+      dialogueTextEl.textContent = '';
+      updateCutsceneDots(idx);
+
+      nextSceneBtn.innerHTML = idx === cutsceneScenes.length - 1 ? 'Enter Base Command &#9654;' : 'Next &#9654;';
+
+      clearInterval(typeInterval);
+      charIndex = 0;
+      isTyping = true;
+      typeInterval = setInterval(() => {
+        if (charIndex < sc.text.length) {
+          dialogueTextEl.textContent += sc.text[charIndex];
+          charIndex++;
+        } else {
+          clearInterval(typeInterval);
+          isTyping = false;
+        }
+      }, 18);
+    }
+
+    function enterGameMode() {
+      clearInterval(typeInterval);
+      state.mode = 'game';
+      document.body.classList.remove('mode-cutscene');
+      document.body.classList.add('mode-game');
+
+      // Ensure lander is parked cleanly on pad with ramp extended and astronaut safely inside base
+      cutAnim.shipY = 0;
+      cutAnim.legOpen = 1;
+      cutAnim.rampOpen = 1;
+      cutAnim.astroProgress = 1;
+      landerGroup.position.y = 0;
+      thrusterFlame.visible = false;
+      thrusterInner.visible = false;
+      boardingRamp.visible = true;
+      boardingRamp.scale.set(1, 1, 1);
+      astroGroup.visible = false;
+
+      if (!userMovedCamera) {
+        camera.position.copy(GAME_CAM_POS);
+        controls.target.copy(GAME_TARGET);
+        controls.update();
+      }
+
+      if (bonusScrap > 0) {
+        logEvent(`Deflector Energy carried over (+${bonusScrap} Bonus Scrap)! Drag with Right-Click or Left-Click to orbit 360° & click any CAD building.`);
+      }
+    }
+
+    function startCutsceneMode() {
+      state.mode = 'cutscene';
+      state.selectedFacility = null;
+      document.getElementById('facility-drawer').classList.remove('open');
+      document.body.classList.remove('mode-game');
+      document.body.classList.add('mode-cutscene');
+
+      cutAnim.shipY = 16.5;
+      cutAnim.legOpen = 0;
+      cutAnim.rampOpen = 0;
+      cutAnim.astroProgress = 0;
+      landerGroup.position.y = 16.5;
+      thrusterFlame.visible = true;
+      thrusterInner.visible = true;
+      boardingRamp.visible = false;
+      astroGroup.visible = false;
+
+      userMovedCamera = false;
+      camera.position.set(-16.5, 11.5, 18.5);
+      controls.target.set(-3.5, 2.5, 0.5);
+      loadCutsceneStep(0);
+    }
+
+    nextSceneBtn.addEventListener('click', () => {
+      const sc = cutsceneScenes[state.cutsceneScene];
+      if (isTyping) {
+        clearInterval(typeInterval);
+        dialogueTextEl.textContent = sc.text;
+        isTyping = false;
+        return;
+      }
+
+      if (state.cutsceneScene < cutsceneScenes.length - 1) {
+        loadCutsceneStep(state.cutsceneScene + 1);
+      } else {
+        enterGameMode();
+      }
+    });
+
+    skipIntroBtn.addEventListener('click', () => {
+      enterGameMode();
+    });
+
+    document.getElementById('replay-cutscene-btn').addEventListener('click', () => {
+      startCutsceneMode();
+    });
+
+    // ==================== YOUR CAD MODEL CONTAINER ====================
+    const cadPivot = new THREE.Group();
+    scene.add(cadPivot);
+
+    let cadMeshes = [];
+    let fallbackHitZones = [];
+
+    document.getElementById('rotate-cad-btn').addEventListener('click', () => {
+      if (!state.cadLoaded) return;
+      cadPivot.rotation.y += Math.PI / 2;
+      logEvent('Rotated CAD assembly 90°.');
+    });
+
+    function classifyCadMesh(mesh, normalizedPos) {
+      const name = ((mesh.name || '') + ' ' + (mesh.parent?.name || '')).toLowerCase();
+      if (name.includes('hab') || name.includes('living') || name.includes('house')) return 'habitation';
+      if (name.includes('solar') || name.includes('panel')) return 'solar';
+      if (name.includes('research') || name.includes('yellow') || name.includes('lab')) return 'research';
+      if (name.includes('silo') || name.includes('food') || name.includes('cyl')) return 'silo';
+      if (name.includes('comm') || name.includes('dish') || name.includes('tank')) return 'comms';
+
+      if (mesh.material && mesh.material.color) {
+        const c = mesh.material.color;
+        if (c.r > 0.65 && c.g > 0.45 && c.b < 0.3) return 'research';
+        if (c.b > 0.45 && c.r < 0.28 && c.g < 0.42 && normalizedPos.z > 0.45) return 'solar';
+      }
+
+      if (normalizedPos.z < 0.44 && normalizedPos.x < 0.76) return 'habitation';
+      if (normalizedPos.x >= 0.72) return 'silo';
+      if (normalizedPos.x < 0.38 && normalizedPos.z >= 0.44) return 'research';
+      if (normalizedPos.x >= 0.38 && normalizedPos.x < 0.72 && normalizedPos.z >= 0.44 && normalizedPos.z <= 0.80) return 'solar';
+      return 'comms';
+    }
+
+    function createSpatialHitZones(boxSize) {
+      fallbackHitZones.forEach((z) => cadPivot.remove(z));
+      fallbackHitZones = [];
+
+      const w = boxSize.x;
+      const h = Math.max(boxSize.y, 1.5);
+      const d = boxSize.z;
+
+      const zones = [
+        { id: 'habitation', size: [w * 0.65, h, d * 0.36], pos: [-w * 0.14, h * 0.5, -d * 0.28] },
+        { id: 'silo',       size: [w * 0.30, h * 1.2, d * 0.52], pos: [w * 0.33, h * 0.6, d * 0.14] },
+        { id: 'solar',      size: [w * 0.32, h * 0.45, d * 0.34], pos: [0.0, h * 0.25, d * 0.16] },
+        { id: 'research',   size: [w * 0.24, h * 0.65, d * 0.36], pos: [-w * 0.26, h * 0.35, d * 0.20] },
+        { id: 'comms',      size: [w * 0.28, h * 0.45, d * 0.24], pos: [w * 0.04, h * 0.25, d * 0.38] }
+      ];
+
+      for (const z of zones) {
+        const hitMesh = new THREE.Mesh(
+          new THREE.BoxGeometry(z.size[0], z.size[1], z.size[2]),
+          new THREE.MeshBasicMaterial({ visible: false })
+        );
+        hitMesh.position.set(z.pos[0], z.pos[1], z.pos[2]);
+        hitMesh.userData.facilityId = z.id;
+        cadPivot.add(hitMesh);
+        fallbackHitZones.push(hitMesh);
+      }
+    }
+
+    function mountCadObject(obj3d, fileName) {
+      while (cadPivot.children.length > 0) {
+        cadPivot.remove(cadPivot.children[0]);
+      }
+      cadPivot.rotation.set(0, 0, 0);
+      cadMeshes = [];
+      fallbackHitZones = [];
+
+      const rawBox = new THREE.Box3().setFromObject(obj3d);
+      const rawSize = new THREE.Vector3();
+      const rawCenter = new THREE.Vector3();
+      rawBox.getSize(rawSize);
+      rawBox.getCenter(rawCenter);
+
+      const maxSpan = Math.max(rawSize.x, rawSize.z, 0.001);
+      const scaleFactor = 16.0 / maxSpan;
+
+      obj3d.scale.setScalar(scaleFactor);
+      obj3d.position.set(
+        -rawCenter.x * scaleFactor,
+        -rawBox.min.y * scaleFactor,
+        -rawCenter.z * scaleFactor
+      );
+
+      cadPivot.add(obj3d);
+      cadPivot.updateMatrixWorld(true);
+
+      const finalBox = new THREE.Box3().setFromObject(obj3d);
+      const finalSize = new THREE.Vector3();
+      finalBox.getSize(finalSize);
+
+      obj3d.traverse((child) => {
+        if (child.isMesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+
+          if (child.material) {
+            child.material = child.material.clone();
+            if (!child.material.emissive) {
+              child.material.emissive = new THREE.Color(0x000000);
+            }
+            child.userData.origEmissive = child.material.emissive.clone();
+          }
+
+          const meshBox = new THREE.Box3().setFromObject(child);
+          const meshCenter = new THREE.Vector3();
+          meshBox.getCenter(meshCenter);
+
+          const normPos = {
+            x: (meshCenter.x - finalBox.min.x) / Math.max(finalSize.x, 0.001),
+            y: (meshCenter.y - finalBox.min.y) / Math.max(finalSize.y, 0.001),
+            z: (meshCenter.z - finalBox.min.z) / Math.max(finalSize.z, 0.001)
+          };
+
+          const isBaseplate = (meshBox.max.x - meshBox.min.x) > finalSize.x * 0.85 &&
+                              (meshBox.max.z - meshBox.min.z) > finalSize.z * 0.85 &&
+                              (meshBox.max.y - meshBox.min.y) < finalSize.y * 0.25;
+
+          if (!isBaseplate) {
+            child.userData.facilityId = classifyCadMesh(child, normPos);
+            cadMeshes.push(child);
+          }
+        }
+      });
+
+      if (cadMeshes.length <= 1) {
+        createSpatialHitZones(finalSize);
+      }
+
+      state.cadLoaded = true;
+      document.getElementById('cad-prompt-banner').classList.add('hidden');
+      logEvent(`CAD BASE ACTIVE: "${fileName}" (${cadMeshes.length} interactive parts). Hold Right-Click or Left-Click & Drag to orbit 360°!`);
+    }
+
     const gltfLoader = new GLTFLoader();
     const stlLoader = new STLLoader();
+    const objLoader = new OBJLoader();
 
-    cadInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const url = URL.createObjectURL(file);
-      const ext = file.name.split('.').pop().toLowerCase();
-
-      const mountImportedModel = (obj3d) => {
-        // Clear previous custom CAD model and hide default procedural buildings
-        while (customCadContainer.children.length > 0) {
-          customCadContainer.remove(customCadContainer.children[0]);
-        }
-        defaultBuildingsGroup.visible = false;
-
-        // Auto-center and auto-scale the CAD assembly onto the 16 x 11 Mars baseplate
-        const box = new THREE.Box3().setFromObject(obj3d);
-        const size = new THREE.Vector3();
-        const center = new THREE.Vector3();
-        box.getSize(size);
-        box.getCenter(center);
-
-        const maxHoriz = Math.max(size.x, size.z, 0.001);
-        const targetSpan = 15.2;
-        const scaleFactor = targetSpan / maxHoriz;
-
-        obj3d.scale.setScalar(scaleFactor);
-        obj3d.position.set(
-          -center.x * scaleFactor,
-          0.26 - box.min.y * scaleFactor,
-          -center.z * scaleFactor
-        );
-
-        obj3d.traverse((child) => {
-          if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
-          }
-        });
-
-        customCadContainer.add(obj3d);
-        logEvent(`CAD FILE MOUNTED: "${file.name}" scaled to Jezero Baseplate! Click any zone to operate.`);
-      };
+    function loadCadFromBuffer(arrayBuffer, fileName) {
+      const ext = fileName.split('.').pop().toLowerCase();
 
       if (ext === 'glb' || ext === 'gltf') {
-        gltfLoader.load(url, (gltf) => mountImportedModel(gltf.scene));
+        gltfLoader.parse(
+          arrayBuffer,
+          '',
+          (gltf) => mountCadObject(gltf.scene, fileName),
+          (err) => {
+            console.error(err);
+            logEvent(`Error reading ${fileName}. Try exporting as binary .glb from your CAD editor.`);
+          }
+        );
       } else if (ext === 'stl') {
-        stlLoader.load(url, (geometry) => {
+        try {
+          const geometry = stlLoader.parse(arrayBuffer);
           geometry.computeVertexNormals();
           const mesh = new THREE.Mesh(
             geometry,
             new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.4, metalness: 0.45 })
           );
-          // STL exports from Z-up CAD tools often need -90 deg X rotation
           mesh.rotation.x = -Math.PI / 2;
-          const wrapper = new THREE.Group();
-          wrapper.add(mesh);
-          mountImportedModel(wrapper);
+          const group = new THREE.Group();
+          group.add(mesh);
+          mountCadObject(group, fileName);
+        } catch (err) {
+          console.error(err);
+          logEvent(`Error parsing STL file ${fileName}.`);
+        }
+      } else if (ext === 'obj') {
+        try {
+          const text = new TextDecoder().decode(arrayBuffer);
+          const obj = objLoader.parse(text);
+          mountCadObject(obj, fileName);
+        } catch (err) {
+          console.error(err);
+          logEvent(`Error parsing OBJ file ${fileName}.`);
+        }
+      }
+    }
+
+    // ==================== INDEXEDDB CAD STORAGE ====================
+    function openCadDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('AstronuggetsCadDB', 1);
+        req.onupgradeneeded = () => req.result.createObjectStore('files');
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function saveCadToBrowser(fileName, arrayBuffer) {
+      try {
+        const db = await openCadDB();
+        const tx = db.transaction('files', 'readwrite');
+        tx.objectStore('files').put({ fileName, arrayBuffer }, 'active_cad');
+      } catch (e) {
+        console.warn('IndexedDB save skipped:', e);
+      }
+    }
+
+    async function loadSavedCadFromBrowser() {
+      try {
+        const db = await openCadDB();
+        return await new Promise((resolve) => {
+          const tx = db.transaction('files', 'readonly');
+          const req = tx.objectStore('files').get('active_cad');
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
         });
+      } catch {
+        return null;
+      }
+    }
+
+    async function initCadModel() {
+      const repoCandidates = ['./mars_base.glb', './mars_base.gltf', './mars_base.stl'];
+      for (const candidate of repoCandidates) {
+        try {
+          const res = await fetch(candidate);
+          if (res.ok) {
+            const buf = await res.arrayBuffer();
+            loadCadFromBuffer(buf, candidate.replace('./', ''));
+            return;
+          }
+        } catch {
+          // Keep checking
+        }
+      }
+
+      const saved = await loadSavedCadFromBrowser();
+      if (saved && saved.arrayBuffer) {
+        loadCadFromBuffer(saved.arrayBuffer, saved.fileName);
+      }
+    }
+
+    function handleUserCadFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const buffer = ev.target.result;
+        loadCadFromBuffer(buffer.slice(0), file.name);
+        await saveCadToBrowser(file.name, buffer);
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    document.getElementById('cad-file-input').addEventListener('change', (e) => {
+      handleUserCadFile(e.target.files[0]);
+    });
+
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleUserCadFile(e.dataTransfer.files[0]);
       }
     });
 
-    // ==================== RAYCASTING: HOVER & CLICK ON 3D BUILDINGS ====================
+    // ==================== 3D RAYCASTING (ACTIVE IN GAMEPLAY MODE) ====================
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
     const hoverTag = document.getElementById('hover-tag');
     let pointerDownPos = { x: 0, y: 0 };
+    let hoveredMesh = null;
+
+    function clearHoverHighlight() {
+      if (hoveredMesh && hoveredMesh.material && hoveredMesh.userData.origEmissive) {
+        hoveredMesh.material.emissive.copy(hoveredMesh.userData.origEmissive);
+      }
+      hoveredMesh = null;
+    }
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
       pointerDownPos = { x: e.clientX, y: e.clientY };
     });
 
     renderer.domElement.addEventListener('pointermove', (e) => {
+      if (state.mode !== 'game' || !state.cadLoaded) {
+        hoverTag.style.display = 'none';
+        return;
+      }
+
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
 
       raycaster.setFromCamera(pointer, camera);
-      const hits = raycaster.intersectObjects(clickableZones, false);
+      const targets = fallbackHitZones.length > 0 ? fallbackHitZones : cadMeshes;
+      const hits = raycaster.intersectObjects(targets, false);
+
+      clearHoverHighlight();
 
       if (hits.length > 0) {
-        const data = hits[0].object.userData;
+        const hitObj = hits[0].object;
+        const facId = hitObj.userData.facilityId || 'habitation';
+        const meta = FACILITY_META[facId];
+
+        if (hitObj.material && hitObj.material.emissive) {
+          hoveredMesh = hitObj;
+          hoveredMesh.material.emissive.setHex(0x1d4ed8);
+        }
+
         hoverTag.style.display = 'block';
         hoverTag.style.left = `${e.clientX}px`;
         hoverTag.style.top = `${e.clientY}px`;
-        hoverTag.innerHTML = `${data.label}<span>${data.subtitle}</span>`;
+        hoverTag.innerHTML = `${meta.label}<span>${meta.subtitle}</span>`;
         container.style.cursor = 'pointer';
       } else {
         hoverTag.style.display = 'none';
@@ -1009,21 +1529,23 @@
     });
 
     renderer.domElement.addEventListener('pointerup', (e) => {
+      if (state.mode !== 'game' || !state.cadLoaded || state.gameOver) return;
       const moveDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
-      // Only trigger click menu if user did NOT drag/orbit the camera
-      if (moveDist > 6 || state.gameOver) return;
+      if (moveDist > 6) return;
 
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
       pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
 
-      const hits = raycaster.intersectObjects(clickableZones, false);
+      const targets = fallbackHitZones.length > 0 ? fallbackHitZones : cadMeshes;
+      const hits = raycaster.intersectObjects(targets, false);
       if (hits.length > 0) {
-        openFacilityMenu(hits[0].object.userData.facilityId);
+        const facId = hits[0].object.userData.facilityId || 'habitation';
+        openFacilityMenu(facId);
       }
     });
 
-    // ==================== INTERACTIVE FACILITY MENUS & GAME LOGIC ====================
+    // ==================== FACILITY MENUS & SOL PROGRESSION ====================
     const drawer = document.getElementById('facility-drawer');
     const drawerTag = document.getElementById('drawer-tag');
     const drawerTitle = document.getElementById('drawer-title');
@@ -1121,19 +1643,18 @@
       if (id === 'solar') {
         drawerTag.textContent = 'SECTOR 02 // POWER GRID';
         drawerTitle.textContent = 'SOLAR PANEL ARRAY';
-        drawerDesc.textContent = 'Six monocrystalline photovoltaic arrays plus baseline RTG nuclear power. Stow panels during dust storms to prevent abrasion.';
+        drawerDesc.textContent = 'Photovoltaic solar field plus baseline RTG nuclear power. Switch to Safe Mode during dust storms to prevent abrasion.';
         addStat('Available Grid', `${state.power} kW`);
-        addStat('Array State', state.panelsDeployed ? 'DEPLOYED' : 'STOWED');
+        addStat('Array Mode', state.panelsDeployed ? 'ACTIVE' : 'SAFE STOW');
 
         addAction(
-          state.panelsDeployed ? 'Stow Solar Panels' : 'Deploy Solar Panels',
+          state.panelsDeployed ? 'Switch to Dust-Storm Safe Mode' : 'Resume Solar Power Collection',
           '0 kW',
-          state.panelsDeployed ? 'Protects arrays during Martian dust storms' : 'Restores full solar kW generation next Sol',
+          state.panelsDeployed ? 'Protects solar panels during Martian dust storms' : 'Restores full solar kW generation next Sol',
           false,
           () => {
             state.panelsDeployed = !state.panelsDeployed;
-            solarPanels.forEach((p) => { p.rotation.x = state.panelsDeployed ? 0.26 : 0.02; });
-            logEvent(state.panelsDeployed ? 'Solar arrays angled toward the Martian sun.' : 'Solar arrays locked flat in dust-storm safe mode.');
+            logEvent(state.panelsDeployed ? 'Solar array set to full power generation.' : 'Solar array locked in dust-storm safe mode.');
           }
         );
 
@@ -1174,7 +1695,7 @@
         addAction('Harvest Aeroponic Crops', '-3 kW', 'Grows nutrient-dense algae & potatoes (+20% Food)', state.power < 3, () => {
           state.power -= 3;
           state.food = Math.min(100, state.food + 20);
-          logEvent('Hydroponic bay harvested +20% crew food rations.');
+          logEvent('Food Silo harvested +20% crew food rations.');
         });
 
         addAction('Salvage Supply Crate', '-2 kW', 'Extracts spare aluminum & electronics (+2 Scrap)', state.power < 2, () => {
@@ -1186,7 +1707,7 @@
 
       if (id === 'comms') {
         drawerTag.textContent = 'SECTOR 05 // TELEMETRY';
-        drawerTitle.textContent = 'DEEP-SPACE COMMS DISH';
+        drawerTitle.textContent = 'COMMS DISH & CRYO TANKS';
         drawerDesc.textContent = 'High-gain X-band dish linking Jezero Base to Earth DSN (3–22 min light-speed delay) and orbital weather satellites.';
         addStat('Signal Delay', `${4 + (state.sol % 15)} min`);
         addStat('Weather Forecast', state.dustStormActive ? 'DUST STORM' : (state.solarStormActive ? 'SOLAR FLARE' : 'NOMINAL'));
@@ -1205,7 +1726,6 @@
     nextSolBtn.addEventListener('click', () => {
       if (state.gameOver) return;
 
-      // Apply hazard penalties from the ending Sol
       let alertMsg = '';
       if (state.solarStormActive && !state.shieldCharged) {
         state.o2 -= 12;
@@ -1217,32 +1737,28 @@
 
       if (state.dustStormActive && state.panelsDeployed) {
         state.maxPower = Math.max(8, state.maxPower - 2);
-        alertMsg += 'Dust storm abraded deployed panels (-2 kW max grid)! ';
+        alertMsg += 'Dust storm abraded active solar panels (-2 kW max grid)! ';
       }
 
-      // Advance Sol
       state.sol += 1;
       state.shieldCharged = false;
 
-      // Daily crew attrition
       const o2Loss = state.moxieBoosted ? 6 : 10;
       state.o2 = Math.max(0, state.o2 - o2Loss);
       state.h2o = Math.max(0, state.h2o - 9);
       state.food = Math.max(0, state.food - 8);
 
-      // Roll new space weather
       const roll = Math.random();
       state.dustStormActive = roll < 0.25;
       state.solarStormActive = roll >= 0.25 && roll < 0.45;
 
-      // Recharge daily kW
       const solarOutput = state.panelsDeployed ? (state.dustStormActive ? 5 : state.maxPower) : 6;
       state.power = solarOutput;
 
       if (state.dustStormActive) {
-        alertMsg += 'WARNING: Martian Dust Storm detected—stow Solar Panels!';
+        alertMsg += 'WARNING: Martian Dust Storm detected—switch Solar Array to Safe Mode!';
       } else if (state.solarStormActive) {
-        alertMsg += 'WARNING: Solar Particle Event inbound—charge Magnetic Shield!';
+        alertMsg += 'WARNING: Solar Particle Event inbound—charge Magnetic Shield in Habitation!';
       } else if (!alertMsg) {
         alertMsg = `Sol ${state.sol} nominal. ${state.power} kW generated across outpost grid.`;
       }
@@ -1251,7 +1767,6 @@
       if (state.selectedFacility) renderFacilityContent(state.selectedFacility);
       logEvent(alertMsg);
 
-      // Check Win / Loss Conditions
       if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) {
         endGame(false, `Critical life-support failure on Sol ${state.sol}. Keep O₂, H₂O, and Food above 0% to sustain the crew.`);
       } else if (state.science >= 100 || state.sol >= state.maxSols) {
@@ -1275,37 +1790,13 @@
       document.getElementById('end-modal').classList.add('active');
     }
 
-    // ==================== RENDER & ANIMATION LOOP ====================
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // ==================== 3D RENDER & CUTSCENE ANIMATION LOOP ====================
     const clock = new THREE.Clock();
     function animate() {
-      requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      // Patrol astronaut along the base walkway between Habitation, Research & Solar Panels
-      const walkAngle = t * 0.45;
-      astroGroup.position.x = -1.5 + Math.cos(walkAngle) * 3.2;
-      astroGroup.position.z = -0.35 + Math.sin(walkAngle) * 0.45;
-      astroGroup.position.y = 0.25 + Math.abs(Math.sin(t * 6)) * 0.06;
-      astroGroup.rotation.y = Math.atan2(-Math.sin(walkAngle) * 3.2, Math.cos(walkAngle) * 0.45);
-
-      // Slowly rotate comms dish antenna
-      antenna.rotation.y = t * 0.8;
-
-      controls.update();
-      renderer.render(scene, camera);
-    }
-
-    updateTopHUD();
-    if (bonusScrap > 0) {
-      logEvent(`Deflector Energy carried over from launch (+${bonusScrap} Bonus Scrap)! Right-click or left-click drag to orbit.`);
-    }
-    animate();
-  </script>
-</body>
-</html>
+      requestAnimationFrame
