@@ -52,6 +52,73 @@
       -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
     }
 
+    /* Top-Right Energy HUD */
+    .energy-hud {
+      position: fixed;
+      top: 1.25rem;
+      right: 1.25rem;
+      z-index: 10;
+      width: 230px;
+      background: rgba(11, 17, 32, 0.78);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .energy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #bae6fd;
+      margin-bottom: 0.45rem;
+    }
+
+    #energy-pct {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .energy-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .energy-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #818cf8, #fb923c);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.75);
+      border-radius: 999px;
+      transition: width 0.05s linear;
+    }
+
+    .energy-status {
+      margin-top: 0.45rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .energy-status span.active-mode {
+      color: #fb923c;
+      font-weight: 600;
+    }
+
     /* Full-Screen Hero Section */
     .hero {
       position: relative;
@@ -166,10 +233,11 @@
 
     .hero-hint {
       margin-top: 1.5rem;
-      font-size: 0.82rem;
-      letter-spacing: 0.12em;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: rgba(186, 230, 253, 0.6);
+      color: rgba(186, 230, 253, 0.65);
+      user-select: none;
     }
 
     .scroll-indicator {
@@ -309,6 +377,21 @@
   <canvas id="space"></canvas>
   <div class="hud-grid"></div>
 
+  <!-- Top-Right Corner Energy Bar -->
+  <aside class="energy-hud" aria-label="Deflector Energy">
+    <div class="energy-header">
+      <span>Deflector Energy</span>
+      <span id="energy-pct">0%</span>
+    </div>
+    <div class="energy-track">
+      <div class="energy-fill" id="energy-fill"></div>
+    </div>
+    <div class="energy-status">
+      <span id="energy-mode">HOLD CLICK: CHARGE</span>
+      <span>SPACE: FIRE</span>
+    </div>
+  </aside>
+
   <!-- Fullscreen Hero -->
   <header class="hero">
     <div class="badge">JUNIOR ASTRONAUT MISSION TRAINER</div>
@@ -325,7 +408,7 @@
       </a>
     </div>
 
-    <p class="hero-hint">Move cursor to ignite thruster trail &amp; deflect incoming asteroids</p>
+    <p class="hero-hint">Hold Click to Charge Power &bull; Hold Space to Ignite Trail &amp; Fire Bolts</p>
 
     <a href="#mission-briefing" class="scroll-indicator">
       <span>Scroll Down</span>
@@ -380,15 +463,27 @@
   <script>
     const canvas = document.getElementById('space');
     const ctx = canvas.getContext('2d');
+    const energyFillEl = document.getElementById('energy-fill');
+    const energyPctEl = document.getElementById('energy-pct');
+    const energyModeEl = document.getElementById('energy-mode');
 
     let width, height;
     const stars = [];
     const asteroids = [];
     const trail = [];
     const sparks = [];
+    const bullets = [];
+    const shockwaves = [];
 
     const STAR_COUNT = 160;
     const ASTEROID_COUNT = 22;
+
+    // Energy & Weapon State
+    let energy = 0; // 0 to 100
+    let isCharging = false;
+    let isSpaceHeld = false;
+    let lastShotTime = 0;
+    const SHOT_INTERVAL_MS = 500; // Fires every 0.5 seconds while Space is held
 
     const mouse = {
       x: -9999,
@@ -397,6 +492,8 @@
       py: -9999,
       vx: 0,
       vy: 0,
+      dirX: 1, // Last normalized movement direction X
+      dirY: 0, // Last normalized movement direction Y
       active: false
     };
 
@@ -407,7 +504,59 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Track mouse movement for lighter-style trail & asteroid deflection
+    function updateEnergyHUD() {
+      const clamped = Math.max(0, Math.min(100, energy));
+      energyFillEl.style.width = `${clamped}%`;
+      energyPctEl.textContent = `${Math.round(clamped)}%`;
+
+      if (isSpaceHeld && clamped > 0) {
+        energyModeEl.textContent = 'OVERDRIVE FIRING';
+        energyModeEl.classList.add('active-mode');
+      } else if (isCharging) {
+        energyModeEl.textContent = 'CHARGING CORE...';
+        energyModeEl.classList.add('active-mode');
+      } else if (clamped > 0) {
+        energyModeEl.textContent = 'ENERGY READY';
+        energyModeEl.classList.remove('active-mode');
+      } else {
+        energyModeEl.textContent = 'HOLD CLICK: CHARGE';
+        energyModeEl.classList.remove('active-mode');
+      }
+    }
+
+    // Hold Left-Click to charge energy bar
+    window.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      // Don't hijack link clicks
+      if (e.target.closest('a, button')) return;
+      isCharging = true;
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (e.button !== 0) return;
+      isCharging = false;
+    });
+
+    // Hold Spacebar to ignite trail and shoot bullets every 0.5s
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !e.target.matches('input, textarea')) {
+        e.preventDefault();
+        isSpaceHeld = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        isSpaceHeld = false;
+      }
+    });
+
+    window.addEventListener('blur', () => {
+      isCharging = false;
+      isSpaceHeld = false;
+    });
+
+    // Track mouse movement & direction vector
     window.addEventListener('mousemove', (e) => {
       if (!mouse.active) {
         mouse.px = e.clientX;
@@ -423,24 +572,36 @@
       mouse.vx = mouse.x - mouse.px;
       mouse.vy = mouse.y - mouse.py;
 
-      // Add short-lived flame/plasma trail points
+      const speed = Math.hypot(mouse.vx, mouse.vy);
+      if (speed > 0.5) {
+        mouse.dirX = mouse.vx / speed;
+        mouse.dirY = mouse.vy / speed;
+      }
+
+      const ignited = isSpaceHeld && energy > 0;
+
+      // Add short-lived lighter/plasma trail points
       trail.push({
         x: mouse.x,
         y: mouse.y,
-        life: 1.0
+        life: 1.0,
+        ignited
       });
 
-      // Spawn tiny lighter-like embers when moving
-      const speed = Math.hypot(mouse.vx, mouse.vy);
-      if (speed > 2) {
-        sparks.push({
-          x: mouse.x + (Math.random() - 0.5) * 4,
-          y: mouse.y + (Math.random() - 0.5) * 4,
-          vx: -mouse.vx * 0.12 + (Math.random() - 0.5) * 1.2,
-          vy: -mouse.vy * 0.12 - Math.random() * 0.9,
-          life: 1.0,
-          size: Math.random() * 1.8 + 0.8
-        });
+      // Spawn embers along trail
+      if (speed > 1.5 || ignited) {
+        const sparkCount = ignited ? 3 : 1;
+        for (let s = 0; s < sparkCount; s++) {
+          sparks.push({
+            x: mouse.x + (Math.random() - 0.5) * (ignited ? 10 : 4),
+            y: mouse.y + (Math.random() - 0.5) * (ignited ? 10 : 4),
+            vx: -mouse.vx * 0.12 + (Math.random() - 0.5) * (ignited ? 2.6 : 1.2),
+            vy: -mouse.vy * 0.12 - Math.random() * (ignited ? 1.8 : 0.9),
+            life: 1.0,
+            size: ignited ? Math.random() * 2.6 + 1.2 : Math.random() * 1.8 + 0.8,
+            ignited
+          });
+        }
       }
     });
 
@@ -504,9 +665,51 @@
       asteroids.push(createAsteroid(false));
     }
 
+    function fireBullet() {
+      if (!mouse.active || energy <= 0) return;
+
+      const bulletCost = 8;
+      energy = Math.max(0, energy - bulletCost);
+
+      const speed = 15;
+      bullets.push({
+        x: mouse.x,
+        y: mouse.y,
+        vx: mouse.dirX * speed,
+        vy: mouse.dirY * speed,
+        angle: Math.atan2(mouse.dirY, mouse.dirX),
+        life: 1.0
+      });
+
+      // Muzzle flash sparks
+      for (let k = 0; k < 7; k++) {
+        sparks.push({
+          x: mouse.x,
+          y: mouse.y,
+          vx: mouse.dirX * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
+          vy: mouse.dirY * (Math.random() * 4 + 2) + (Math.random() - 0.5) * 3,
+          life: 1.0,
+          size: Math.random() * 2.2 + 1,
+          ignited: true
+        });
+      }
+    }
+
     function drawMouseTrail() {
+      const ignited = isSpaceHeld && energy > 0;
+
+      // If holding Space while stationary, keep feeding a glowing flame around the cursor
+      if (ignited && mouse.active) {
+        trail.push({
+          x: mouse.x + (Math.random() - 0.5) * 3,
+          y: mouse.y + (Math.random() - 0.5) * 3,
+          life: 1.0,
+          ignited: true
+        });
+      }
+
       for (let i = trail.length - 1; i >= 0; i--) {
-        trail[i].life -= 0.085;
+        trail[i].life -= trail[i].ignited ? 0.065 : 0.09;
         if (trail[i].life <= 0) {
           trail.splice(i, 1);
         }
@@ -523,17 +726,49 @@
           ctx.moveTo(p0.x, p0.y);
           ctx.lineTo(p1.x, p1.y);
           ctx.lineCap = 'round';
-          ctx.strokeStyle = `rgba(251, 146, 60, ${alpha * 0.55})`;
-          ctx.lineWidth = alpha * 6.5;
-          ctx.stroke();
 
-          ctx.strokeStyle = `rgba(254, 249, 195, ${alpha * 0.95})`;
-          ctx.lineWidth = alpha * 2.2;
-          ctx.stroke();
+          if (p1.ignited) {
+            // Bright overcharged plasma flame when Space is held
+            ctx.strokeStyle = `rgba(56, 189, 248, ${alpha * 0.75})`;
+            ctx.lineWidth = alpha * 14;
+            ctx.stroke();
+
+            ctx.strokeStyle = `rgba(251, 146, 60, ${alpha * 0.85})`;
+            ctx.lineWidth = alpha * 7.5;
+            ctx.stroke();
+
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth = alpha * 3;
+            ctx.stroke();
+          } else {
+            // Subtle short-lived lighter flame during normal movement
+            ctx.strokeStyle = `rgba(251, 146, 60, ${alpha * 0.55})`;
+            ctx.lineWidth = alpha * 6.5;
+            ctx.stroke();
+
+            ctx.strokeStyle = `rgba(254, 249, 195, ${alpha * 0.95})`;
+            ctx.lineWidth = alpha * 2.2;
+            ctx.stroke();
+          }
           ctx.restore();
         }
       }
 
+      // Charging aura ring around cursor when holding Click
+      if (mouse.active && (isCharging || energy > 0)) {
+        const radius = 10 + (energy / 100) * 18;
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = isSpaceHeld && energy > 0
+          ? 'rgba(56, 189, 248, 0.85)'
+          : `rgba(251, 146, 60, ${0.25 + (energy / 100) * 0.65})`;
+        ctx.lineWidth = isCharging ? 2.5 : 1.5;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
         const sp = sparks[i];
         sp.x += sp.vx;
@@ -543,10 +778,102 @@
           sparks.splice(i, 1);
           continue;
         }
-        ctx.fillStyle = `rgba(253, 186, 116, ${sp.life})`;
+        ctx.fillStyle = sp.ignited
+          ? `rgba(125, 211, 252, ${sp.life})`
+          : `rgba(253, 186, 116, ${sp.life})`;
         ctx.beginPath();
         ctx.arc(sp.x, sp.y, sp.size * sp.life, 0, Math.PI * 2);
         ctx.fill();
+      }
+    }
+
+    function drawBulletsAndShockwaves() {
+      // Shockwaves from charged asteroid hits
+      for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.r += 7;
+        sw.alpha -= 0.05;
+        if (sw.alpha <= 0) {
+          shockwaves.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(56, 189, 248, ${sw.alpha})`;
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Plasma bolts fired while holding Space
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x += b.vx;
+        b.y += b.vy;
+
+        // Remove off-screen bullets
+        if (b.x < -50 || b.x > width + 50 || b.y < -50 || b.y > height + 50) {
+          bullets.splice(i, 1);
+          continue;
+        }
+
+        // Check bullet collision with asteroids
+        let hit = false;
+        for (let j = 0; j < asteroids.length; j++) {
+          const a = asteroids[j];
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < a.radius + 8) {
+            // Deflect asteroid strongly in the bullet's travel direction
+            const bSpeed = Math.hypot(b.vx, b.vy);
+            const nx = b.vx / bSpeed;
+            const ny = b.vy / bSpeed;
+
+            a.vx = nx * 11 + (Math.random() - 0.5) * 2;
+            a.vy = ny * 11 + (Math.random() - 0.5) * 2;
+            a.spin += (Math.random() - 0.5) * 0.15;
+            a.hitFlash = 1.0;
+
+            shockwaves.push({ x: b.x, y: b.y, r: 6, alpha: 0.9 });
+
+            for (let k = 0; k < 10; k++) {
+              sparks.push({
+                x: b.x,
+                y: b.y,
+                vx: (Math.random() - 0.5) * 7,
+                vy: (Math.random() - 0.5) * 7,
+                life: 1.0,
+                size: Math.random() * 2.4 + 1,
+                ignited: true
+              });
+            }
+
+            hit = true;
+            break;
+          }
+        }
+
+        if (hit) {
+          bullets.splice(i, 1);
+          continue;
+        }
+
+        // Draw glowing plasma bolt
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.angle);
+
+        const grad = ctx.createLinearGradient(-22, 0, 8, 0);
+        grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+        grad.addColorStop(0.6, 'rgba(56, 189, 248, 0.9)');
+        grad.addColorStop(1, '#ffffff');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.roundRect(-22, -3, 30, 6, 3);
+        ctx.fill();
+
+        ctx.restore();
       }
     }
 
@@ -557,7 +884,7 @@
       const trailGrad = ctx.createLinearGradient(-a.vx * 20, -a.vy * 20, 0, 0);
       trailGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
       trailGrad.addColorStop(1, a.hitFlash > 0
-        ? `rgba(251, 146, 60, ${0.25 * a.hitFlash})`
+        ? `rgba(251, 146, 60, ${0.28 * a.hitFlash})`
         : 'rgba(56, 189, 248, 0.12)');
       ctx.strokeStyle = trailGrad;
       ctx.lineWidth = a.radius * 0.55;
@@ -611,8 +938,24 @@
       ctx.restore();
     }
 
-    function animate() {
+    function animate(now) {
       ctx.clearRect(0, 0, width, height);
+
+      // Charge energy while holding left-click
+      if (isCharging) {
+        energy = Math.min(100, energy + 0.9);
+      }
+
+      // Drain energy & fire bullets every 0.5s while holding Space
+      if (isSpaceHeld && energy > 0) {
+        energy = Math.max(0, energy - 0.12); // Trail ignition sustain drain
+        if (now - lastShotTime >= SHOT_INTERVAL_MS) {
+          fireBullet();
+          lastShotTime = now;
+        }
+      }
+
+      updateEnergyHUD();
 
       for (const s of stars) {
         s.alpha += s.twinkle;
@@ -630,7 +973,7 @@
           const dx = a.x - mouse.x;
           const dy = a.y - mouse.y;
           const dist = Math.hypot(dx, dy);
-          const hitRadius = a.radius + 10;
+          const hitRadius = a.radius + 10 + (energy / 100) * 14;
 
           if (dist < hitRadius && dist > 0.001) {
             const nx = dx / dist;
@@ -639,22 +982,36 @@
             a.x = mouse.x + nx * (hitRadius + 2);
             a.y = mouse.y + ny * (hitRadius + 2);
 
+            // Use stored energy to launch the asteroid much further
+            const energyBoost = (energy / 100) * 13.5;
             const cursorSpeed = Math.min(Math.hypot(mouse.vx, mouse.vy), 28);
-            const impulse = 3.2 + cursorSpeed * 0.22;
+            const impulse = 3.2 + cursorSpeed * 0.22 + energyBoost;
+
             a.vx = nx * impulse + mouse.vx * 0.15;
             a.vy = ny * impulse + mouse.vy * 0.15;
-
-            a.spin += (Math.random() - 0.5) * 0.08;
+            a.spin += (Math.random() - 0.5) * (0.08 + (energy / 100) * 0.18);
             a.hitFlash = 1.0;
 
-            for (let k = 0; k < 8; k++) {
+            if (energy > 10) {
+              shockwaves.push({
+                x: mouse.x,
+                y: mouse.y,
+                r: 10,
+                alpha: 0.95
+              });
+              // Consume energy used for the power hit
+              energy = 0;
+            }
+
+            for (let k = 0; k < 10; k++) {
               sparks.push({
                 x: mouse.x,
                 y: mouse.y,
-                vx: nx * (Math.random() * 3 + 1) + (Math.random() - 0.5) * 3,
-                vy: ny * (Math.random() * 3 + 1) + (Math.random() - 0.5) * 3,
+                vx: nx * (Math.random() * 4 + 1) + (Math.random() - 0.5) * 3,
+                vy: ny * (Math.random() * 4 + 1) + (Math.random() - 0.5) * 3,
                 life: 1.0,
-                size: Math.random() * 2 + 1
+                size: Math.random() * 2.2 + 1,
+                ignited: energyBoost > 2
               });
             }
           }
@@ -680,6 +1037,7 @@
         drawAsteroid(a);
       }
 
+      drawBulletsAndShockwaves();
       drawMouseTrail();
 
       mouse.vx *= 0.8;
@@ -688,7 +1046,7 @@
       requestAnimationFrame(animate);
     }
 
-    animate();
+    requestAnimationFrame(animate);
   </script>
 </body>
 </html>
