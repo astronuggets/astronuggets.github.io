@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASTRONUGGETS // Mars Arrival & 3D Outpost Command</title>
+  <title>ASTRONUGGETS // Mars Outpost Command</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -696,22 +696,25 @@
     }
 
     const state = {
-      mode: 'cutscene', // 'cutscene' -> 'game'
+      mode: 'cutscene',
       cutsceneScene: 0,
       sol: 1,
       maxSols: 20,
       o2: 88,
       h2o: 85,
       food: 82,
-      power: 14,
-      maxPower: 16,
+      power: 9,
+      maxPower: 10,
       science: 0,
+      scienceGoal: 80,
       scrap: 4 + bonusScrap,
+      dose: 0,              // crew radiation dose, 100 = mission limit (game scale)
+      sheltered: false,     // sheltering this sol?
       panelsDeployed: true,
-      dustStormActive: false,
-      solarStormActive: false,
-      shieldCharged: false,
       moxieBoosted: false,
+      forecast: null,       // event that hits when you press "Advance"
+      schedule: [],
+      used: {}, levels: { habitation: 1, solar: 1, research: 1, silo: 1, comms: 1 }, crisisOpen: false, crisisDeck: [], crisesHandled: 0, shake: 0, dustUntil: 0, bs: { morale: 80, clean: 100, calib: 100, crop: 100, align: 100 }, battery: 0, batteryCap: 12, labsOff: false,             // each action can only be used once per sol
       selectedFacility: null,
       gameOver: false
     };
@@ -1424,7 +1427,57 @@
       }
     });
 
-    // ==================== FACILITY MENUS & 20-SOL GAME LOOP ====================
+    // ==================== FACILITY MENUS & 20-SOL GAME LOOP (PATCHED) ====================
+    // ---- Archived real space-weather events (NASA DONKI flare catalogue). ----
+    // This is a STATIC, ARCHIVED list, not a live feed. Check dates against
+    // https://kauai.ccmc.gsfc.nasa.gov/DONKI/ before submitting.
+    // sev = how strong the radiation hit is in the game (1-3).
+    const REAL_FLARES = [
+      { date: '2017-09-06', label: 'X9.3 solar flare', sev: 3 },
+      { date: '2017-09-10', label: 'X8.2 flare + proton storm', sev: 3 },
+      { date: '2021-10-28', label: 'X1.0 flare + ground-level proton event', sev: 2 },
+      { date: '2023-12-14', label: 'X2.8 solar flare', sev: 2 },
+      { date: '2024-02-22', label: 'X6.3 solar flare', sev: 3 },
+      { date: '2024-05-11', label: 'X5.8 flare + huge CME', sev: 3 },
+      { date: '2024-10-03', label: 'X9.0 solar flare', sev: 3 },
+      { date: '2024-10-09', label: 'X1.8 flare + CME', sev: 2 }
+    ];
+
+    const WHY = {
+      flare: 'Solar flares and CMEs blast out fast particles. On Mars there is no thick air or magnetic field to stop them, so astronauts hide behind thick walls (rock, soil or water).',
+      dust: 'Mars dust storms block sunlight, so solar panels make less power. In 2018 a global dust storm ended the Opportunity rover mission.',
+      quiet: 'Most days the Sun is calm. Even then, space radiation on Mars adds up slowly (Curiosity\u2019s RAD instrument measured about 0.7 mSv per day).'
+    };
+
+    function shuffle(a) {
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // New order every game = replayable. 6 real flares + 3 dust storms + 11 quiet days.
+    function buildSchedule() {
+      const flares = shuffle([...REAL_FLARES]).slice(0, 6).map((e) => ({ type: 'flare', ...e }));
+      const dust = [1, 2, 3].map(() => ({
+        type: 'dust', label: 'Mars dust storm', date: 'Mars mission archive (like the 2018 global storm)', sev: 0
+      }));
+      const quiet = Array.from({ length: 11 }, () => ({ type: 'quiet', label: 'Quiet Sun', date: '', sev: 0 }));
+      return shuffle([...flares, ...dust, ...quiet]);
+    }
+
+    state.schedule = buildSchedule();
+    state.forecast = state.schedule[0];
+
+    function forecastText(ev) {
+      if (!ev) return '';
+      if (ev.type === 'flare') return `\u26A0 FORECAST (real NASA DONKI event, ${ev.date}): ${ev.label}. Shelter, or keep working and take the dose?`;
+      if (ev.type === 'dust') return '\u26A0 FORECAST: Dust storm coming. Stow the panels or they get scratched!';
+      return 'FORECAST: Quiet Sun. Safe to work outside today.';
+    }
+
+    // ---- DOM refs ----
     const drawer = document.getElementById('facility-drawer');
     const drawerTag = document.getElementById('drawer-tag');
     const drawerTitle = document.getElementById('drawer-title');
@@ -1433,23 +1486,40 @@
     const drawerActions = document.getElementById('drawer-actions');
     const eventLog = document.getElementById('event-log');
 
+    // New DOSE pill in the top bar
+    const dosePill = document.createElement('div');
+    dosePill.className = 'hud-pill game-only';
+    dosePill.id = 'pill-dose';
+    dosePill.innerHTML = 'DOSE <strong id="hud-dose">0%</strong>';
+    document.getElementById('pill-food').after(dosePill);
+
     document.getElementById('close-drawer').addEventListener('click', () => {
       drawer.classList.remove('open');
       state.selectedFacility = null;
     });
 
-    function logEvent(msg) {
-      eventLog.innerHTML = `<span class="tag">SOL ${state.sol} //</span> ${msg}`;
+    function logEvent(msg, why) {
+      eventLog.innerHTML =
+        `<span class="tag">SOL ${state.sol} //</span> ${msg}` +
+        (why ? `<div style="margin-top:4px;color:#94a3b8;font-size:0.76rem;">Why? ${why}</div>` : '') +
+        `<div style="margin-top:4px;color:#475569;font-size:0.66rem;">Data: NASA DONKI (archived events), Curiosity RAD, Mars mission archive. Not live.</div>`;
+    }
+    logEvent(forecastText(state.forecast), WHY[state.forecast.type]);
+
+    function sciGain(n) {
+      // High dose = tired crew = half the science
+      return (state.dose >= 60 || state.bs.morale < 30) ? Math.floor(n / 2) : n;
     }
 
-    function updateTopHUD() {
+    function updateTopHUDBase() {
       document.getElementById('hud-sol').textContent = `${state.sol} / ${state.maxSols}`;
       document.getElementById('hud-o2').textContent = `${Math.round(state.o2)}%`;
       document.getElementById('hud-h2o').textContent = `${Math.round(state.h2o)}%`;
       document.getElementById('hud-food').textContent = `${Math.round(state.food)}%`;
       document.getElementById('hud-pwr').textContent = `${state.power} kW`;
-      document.getElementById('hud-sci').textContent = `${state.science} / 100`;
+      document.getElementById('hud-sci').textContent = `${state.science} / ${state.scienceGoal}`;
       document.getElementById('hud-scrap').textContent = `${state.scrap}`;
+      document.getElementById('hud-dose').textContent = `${Math.round(state.dose)}%`;
 
       const setStatus = (id, val) => {
         const el = document.getElementById(id);
@@ -1460,6 +1530,10 @@
       setStatus('pill-o2', state.o2);
       setStatus('pill-h2o', state.h2o);
       setStatus('pill-food', state.food);
+
+      dosePill.classList.remove('warn', 'danger');
+      if (state.dose >= 70) dosePill.classList.add('danger');
+      else if (state.dose >= 40) dosePill.classList.add('warn');
     }
 
     function openFacilityMenu(id) {
@@ -1468,7 +1542,7 @@
       renderFacilityContent(id);
     }
 
-    function renderFacilityContent(id) {
+    function renderFacilityContentBase(id) {
       drawerActions.innerHTML = '';
       drawerStats.innerHTML = '';
 
@@ -1476,198 +1550,573 @@
         drawerStats.innerHTML += `<div class="stat-box"><div class="stat-label">${label}</div><div class="stat-val">${val}</div></div>`;
       };
 
-      const addAction = (title, costText, subText, disabled, onClick) => {
+      // key = unique action id, each can be used once per sol
+      const addAction = (key, title, costText, subText, disabled, onClick) => {
+        const done = !!state.used[key];
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'action-btn';
-        btn.disabled = disabled;
+        btn.disabled = disabled || done;
         btn.innerHTML = `
-          <div class="action-btn-top"><span>${title}</span><span class="action-cost">${costText}</span></div>
+          <div class="action-btn-top"><span>${title}</span><span class="action-cost">${done ? 'DONE TODAY' : costText}</span></div>
           <div class="action-sub">${subText}</div>
         `;
         btn.addEventListener('click', () => {
-          onClick();
+          state.used[key] = true;
+          onClick(); applyLevelBonus(key);
           updateTopHUD();
           renderFacilityContent(id);
         });
         drawerActions.appendChild(btn);
       };
 
+      const noOutside = state.sheltered ? ' (locked: you are sheltering)' : '';
+
       if (id === 'habitation') {
         drawerTag.textContent = 'SECTOR 01 // LIFE SUPPORT';
         drawerTitle.textContent = 'HABITATION MODULE';
-        drawerDesc.textContent = 'Pressurized crew quarters housing MOXIE CO₂-to-O₂ electrolysis and closed-loop ECLSS water recovery.';
-        addStat('O₂ Reserves', `${Math.round(state.o2)}%`);
-        addStat('H₂O Reserves', `${Math.round(state.h2o)}%`);
+        drawerDesc.textContent = 'Where the crew lives. MOXIE is a machine that turns Mars\u2019 carbon-dioxide air into oxygen. ECLSS (life-support system) cleans and reuses water.';
+        addStat('O\u2082 Reserves', `${Math.round(state.o2)}%`);
+        addStat('H\u2082O Reserves', `${Math.round(state.h2o)}%`);
 
-        addAction('Run MOXIE O₂ Cycle', '-3 kW', 'Splits Martian CO₂ into breathable oxygen (+18% O₂)', state.power < 3, () => {
-          state.power -= 3;
-          state.o2 = Math.min(100, state.o2 + 18);
-          logEvent('MOXIE electrolyzer produced +18% breathable O₂.');
+        addAction('moxie', 'Run MOXIE O\u2082 Cycle', '-3 kW', 'Makes breathable oxygen (+14% O\u2082)', state.power < 3, () => {
+          state.power -= 3; state.o2 = Math.min(100, state.o2 + 14);
+          logEvent('MOXIE made +14% oxygen.');
         });
-
-        addAction('Purify ECLSS Water Loop', '-3 kW', 'Reclaims cabin humidity & wastewater (+18% H₂O)', state.power < 3, () => {
-          state.power -= 3;
-          state.h2o = Math.min(100, state.h2o + 18);
-          logEvent('ECLSS water processor recovered +18% H₂O reserves.');
+        addAction('water', 'Clean ECLSS Water Loop', '-3 kW', 'Recycles wastewater (+14% H\u2082O)', state.power < 3, () => {
+          state.power -= 3; state.h2o = Math.min(100, state.h2o + 14);
+          logEvent('Water recycler made +14% H\u2082O.');
         });
-
-        addAction('Energize Magnetic Shield', '-4 kW', 'Protects crew from incoming Solar Particle Events', state.power < 4 || state.shieldCharged, () => {
-          state.power -= 4;
-          state.shieldCharged = true;
-          logEvent('Magnetic radiation deflector online for this Sol.');
-        });
+        addAction('shelter', 'Storm Shelter', '-2 kW', 'Hide in the thick-walled core. Much less radiation, but no outside work or science today.',
+          state.power < 2 || state.sheltered, () => {
+            state.power -= 2; state.sheltered = true;
+            logEvent('Crew is sheltering in the shielded core today.', 'Real Mars crews would shelter behind regolith (soil) or water walls, because Mars has no global magnetic field.');
+          });
       }
 
       if (id === 'solar') {
         drawerTag.textContent = 'SECTOR 02 // POWER GRID';
         drawerTitle.textContent = 'SOLAR PANEL ARRAY';
-        drawerDesc.textContent = 'Six monocrystalline photovoltaic arrays plus baseline RTG nuclear power. Stow panels during dust storms to prevent abrasion.';
-        addStat('Available Grid', `${state.power} kW`);
-        addStat('Array State', state.panelsDeployed ? 'DEPLOYED' : 'STOWED');
+        drawerDesc.textContent = 'Solar panels make electricity (kW = kilowatts, the amount of power). Dust storms block light and scratch deployed panels.';
+        addStat('Power Now', `${state.power} kW`);
+        addStat('Panels', state.panelsDeployed ? 'DEPLOYED' : 'STOWED');
 
-        addAction(
-          state.panelsDeployed ? 'Stow Solar Panels' : 'Deploy Solar Panels',
-          '0 kW',
-          state.panelsDeployed ? 'Protects arrays during Martian dust storms' : 'Restores full solar kW generation next Sol',
-          false,
-          () => {
+        addAction('stow', state.panelsDeployed ? 'Stow Solar Panels' : 'Deploy Solar Panels', '0 kW',
+          state.panelsDeployed ? 'Safe from dust, but you make less power' : 'Full power again next sol', false, () => {
             state.panelsDeployed = !state.panelsDeployed;
             solarPanels.forEach((p) => { p.rotation.x = state.panelsDeployed ? 0.26 : 0.02; });
-            logEvent(state.panelsDeployed ? 'Solar arrays angled toward the Martian sun.' : 'Solar arrays locked flat in dust-storm safe mode.');
-          }
-        );
-
-        addAction('Brush Martian Regolith Dust', '-1 Scrap', 'Restores +4 kW immediate battery boost', state.scrap < 1, () => {
-          state.scrap -= 1;
-          state.power += 4;
-          logEvent('EVA dust cleaning restored +4 kW to the habitat bus.');
-        });
+            logEvent(state.panelsDeployed ? 'Panels deployed toward the Sun.' : 'Panels stowed flat.');
+          });
+        addAction('brush', 'Brush Dust Off Panels', '-1 Scrap', 'Spend scrap on a small boost (+2 kW)' + noOutside,
+          state.scrap < 1 || state.sheltered, () => {
+            state.scrap -= 1; state.power += 2;
+            logEvent('Dust brushed off: +2 kW.');
+          });
       }
 
       if (id === 'research') {
         drawerTag.textContent = 'SECTOR 03 // SCIENCE LAB';
-        drawerTitle.textContent = 'YELLOW RESEARCH CENTER';
-        drawerDesc.textContent = 'Analyze Jezero crater core samples and upgrade life-support efficiency toward your 100-point mission target.';
-        addStat('Mission Science', `${state.science} / 100`);
-        addStat('Spare Scrap', `${state.scrap} Units`);
+        drawerTitle.textContent = 'RESEARCH CENTER';
+        drawerDesc.textContent = `Study Jezero crater rocks. Goal: ${state.scienceGoal} science points. A high radiation dose makes the crew tired and halves science.`;
+        addStat('Science', `${state.science} / ${state.scienceGoal}`);
+        addStat('Spare Scrap', `${state.scrap}`);
 
-        addAction('Run Spectrometer Analysis', '-4 kW', 'Processes Martian soil & ice samples (+18 Science)', state.power < 4, () => {
-          state.power -= 4;
-          state.science = Math.min(100, state.science + 18);
-          logEvent('Research Center completed sample assay (+18 Science).');
-        });
-
-        addAction('Upgrade MOXIE Catalysts', '-2 Scrap', 'Permanently reduces daily O₂ drain by 35%', state.scrap < 2 || state.moxieBoosted, () => {
-          state.scrap -= 2;
-          state.moxieBoosted = true;
-          logEvent('MOXIE solid-oxide stacks upgraded! Daily O₂ consumption reduced.');
+        addAction('spectro', 'Run Spectrometer', '-4 kW', `Analyzes rock and ice (+${sciGain(9)} science)` + noOutside,
+          state.power < 4 || state.sheltered, () => {
+            state.power -= 4; state.science = Math.min(state.scienceGoal, state.science + sciGain(9));
+            logEvent('Sample analysis done.');
+          });
+        addAction('upgrade', 'Upgrade MOXIE', '-2 Scrap', 'Permanently uses less O\u2082 each sol', state.scrap < 2 || state.moxieBoosted, () => {
+          state.scrap -= 2; state.moxieBoosted = true;
+          logEvent('MOXIE upgraded: less oxygen used per sol.');
         });
       }
 
       if (id === 'silo') {
-        drawerTag.textContent = 'SECTOR 04 // HYDROPONICS';
-        drawerTitle.textContent = 'FOOD STORAGE SILO';
-        drawerDesc.textContent = 'Pressurized vertical grain silo and LED aeroponic grow depot sustaining crew nutrition.';
-        addStat('Ration Reserves', `${Math.round(state.food)}%`);
-        addStat('Silo Pressure', '101.3 kPa');
+        drawerTag.textContent = 'SECTOR 04 // FOOD';
+        drawerTitle.textContent = 'FOOD SILO';
+        drawerDesc.textContent = 'Grow plants indoors under LED lights. Lights need power, so food costs electricity.';
+        addStat('Food', `${Math.round(state.food)}%`);
+        addStat('Scrap', `${state.scrap}`);
 
-        addAction('Harvest Aeroponic Crops', '-3 kW', 'Grows nutrient-dense algae & potatoes (+20% Food)', state.power < 3, () => {
-          state.power -= 3;
-          state.food = Math.min(100, state.food + 20);
-          logEvent('Hydroponic bay harvested +20% crew food rations.');
+        addAction('harvest', 'Harvest Crops', '-3 kW', 'Potatoes and algae (+14% food)', state.power < 3, () => {
+          state.power -= 3; state.food = Math.min(100, state.food + 14);
+          logEvent('Harvest done: +14% food.');
         });
-
-        addAction('Salvage Supply Crate', '-2 kW', 'Extracts spare aluminum & electronics (+2 Scrap)', state.power < 2, () => {
-          state.power -= 2;
-          state.scrap += 2;
-          logEvent('Supply depot fabricator recycled +2 Scrap parts.');
-        });
+        addAction('salvage', 'Salvage Spare Parts', '-2 kW', 'Recycle metal (+1 scrap)' + noOutside,
+          state.power < 2 || state.sheltered, () => {
+            state.power -= 2; state.scrap += 1;
+            logEvent('Salvaged +1 scrap.');
+          });
       }
 
       if (id === 'comms') {
         drawerTag.textContent = 'SECTOR 05 // TELEMETRY';
         drawerTitle.textContent = 'DEEP-SPACE COMMS DISH';
-        drawerDesc.textContent = 'High-gain X-band dish linking Jezero Base to Earth DSN (3–22 min light-speed delay) and orbital weather satellites.';
-        addStat('Signal Delay', `${4 + (state.sol % 15)} min`);
-        addStat('Weather Forecast', state.dustStormActive ? 'DUST STORM' : (state.solarStormActive ? 'SOLAR FLARE' : 'NOMINAL'));
+        drawerDesc.textContent = 'Talks to Earth. Radio takes 3 to 22 minutes one way, depending on where Earth and Mars are, so Mission Control can\u2019t help instantly.';
+        addStat('Delay (one way)', '3\u201322 min');
+        addStat('Forecast', state.forecast ? (state.forecast.type === 'flare' ? 'SOLAR FLARE' : state.forecast.type === 'dust' ? 'DUST STORM' : 'QUIET') : '-');
 
-        addAction('Transmit Science Packet to Earth', '-3 kW', 'Downlinks telemetry for +14 Science & +1 Scrap', state.power < 3, () => {
-          state.power -= 3;
-          state.science = Math.min(100, state.science + 14);
-          state.scrap += 1;
-          logEvent('DSN packet confirmed (+14 Science, +1 Scrap grant).');
-        });
+        addAction('comms', 'Send Science to Earth', '-3 kW', `Earth checks your data (+${sciGain(6)} science, +1 scrap)` + noOutside,
+          state.power < 3 || state.sheltered, () => {
+            state.power -= 3; state.science = Math.min(state.scienceGoal, state.science + sciGain(6)); state.scrap += 1;
+            logEvent('Packet sent. Earth replies in minutes, not seconds!');
+          });
       }
     }
 
-    // ==================== ADVANCE SOL TURN LOOP ====================
+    // ---- Advance one sol ----
     const nextSolBtn = document.getElementById('next-sol-btn');
     nextSolBtn.addEventListener('click', () => {
       if (state.gameOver) return;
 
-      let alertMsg = '';
-      if (state.solarStormActive && !state.shieldCharged) {
-        state.o2 -= 12;
-        state.science = Math.max(0, state.science - 8);
-        alertMsg = 'Unshielded Solar Flare damaged electronics (-12% O₂, -8 Science)! ';
-      } else if (state.solarStormActive && state.shieldCharged) {
-        alertMsg = 'Magnetic Shield deflected the Solar Flare! ';
+      SFX.click();
+  const ev = state.forecast;
+      let msg = '';
+
+      if (ev.type === 'flare') {
+        const add = ev.sev * (state.sheltered ? 2 : 7);
+        state.dose += add;
+        if (state.sheltered) {
+          msg = `Crew sheltered from the ${ev.label}. Dose +${add}%. `;
+        } else {
+          state.science = Math.max(0, state.science - 6);
+          msg = `${ev.label} hit the crew outside! Dose +${add}%, electronics glitched (-6 science). `;
+        }
+      } else if (ev.type === 'dust') {
+        if (state.panelsDeployed) {
+          state.maxPower = Math.max(7, state.maxPower - 1);
+          msg = 'Dust scratched the deployed panels (max power -1 kW forever). ';
+        } else {
+          msg = 'Panels were safely stowed. ';
+        }
       }
 
-      if (state.dustStormActive && state.panelsDeployed) {
-        state.maxPower = Math.max(8, state.maxPower - 2);
-        alertMsg += 'Dust storm abraded deployed panels (-2 kW max grid)! ';
-      }
-
+      // New day
       state.sol += 1;
-      state.shieldCharged = false;
+      state.sheltered = false;
+      state.used = {}; state.labsOff = false;
+      state.dose += 1; // everyday background radiation on Mars
+  msg += decayBuildingStats(ev);
 
-      const o2Loss = state.moxieBoosted ? 6 : 10;
-      state.o2 = Math.max(0, state.o2 - o2Loss);
-      state.h2o = Math.max(0, state.h2o - 9);
-      state.food = Math.max(0, state.food - 8);
+      state.o2 = Math.max(0, state.o2 - (state.moxieBoosted ? 5 : 8));
+      state.h2o = Math.max(0, state.h2o - 6);
+      state.food = Math.max(0, state.food - 5);
 
-      const roll = Math.random();
-      state.dustStormActive = roll < 0.25;
-      state.solarStormActive = roll >= 0.25 && roll < 0.45;
+      const dusty = ev.type === 'dust';
+      state.power = (state.panelsDeployed && !dusty) ? Math.round(state.maxPower * (0.6 + 0.4 * state.bs.clean / 100)) : 5;
 
-      const solarOutput = state.panelsDeployed ? (state.dustStormActive ? 5 : state.maxPower) : 6;
-      state.power = solarOutput;
+      const missionOver = state.sol > state.maxSols;
+      state.forecast = state.schedule[state.sol - 1] || { type: 'quiet', label: 'Quiet Sun', sev: 0, date: '' };
 
-      if (state.dustStormActive) {
-        alertMsg += 'WARNING: Martian Dust Storm detected—stow Solar Panels!';
-      } else if (state.solarStormActive) {
-        alertMsg += 'WARNING: Solar Particle Event inbound—charge Magnetic Shield!';
-      } else if (!alertMsg) {
-        alertMsg = `Sol ${state.sol} nominal. ${state.power} kW generated across outpost grid.`;
-      }
+      if (state.forecast.type !== 'quiet') SFX.alarm();
+  if (!state.panelsDeployed && !dusty) msg += 'Reminder: panels are stowed, so power is low. Deploy them! ';
 
       updateTopHUD();
       if (state.selectedFacility) renderFacilityContent(state.selectedFacility);
-      logEvent(alertMsg);
+      logEvent(msg + forecastText(state.forecast), WHY[ev.type]);
 
       if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) {
-        endGame(false, `Critical life-support failure on Sol ${state.sol}. Keep O₂, H₂O, and Food above 0% to sustain the crew.`);
-      } else if (state.science >= 100 || state.sol >= state.maxSols) {
-        const won = state.science >= 100;
-        endGame(
-          won,
-          won
-            ? `Outstanding command! You reached ${state.science} Science Points by Sol ${state.sol} while keeping your crew alive on Mars.`
-            : `You survived all 20 Sols with ${state.science}/100 Science Points! Run again to hit the 100-point science milestone.`
-        );
+        endGame(false, `Life support failed on Sol ${state.sol}. Every system uses power, so power is the real budget.`);
+      } else if (state.dose >= 100) {
+        endGame(false, `The crew hit the radiation limit on Sol ${state.sol} and had to head home.`);
+      } else if (state.science >= state.scienceGoal) {
+        endGame(true, `You reached ${state.science} science points by Sol ${state.sol} and kept the crew safe.`);
+      } else if (missionOver) {
+        endGame(false, `You survived all ${state.maxSols} sols with ${state.science}/${state.scienceGoal} science. Try balancing power differently!`);
       } else {
-        nextSolBtn.innerHTML = `Advance to Sol ${state.sol + 1} &#9654;`;
+        if (state.sol < state.maxSols && Math.random() < 0.75) setTimeout(triggerCrisis, 450);
+    nextSolBtn.innerHTML = state.sol === state.maxSols
+          ? 'Finish Mission &#9654;'
+          : `Advance to Sol ${state.sol + 1} &#9654;`;
       }
     });
 
-    function endGame(victory, message) {
+    function endGameBase(victory, message) {
       state.gameOver = true;
-      document.getElementById('modal-tag').textContent = victory ? 'MISSION ACCOMPLISHED' : 'MISSION TERMINATED';
-      document.getElementById('modal-title').textContent = victory ? 'JEZERO BASE THRIVING' : 'LIFE SUPPORT DEPLETED';
-      document.getElementById('modal-body').textContent = message;
+      const takeaway = state.dose >= 60
+        ? 'Real-world takeaway: radiation adds up over time. That is why NASA plans shelters and limits how long crews work outside on Mars.'
+        : 'Real-world takeaway: every system on a Mars base shares one limited power supply, so something always has to wait.';
+      document.getElementById('modal-tag').textContent = victory ? 'MISSION ACCOMPLISHED' : 'MISSION OVER';
+      document.getElementById('modal-title').textContent = victory ? 'JEZERO BASE THRIVING' : 'TRY A NEW PLAN';
+      document.getElementById('modal-body').textContent = `${message} ${takeaway} (Space weather events come from NASA DONKI archives.)`;
       document.getElementById('end-modal').classList.add('active');
+    }
+
+    // ==================== COMBINED FEATURES (sound, crises, upgrades, rover, briefing) ====================
+    class SoundFX {
+      constructor() { this.ctx = null; this.muted = false; }
+      init() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      tone(f, dur = 0.1, type = 'sine', vol = 0.08) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const o = this.ctx.createOscillator(), g = this.ctx.createGain(), n = this.ctx.currentTime;
+          o.type = type; o.frequency.setValueAtTime(f, n);
+          g.gain.setValueAtTime(vol, n); g.gain.exponentialRampToValueAtTime(0.001, n + dur);
+          o.connect(g); g.connect(this.ctx.destination); o.start(); o.stop(n + dur);
+        } catch (e) {}
+      }
+      seq(arr, step, type, dur, vol) { arr.forEach((f, i) => setTimeout(() => this.tone(f, dur, type, vol), i * step)); }
+      click() { this.seq([550, 750], 40, 'sine', 0.06, 0.08); }
+      upgrade() { this.seq([440, 554, 659, 880], 55, 'triangle', 0.1, 0.09); }
+      alarm() { this.seq([820, 520], 120, 'sawtooth', 0.14, 0.07); }
+      win() { this.seq([523, 659, 784, 1046, 1318], 80, 'triangle', 0.25, 0.1); }
+      lose() { this.seq([340, 270, 200, 140], 100, 'sawtooth', 0.25, 0.1); }
+    }
+    const SFX = new SoundFX();
+
+    // ---- Unexpected situations. Each has 2 choices and every choice costs something. ----
+    const CRISES = [
+      { title: '\uD83C\uDF2A\uFE0F Dust Storm Over Jezero', badge: 'Inspired by the real 2018 Mars dust storm', vfx: 'dust',
+        desc: 'Red dust is blocking the sunlight and settling on your solar panels.',
+        fact: 'In 2018 a planet-wide dust storm ended NASA\u2019s Opportunity rover mission because its solar panels could not make enough power.',
+        choices: [
+          { label: 'Spacewalk: brush the panels', tradeoff: '-8% O\u2082 \u00B7 +3 kW \u00B7 +4% dose', msg: 'Panels brushed, but the spacewalk used air and added radiation.', fx: { o2: -8, power: 3, dose: 4 } },
+          { label: 'Wait it out on batteries', tradeoff: '-3 kW today', msg: 'The crew stayed safe inside and used battery power.', fx: { power: -3 } } ] },
+      { title: '\u2600\uFE0F Surprise Proton Burst', badge: 'Inspired by Curiosity RAD measurements', vfx: 'flare',
+        desc: 'Fast particles from the Sun are racing toward the base with almost no warning.',
+        fact: 'Curiosity\u2019s RAD instrument measures radiation on Mars, including jumps during solar storms.',
+        choices: [
+          { label: 'Keep working through it', tradeoff: '+5 science \u00B7 +10% dose', msg: 'Great data, but the crew soaked up extra radiation.', fx: { science: 5, dose: 10 } },
+          { label: 'Pump water around crew quarters', tradeoff: '-6% H\u2082O \u00B7 +2% dose', msg: 'Water is a great radiation blocker. The crew stayed safe.', fx: { h2o: -6, dose: 2 } } ] },
+      { title: '\uD83E\uDDCA Rover Finds Underground Ice', badge: 'Inspired by NASA Phoenix lander (2008)',
+        desc: 'Your rover drilled into the ground and hit solid water ice!',
+        fact: 'NASA\u2019s Phoenix lander dug up water ice near Mars\u2019 north pole in 2008. Mining ice on Mars saves hauling water from Earth.',
+        choices: [
+          { label: 'Melt it into the water tanks', tradeoff: '-2 kW \u00B7 +20% H\u2082O', msg: 'Heating the ice made fresh water.', fx: { power: -2, h2o: 20 } },
+          { label: 'Use it to flood the crop trays', tradeoff: '-2 kW \u00B7 +14% food', msg: 'The plants loved it.', fx: { power: -2, food: 14 } } ] },
+      { title: '\uD83D\uDCA8 Slow Air Leak in the Airlock', badge: 'Engineering emergency', vfx: 'shake',
+        desc: 'A seal in the airlock is hissing. Air is slowly escaping to Mars!',
+        fact: 'Mars air is less than 1% as thick as Earth\u2019s, so a habitat must hold in every bit of its own air.',
+        choices: [
+          { label: 'Patch it with spare parts', tradeoff: '-2 Scrap', msg: 'The seal is fixed with spare parts.', fx: { scrap: -2 } },
+          { label: 'Tape it and keep going', tradeoff: '-12% O\u2082', msg: 'The tape held, but you lost a lot of air.', fx: { o2: -12 } } ] },
+      { title: '\uD83D\uDCE1 Radio Blackout With Earth', badge: 'Real effect: solar conjunction',
+        desc: 'The Sun is almost exactly between Earth and Mars and is scrambling the radio signal.',
+        fact: 'About every 2 years the Sun blocks the Earth\u2013Mars radio path. Mission teams stop sending commands for about two weeks.',
+        choices: [
+          { label: 'Use the backup antenna anyway', tradeoff: '-3 kW \u00B7 +6 science', msg: 'A few packets squeaked through.', fx: { power: -3, science: 6 } },
+          { label: 'Wait and save power', tradeoff: '+2 kW \u00B7 -4 science', msg: 'Experiments paused until the link returns.', fx: { power: 2, science: -4 } } ] },
+      { title: '\uD83E\uDD54 Toxic Salts in the Soil', badge: 'Inspired by NASA Phoenix findings',
+        desc: 'Tests show the Martian soil you mixed into the crops has perchlorate salts.',
+        fact: 'NASA\u2019s Phoenix lander found perchlorates in Martian soil. They are harmful to people, so farmers there must clean soil or use clean trays.',
+        choices: [
+          { label: 'Rinse the soil with water', tradeoff: '-8% H\u2082O \u00B7 +12% food', msg: 'Rinsed soil gave a safe harvest.', fx: { h2o: -8, food: 12 } },
+          { label: 'Switch to clean grow trays', tradeoff: '-3 kW \u00B7 +8% food', msg: 'Clean trays took extra light power.', fx: { power: -3, food: 8 } } ] },
+      { title: '\uD83D\uDE99 Rover Breakdown', badge: 'Inspired by the Perseverance rover',
+        desc: 'Your rover\u2019s wheel motor just died in the middle of a sample run.',
+        fact: 'The Perseverance rover collects rock samples that scientists hope to bring back to Earth.',
+        choices: [
+          { label: 'Repair it with spare parts', tradeoff: '-2 Scrap \u00B7 +6 science', msg: 'The rover is back to work.', fx: { scrap: -2, science: 6 } },
+          { label: 'Take it apart for parts', tradeoff: '+3 Scrap \u00B7 -5 science', msg: 'Now you have parts, but fewer samples.', fx: { scrap: 3, science: -5 } } ] },
+      { title: '\uD83C\uDFCB\uFE0F Crew Needs Exercise', badge: 'Inspired by astronaut health research',
+        desc: 'The crew is feeling weak and sore. Muscles and bones get weaker off Earth.',
+        fact: 'Astronauts on the space station exercise about 2 hours a day to protect their bones and muscles.',
+        choices: [
+          { label: 'Take an exercise break', tradeoff: '-2 kW \u00B7 -3% O\u2082', msg: 'Exercise uses power and air, but the crew feels strong.', fx: { power: -2, o2: -3 } },
+          { label: 'Skip it and do experiments', tradeoff: '+7 science \u00B7 -8% food', msg: 'More science, but a tired crew eats more.', fx: { science: 7, food: -8 } } ] },
+      { title: '\u26A1 Battery Fault', badge: 'Power system emergency',
+        desc: 'A battery bank is overheating and the lights are flickering.',
+        fact: 'NASA tested a small nuclear reactor called Kilopower in 2018 as a way to power future Moon and Mars bases.',
+        choices: [
+          { label: 'Fix the wiring with spare parts', tradeoff: '-1 Scrap \u00B7 -1 kW', msg: 'The battery is stable again.', fx: { scrap: -1, power: -1 } },
+          { label: 'Shut down the lab to cool it', tradeoff: '-4 science \u00B7 +2 kW', msg: 'The lab went dark, but the battery cooled.', fx: { science: -4, power: 2 } } ] }
+    ];
+
+    function applyFx(fx) {
+      for (const [k, v] of Object.entries(fx)) {
+        if (k === 'dose') state.dose = Math.max(0, state.dose + v);
+        else if (k === 'science') state.science = Math.max(0, Math.min(state.scienceGoal, state.science + v));
+        else if (k === 'power' || k === 'scrap') state[k] = Math.max(0, state[k] + v);
+        else state[k] = Math.max(0, Math.min(100, state[k] + v));
+      }
+    }
+    function canPay(fx) {
+      return (!fx.power || fx.power >= 0 || state.power >= -fx.power) && (!fx.scrap || fx.scrap >= 0 || state.scrap >= -fx.scrap);
+    }
+
+    const crisisEl = document.createElement('div');
+    crisisEl.className = 'modal-backdrop';
+    crisisEl.innerHTML = `<div class="modal-card" style="max-width:620px;border-color:#fb923c;">
+      <div class="drawer-tag" id="cr-badge"></div>
+      <h2 id="cr-title" style="font-size:1.3rem;"></h2>
+      <p id="cr-desc" style="margin-bottom:0.6rem;"></p>
+      <p id="cr-fact" style="color:#7dd3fc;font-size:0.85rem;font-style:italic;"></p>
+      <div class="action-list" id="cr-choices" style="text-align:left;"></div></div>`;
+    document.body.appendChild(crisisEl);
+
+    function triggerCrisis() {
+      if (state.gameOver) return;
+      if (!state.crisisDeck.length) state.crisisDeck = shuffle([...CRISES]);
+      const c = state.crisisDeck.pop();
+      state.crisisOpen = true;
+      SFX.alarm();
+      document.getElementById('cr-badge').textContent = 'UNEXPECTED EVENT // ' + c.badge.toUpperCase();
+      document.getElementById('cr-title').textContent = c.title;
+      document.getElementById('cr-desc').textContent = c.desc;
+      document.getElementById('cr-fact').textContent = 'Real science: ' + c.fact;
+      const box = document.getElementById('cr-choices');
+      box.innerHTML = '';
+      c.choices.forEach((ch) => {
+        const ok = canPay(ch.fx);
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'action-btn'; b.disabled = !ok;
+        b.innerHTML = `<div class="action-btn-top"><span>${ch.label}</span></div><div class="action-cost">${ok ? ch.tradeoff : ch.tradeoff + ' (not enough!)'}</div>`;
+        b.addEventListener('click', () => {
+          SFX.click();
+          applyFx(ch.fx);
+          state.crisesHandled++;
+          if (c.vfx === 'dust') { state.dustUntil = state.sol + 1; state.bs.clean = Math.max(0, state.bs.clean - 25); }
+          if (c.vfx === 'shake') { state.shake = 0.6; state.bs.morale = Math.max(0, state.bs.morale - 10); }
+          crisisEl.classList.remove('active');
+          state.crisisOpen = false;
+          updateTopHUD();
+          if (state.selectedFacility) renderFacilityContent(state.selectedFacility);
+          logEvent(ch.msg + ' (' + ch.tradeoff + ')', c.fact);
+          if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) endGame(false, 'A crisis drained your life support on Sol ' + state.sol + '.');
+          else if (state.dose >= 100) endGame(false, 'A crisis pushed the crew past the radiation limit.');
+        });
+        box.appendChild(b);
+      });
+      crisisEl.classList.add('active');
+    }
+
+    // ---- Module upgrades (show as glowing beacons on the 3D buildings) ----
+    const UPG_TEXT = {
+      habitation: '+4% extra O\u2082 and H\u2082O from each cycle',
+      solar: '+1 kW maximum power every sol',
+      research: '+2 science from each spectrometer run',
+      silo: '+4% extra food from each harvest',
+      comms: '+2 science from each transmission'
+    };
+    const badgePos = { habitation: [-2.2, 3.9, -2.9], solar: [-0.3, 1.5, 1.6], research: [-4.1, 2.5, 2.0], silo: [5.8, 5.9, 1.8], comms: [0.7, 2.3, 4.1] };
+    const lvlBadges = {};
+    Object.entries(badgePos).forEach(([id, p]) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+      m.position.set(p[0], p[1], p[2]); m.visible = false;
+      baseGroup.add(m); lvlBadges[id] = m;
+    });
+    function refreshBadges() {
+      for (const id in lvlBadges) {
+        const L = state.levels[id], m = lvlBadges[id];
+        m.visible = L > 1; m.material.color.setHex(L >= 3 ? 0xfbbf24 : 0x38bdf8); m.scale.setScalar(L >= 3 ? 1.5 : 1);
+      }
+    }
+    function applyLevelBonusBase(key) {
+      const L = (id) => state.levels[id] - 1;
+      if (key === 'moxie') state.o2 = Math.min(100, state.o2 + 4 * L('habitation'));
+      if (key === 'water') state.h2o = Math.min(100, state.h2o + 4 * L('habitation'));
+      if (key === 'harvest') state.food = Math.min(100, state.food + 4 * L('silo'));
+      if (key === 'spectro') state.science = Math.min(state.scienceGoal, state.science + sciGain(2 * L('research')));
+      if (key === 'comms') state.science = Math.min(state.scienceGoal, state.science + sciGain(2 * L('comms')));
+    }
+    function renderFacilityContentUpg(id) {
+      renderFacilityContentBase(id);
+      const lvl = state.levels[id], max = lvl >= 3, cost = lvl + 1;
+      drawerStats.innerHTML += `<div class="stat-box"><div class="stat-label">Module Level</div><div class="stat-val">${lvl} / 3</div></div>`;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'action-btn'; b.disabled = max || state.scrap < cost;
+      b.innerHTML = `<div class="action-btn-top"><span>\uD83D\uDD27 Upgrade to Lv.${lvl + 1}</span><span class="action-cost">${max ? 'MAX LEVEL' : '-' + cost + ' Scrap'}</span></div><div class="action-sub">${UPG_TEXT[id]}</div>`;
+      b.addEventListener('click', () => {
+        state.scrap -= cost; state.levels[id]++;
+        if (id === 'solar') { state.maxPower += 1; state.power += 1; }
+        SFX.upgrade(); refreshBadges(); updateTopHUD();
+        logEvent('Upgraded to Level ' + state.levels[id] + '! ' + UPG_TEXT[id] + '.');
+        renderFacilityContent(id);
+      });
+      drawerActions.appendChild(b);
+    }
+
+    // ---- Grade on the end screen ----
+    function endGame(victory, message) {
+      let stars = 0;
+      if (victory) stars++;
+      if (state.dose < 50) stars++;
+      if (state.o2 > 30 && state.h2o > 30 && state.food > 30) stars++;
+      const ups = Object.values(state.levels).reduce((a, b) => a + b - 1, 0);
+      victory ? SFX.win() : SFX.lose();
+      endGameBase(victory, `${message} Grade: ${'\u2605'.repeat(stars)}${'\u2606'.repeat(3 - stars)}. Surprises handled: ${state.crisesHandled}. Upgrades: ${ups}.`);
+    }
+
+    // ---- Rover, weather visuals and shake ----
+    const rover = new THREE.Group();
+    const rBody = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.35, 0.6), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4, metalness: 0.4 }));
+    rBody.position.y = 0.45; rBody.castShadow = true; rover.add(rBody);
+    const rMast = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 8), new THREE.MeshStandardMaterial({ color: 0xfbbf24 }));
+    rMast.position.set(0.25, 0.85, 0); rover.add(rMast);
+    for (const wx of [-0.3, 0, 0.3]) for (const wz of [-0.34, 0.34]) {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.1, 12), new THREE.MeshStandardMaterial({ color: 0x0f172a }));
+      w.rotation.x = Math.PI / 2; w.position.set(wx, 0.16, wz); rover.add(w);
+    }
+    rover.visible = false;
+    scene.add(rover);
+
+    function updateRover(t) {
+      const game = state.mode === 'game';
+      rover.visible = game;
+      const a = t * 0.12, dx = -Math.sin(a) * 14, dz = Math.cos(a) * 10;
+      rover.position.set(Math.cos(a) * 14, 0.15, Math.sin(a) * 10);
+      rover.rotation.y = Math.atan2(dx, dz);
+      const dust = game && ((state.forecast && state.forecast.type === 'dust') || state.sol <= state.dustUntil);
+      scene.fog.density += ((dust ? 0.032 : 0.011) - scene.fog.density) * 0.03;
+      const flare = game && state.forecast && state.forecast.type === 'flare';
+      sunHalo.scale.setScalar(flare ? 1.6 + Math.sin(t * 6) * 0.3 : 1);
+      for (const id in lvlBadges) if (lvlBadges[id].visible) lvlBadges[id].position.y = badgePos[id][1] + Math.sin(t * 3) * 0.08;
+      if (state.shake > 0.01) { baseGroup.position.set((Math.random() - 0.5) * state.shake, 0, (Math.random() - 0.5) * state.shake); state.shake *= 0.92; }
+      else baseGroup.position.set(0, 0, 0);
+    }
+
+    // ---- Briefing popup + sound button ----
+    const briefEl = document.createElement('div');
+    briefEl.className = 'modal-backdrop';
+    briefEl.innerHTML = `<div class="modal-card" style="max-width:640px;text-align:left;max-height:88vh;overflow-y:auto;">
+      <div class="drawer-tag">MISSION BRIEFING</div>
+      <h2 style="font-size:1.3rem;">How to survive on Mars</h2>
+      <p style="margin-bottom:0.7rem;"><b>Goal:</b> collect 80 science points in 20 sols without running out of air, water or food, and without taking too much radiation.</p>
+      <p style="margin-bottom:0.7rem;"><b>Power is your budget.</b> You get a few kilowatts (kW) each sol (a sol is one Mars day). Everything costs power, so something always has to wait.</p>
+      <p style="margin-bottom:0.7rem;"><b>Click a building</b> to see its own health bar and commands (brush panels, calibrate, store power in the battery, divert lab power). Each action works once per sol. Spend Scrap to upgrade buildings. Press Advance to end the sol.</p>
+      <p style="margin-bottom:0.7rem;"><b>Watch the forecast.</b> Real space storms are coming. Shelter, or keep working and take the dose?</p>
+      <p style="margin-bottom:0.7rem;"><b>Surprises</b> can happen almost every sol. Both choices cost something, just like real mission planning.</p>
+      <p style="color:#94a3b8;font-size:0.82rem;margin-bottom:1.2rem;"><b>Data sources:</b> solar flare dates come from an ARCHIVED list based on NASA DONKI (not live). Dust storm, ice, soil, radiation and radio-blackout facts come from NASA missions: Phoenix, Opportunity, Curiosity RAD, Perseverance. Game numbers are simplified for play.</p>
+      <div style="text-align:center;"><button type="button" class="primary-cta" id="brief-close">Got it &#9654;</button></div></div>`;
+    document.body.appendChild(briefEl);
+    document.getElementById('brief-close').addEventListener('click', () => { SFX.click(); briefEl.classList.remove('active'); });
+
+    const topRight = document.querySelector('.top-hud .hud-group:last-child');
+    const resetBtn = document.getElementById('reset-cam-btn');
+    const helpBtn = document.createElement('button');
+    helpBtn.type = 'button'; helpBtn.className = 'nav-btn'; helpBtn.textContent = 'How To Play';
+    helpBtn.addEventListener('click', () => { SFX.click(); briefEl.classList.add('active'); });
+    const soundBtn = document.createElement('button');
+    soundBtn.type = 'button'; soundBtn.className = 'nav-btn'; soundBtn.textContent = 'Sound: On';
+    soundBtn.addEventListener('click', () => { SFX.muted = !SFX.muted; soundBtn.textContent = SFX.muted ? 'Sound: Off' : 'Sound: On'; SFX.click(); });
+    topRight.insertBefore(soundBtn, resetBtn);
+    topRight.insertBefore(helpBtn, soundBtn);
+
+    // ==================== v4: STAT BARS, BUILDING STATS & COMMANDS, BATTERY, POWER DIVERT ====================
+    const v4css = document.createElement('style');
+    v4css.textContent = `.hbar{width:58px;height:7px;border-radius:99px;background:rgba(148,163,184,.28);overflow:hidden;display:inline-block}
+      .hbar i{display:block;height:100%;border-radius:99px;background:#34d399;transition:width .3s}
+      .hbar.warn i{background:#fb923c}.hbar.danger i{background:#f87171}`;
+    document.head.appendChild(v4css);
+
+    const battPill = document.createElement('div');
+    battPill.className = 'hud-pill game-only';
+    battPill.innerHTML = 'BATT <strong id="hud-batt">0 kW</strong>';
+    document.getElementById('pill-pwr').after(battPill);
+
+    function barClass(p, invert) {
+      if (invert) return p >= 70 ? 'danger' : p >= 40 ? 'warn' : '';
+      return p <= 25 ? 'danger' : p <= 50 ? 'warn' : '';
+    }
+    function setBar(pill, pct, invert) {
+      let b = pill.querySelector('.hbar');
+      if (!b) { b = document.createElement('span'); b.innerHTML = '<i></i>'; pill.appendChild(b); }
+      pct = Math.max(0, Math.min(100, pct));
+      b.className = 'hbar ' + barClass(pct, invert);
+      b.firstChild.style.width = pct + '%';
+    }
+    function updateTopHUD() {
+      updateTopHUDBase();
+      document.getElementById('hud-batt').textContent = state.battery + ' kW';
+      setBar(document.getElementById('pill-o2'), state.o2);
+      setBar(document.getElementById('pill-h2o'), state.h2o);
+      setBar(document.getElementById('pill-food'), state.food);
+      setBar(document.getElementById('pill-pwr'), (state.power / state.maxPower) * 100);
+      setBar(battPill, (state.battery / state.batteryCap) * 100);
+      setBar(document.getElementById('pill-dose'), state.dose, true);
+      setBar(document.getElementById('hud-sci').parentElement, (state.science / state.scienceGoal) * 100);
+      const c = state.bs.clean, col = c < 40 ? 0x7c4a1d : c < 70 ? 0x2c4f9e : 0x1d4ed8;
+      solarPanels.forEach((p) => p.material.color.setHex(col));
+    }
+
+    // ---- Each building has its own health stat ----
+    const BSTATS = {
+      habitation: [{ k: 'morale', label: 'Crew Morale', note: 'Below 30% = half science' }],
+      solar: [{ k: 'clean', label: 'Panel Cleanliness', note: 'Dusty panels make less power' }],
+      research: [{ k: 'calib', label: 'Instrument Calibration', note: 'Below 40% = weak results' }],
+      silo: [{ k: 'crop', label: 'Crop Health', note: 'Below 40% = small harvests' }],
+      comms: [{ k: 'align', label: 'Antenna Alignment', note: 'Below 40% = weak signal' }]
+    };
+    function bstatBox(label, pct, note) {
+      pct = Math.round(pct);
+      return `<div class="stat-box" style="grid-column:1/-1;"><div class="stat-label">${label}: ${pct}% <span style="text-transform:none;letter-spacing:0;color:#64748b;">\u2022 ${note}</span></div>
+        <span class="hbar ${barClass(pct)}" style="width:100%;height:10px;margin-top:6px;"><i style="width:${pct}%"></i></span></div>`;
+    }
+
+    // Extra effects when an action runs (wear and low-health penalties)
+    function applyLevelBonus(key) {
+      applyLevelBonusBase(key);
+      const bs = state.bs;
+      if (key === 'spectro') { if (bs.calib < 40) state.science = Math.max(0, state.science - 4); bs.calib = Math.max(0, bs.calib - 12); }
+      if (key === 'comms') { if (bs.align < 40) state.science = Math.max(0, state.science - 3); bs.align = Math.max(0, bs.align - 10); }
+      if (key === 'harvest' && bs.crop < 40) state.food = Math.max(0, state.food - 7);
+      if (key === 'brush') bs.clean = 100;
+    }
+
+    function decayBuildingStats(ev) {
+      const bs = state.bs, dust = ev.type === 'dust';
+      bs.morale -= 4; bs.crop -= 5; bs.calib -= 2; bs.align -= 6;
+      bs.clean -= dust ? (state.panelsDeployed ? 30 : 2) : (state.panelsDeployed ? 8 : 1);
+      const names = { morale: 'Crew morale', clean: 'Panel cleanliness', calib: 'Instrument calibration', crop: 'Crop health', align: 'Antenna alignment' };
+      let w = '';
+      for (const k in bs) { bs[k] = Math.max(0, bs[k]); if (bs[k] < 40) w += `\u26A0 ${names[k]} is low. `; }
+      return w;
+    }
+
+    // ---- Building commands ----
+    function cmdBtn(id, key, title, cost, sub, disabled, fn, once = true) {
+      const done = once && !!state.used[key];
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'action-btn'; b.disabled = disabled || done;
+      b.innerHTML = `<div class="action-btn-top"><span>${title}</span><span class="action-cost">${done ? 'DONE TODAY' : cost}</span></div><div class="action-sub">${sub}</div>`;
+      b.addEventListener('click', () => {
+        if (once) state.used[key] = true;
+        SFX.click(); fn(); updateTopHUD(); renderFacilityContent(id);
+      });
+      return b;
+    }
+    function addExtras(id) {
+      const bs = state.bs;
+      const add = (b) => drawerActions.insertBefore(b, drawerActions.lastElementChild);
+      BSTATS[id].forEach((s) => { drawerStats.innerHTML += bstatBox(s.label, bs[s.k], s.note); });
+      if (state.labsOff && (id === 'research' || id === 'comms')) {
+        [...drawerActions.children].slice(0, -1).forEach((b) => { b.disabled = true; });
+      }
+      if (id === 'habitation') add(cmdBtn(id, 'movie', '\uD83C\uDFAC Crew Movie Night', '-1 kW', 'Cheers everyone up (+20% morale)', state.power < 1, () => {
+        state.power -= 1; bs.morale = Math.min(100, bs.morale + 20); logEvent('Movie night! The crew is happier.');
+      }));
+      if (id === 'research') add(cmdBtn(id, 'calib', '\uD83C\uDFAF Calibrate Instruments', '-1 kW', 'Fixes drift and wear (+40% calibration)', state.power < 1, () => {
+        state.power -= 1; bs.calib = Math.min(100, bs.calib + 40); logEvent('Instruments calibrated.');
+      }));
+      if (id === 'silo') add(cmdBtn(id, 'tend', '\uD83C\uDF31 Tend the Crops', '-1 kW, -3% H\u2082O', 'Water and prune the plants (+30% crop health)', state.power < 1, () => {
+        state.power -= 1; state.h2o = Math.max(0, state.h2o - 3); bs.crop = Math.min(100, bs.crop + 30); logEvent('Crops tended and healthy.');
+      }));
+      if (id === 'comms') add(cmdBtn(id, 'align', '\uD83D\uDCE1 Realign Antenna', '-1 kW', 'Point the dish at Earth again (+45% alignment)', state.power < 1, () => {
+        state.power -= 1; bs.align = Math.min(100, bs.align + 45); logEvent('Antenna realigned with Earth.');
+      }));
+      if (id === 'solar') {
+        add(cmdBtn(id, 'charge', '\uD83D\uDD0B Charge Battery', '-3 kW', 'Save power for later. You lose 1 kW in the conversion (+2 stored).',
+          state.power < 3 || state.battery >= state.batteryCap, () => {
+            state.power -= 3; state.battery = Math.min(state.batteryCap, state.battery + 2); logEvent('Stored power in the battery.');
+          }, false));
+        add(cmdBtn(id, 'discharge', '\u26A1 Use Battery Power', '+' + state.battery + ' kW', 'Move stored power into today\u2019s budget.', state.battery <= 0, () => {
+          const n = state.battery; state.power += n; state.battery = 0; logEvent('Battery gave +' + n + ' kW.');
+        }, false));
+        add(cmdBtn(id, 'divert', '\u21AA\uFE0F Divert Lab Power', '+3 kW', 'Shut down the Research Center and Comms Dish today (no science) and send their power to the base.', state.labsOff, () => {
+          state.labsOff = true; state.power += 3;
+          logEvent('Lab power diverted: +3 kW, but no science today.', 'Real bases share one power supply, so engineers decide which systems get power first.');
+        }));
+      }
+    }
+    function renderFacilityContent(id) {
+      renderFacilityContentUpg(id);
+      addExtras(id);
     }
 
     window.addEventListener('resize', () => {
@@ -1781,6 +2230,7 @@
         }
       }
 
+      updateRover(t);
       // Rotate comms antenna in gameplay mode
       antenna.rotation.y = t * 0.8;
 
