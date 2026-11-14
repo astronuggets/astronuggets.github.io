@@ -52,6 +52,26 @@
       -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
     }
 
+    /* Smooth Page Transition Curtain */
+    .page-transition {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #020307;
+      opacity: 1;
+      pointer-events: none;
+      transition: opacity 0.65s ease-in-out;
+    }
+
+    .page-transition.loaded {
+      opacity: 0;
+    }
+
+    .page-transition.leaving {
+      opacity: 1;
+      pointer-events: all;
+    }
+
     /* Top-Right Energy HUD */
     .energy-hud {
       position: fixed;
@@ -374,6 +394,7 @@
   </style>
 </head>
 <body>
+  <div class="page-transition" id="page-transition"></div>
   <canvas id="space"></canvas>
   <div class="hud-grid"></div>
 
@@ -399,8 +420,7 @@
     <div class="scanline"></div>
 
     <div class="hero-actions">
-      <!-- Replace href="#game-link" with your actual game URL when ready -->
-      <a href="/game" class="launch-btn" rel="noopener">
+      <a href="/game" class="launch-btn" id="play-game-btn">
         Play Game &#9654;
       </a>
       <a href="#mission-briefing" class="secondary-btn">
@@ -461,6 +481,34 @@
   </footer>
 
   <script>
+    // ==================== SMOOTH PAGE TRANSITION ====================
+    const transitionEl = document.getElementById('page-transition');
+    const playGameBtn = document.getElementById('play-game-btn');
+
+    requestAnimationFrame(() => {
+      transitionEl.classList.add('loaded');
+    });
+
+    if (playGameBtn) {
+      playGameBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const destination = playGameBtn.getAttribute('href');
+        transitionEl.classList.remove('loaded');
+        transitionEl.classList.add('leaving');
+        setTimeout(() => {
+          window.location.href = destination;
+        }, 650);
+      });
+    }
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) {
+        transitionEl.classList.remove('leaving');
+        transitionEl.classList.add('loaded');
+      }
+    });
+
+    // ==================== SPACE CANVAS & ASTEROID ENGINE ====================
     const canvas = document.getElementById('space');
     const ctx = canvas.getContext('2d');
     const energyFillEl = document.getElementById('energy-fill');
@@ -478,12 +526,11 @@
     const STAR_COUNT = 160;
     const ASTEROID_COUNT = 22;
 
-    // Energy & Weapon State
-    let energy = 0; // 0 to 100
+    let energy = 0;
     let isCharging = false;
     let isSpaceHeld = false;
     let lastShotTime = 0;
-    const SHOT_INTERVAL_MS = 500; // Fires every 0.5 seconds while Space is held
+    const SHOT_INTERVAL_MS = 500;
 
     const mouse = {
       x: -9999,
@@ -524,7 +571,6 @@
       }
     }
 
-    // Hold Left-Click to charge energy bar
     window.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       if (e.target.closest('a, button')) return;
@@ -536,7 +582,6 @@
       isCharging = false;
     });
 
-    // Hold Spacebar to ignite trail and shoot bullets every 0.5s
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !e.target.matches('input, textarea')) {
         e.preventDefault();
@@ -555,7 +600,6 @@
       isSpaceHeld = false;
     });
 
-    // Track mouse movement & direction vector
     window.addEventListener('mousemove', (e) => {
       if (!mouse.active) {
         mouse.px = e.clientX;
@@ -608,7 +652,6 @@
       mouse.y = -9999;
     });
 
-    // Background twinkling starfield
     for (let i = 0; i < STAR_COUNT; i++) {
       stars.push({
         x: Math.random() * width,
@@ -619,7 +662,6 @@
       });
     }
 
-    // Procedural jagged 3D-shaded asteroid generator spawning from ALL 4 sides
     function createAsteroid(spawnOffscreen = false) {
       const radius = Math.random() * 26 + 11;
       const vertices = Math.floor(Math.random() * 6) + 9;
@@ -645,37 +687,31 @@
       let x, y, vx, vy;
 
       if (!spawnOffscreen) {
-        // Initial scatter across viewport moving in random directions
         x = Math.random() * width;
         y = Math.random() * height;
         const angle = Math.random() * Math.PI * 2;
         vx = Math.cos(angle) * baseSpeed;
         vy = Math.sin(angle) * baseSpeed;
       } else {
-        // Pick one of 4 sides: 0 = left, 1 = right, 2 = top, 3 = bottom
         const side = Math.floor(Math.random() * 4);
-        const spread = (Math.random() - 0.5) * 1.1; // +/- ~31 deg inward angle
+        const spread = (Math.random() - 0.5) * 1.1;
 
         if (side === 0) {
-          // Left edge -> moving right
           x = -margin;
           y = Math.random() * height;
           vx = Math.cos(spread) * baseSpeed;
           vy = Math.sin(spread) * baseSpeed;
         } else if (side === 1) {
-          // Right edge -> moving left
           x = width + margin;
           y = Math.random() * height;
           vx = -Math.cos(spread) * baseSpeed;
           vy = Math.sin(spread) * baseSpeed;
         } else if (side === 2) {
-          // Top edge -> moving down
           x = Math.random() * width;
           y = -margin;
           vx = Math.sin(spread) * baseSpeed;
           vy = Math.cos(spread) * baseSpeed;
         } else {
-          // Bottom edge -> moving up
           x = Math.random() * width;
           y = height + margin;
           vx = Math.sin(spread) * baseSpeed;
@@ -787,7 +823,6 @@
         }
       }
 
-      // Compact charging ring around cursor (5px to 11px)
       if (mouse.active && (isCharging || energy > 0)) {
         const radius = 5 + (energy / 100) * 6;
         ctx.save();
@@ -801,7 +836,6 @@
         ctx.restore();
       }
 
-      // Sparks
       for (let i = sparks.length - 1; i >= 0; i--) {
         const sp = sparks[i];
         sp.x += sp.vx;
