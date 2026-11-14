@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ASTRONUGGETS // Mission Briefing Cutscene</title>
+  <title>ASTRONUGGETS // 3D Mars Outpost Command</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,563 +18,1294 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background: radial-gradient(circle at 50% 35%, #0c1326 0%, #05070f 65%, #020307 100%);
+      background: #04060e;
       font-family: 'Space Grotesk', sans-serif;
       color: #f8fafc;
+      user-select: none;
     }
 
-    /* Smooth Page Transition Curtain */
-    .page-transition {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      background: #020307;
-      opacity: 1;
-      pointer-events: none;
-      transition: opacity 0.7s ease-in-out;
-    }
-
-    .page-transition.loaded {
-      opacity: 0;
-    }
-
-    .page-transition.leaving {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* Starfield & Approach Canvas */
-    canvas#cutscene-canvas {
+    #viewport {
       position: fixed;
       inset: 0;
       width: 100%;
       height: 100%;
-      display: block;
       z-index: 1;
+      cursor: grab;
     }
 
-    /* Matching Futuristic HUD Grid Overlay */
-    .hud-grid {
+    #viewport:active {
+      cursor: grabbing;
+    }
+
+    /* Top Telemetry & Resource HUD */
+    .top-hud {
       position: fixed;
-      inset: 0;
-      z-index: 2;
+      top: 1rem;
+      left: 1rem;
+      right: 1rem;
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
       pointer-events: none;
-      background-image:
-        linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
-      background-size: 64px 64px;
-      mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
-      -webkit-mask-image: radial-gradient(circle at center, black 35%, transparent 85%);
     }
 
-    /* Main Cutscene Layout */
-    .cutscene-stage {
-      position: relative;
-      z-index: 3;
-      width: 100%;
-      height: 100%;
+    .hud-group {
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: center;
-      padding: 2rem 1.5rem;
+      gap: 0.55rem;
+      pointer-events: auto;
     }
 
-    /* Top Bar */
-    .top-bar {
-      width: 100%;
-      max-width: 1120px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .feed-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: #38bdf8;
-      background: rgba(15, 23, 42, 0.65);
+    .hud-pill {
+      background: rgba(11, 17, 32, 0.82);
       border: 1px solid rgba(56, 189, 248, 0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 0.5rem 1.1rem;
-      border-radius: 999px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 12px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
     }
 
-    .pulse-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #38bdf8;
-      box-shadow: 0 0 10px #38bdf8;
-      animation: blink 1.2s infinite;
-    }
-
-    .home-link {
+    .hud-pill strong {
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.82rem;
+      color: #38bdf8;
+    }
+
+    .hud-pill.warn strong { color: #fb923c; }
+    .hud-pill.danger strong { color: #f87171; }
+    .hud-pill.good strong { color: #34d399; }
+
+    .nav-btn {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
       font-weight: 700;
-      letter-spacing: 0.16em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       text-decoration: none;
       color: #e0f2fe;
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      padding: 0.5rem 1.15rem;
-      border-radius: 999px;
-      transition: border-color 0.2s ease, background 0.2s ease;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      padding: 0.52rem 0.95rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .home-link:hover {
+    .nav-btn:hover {
       border-color: #38bdf8;
-      background: rgba(30, 41, 59, 0.85);
+      background: rgba(30, 41, 59, 0.95);
+      transform: translateY(-1px);
     }
 
-    /* Center Transmission Card */
-    .transmission-card {
-      width: 100%;
-      max-width: 780px;
-      background: rgba(11, 17, 32, 0.76);
-      border: 1px solid rgba(56, 189, 248, 0.28);
-      border-radius: 22px;
-      padding: 2.5rem 2.25rem;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
-      text-align: center;
+    .cad-upload-btn {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(129, 140, 248, 0.22));
+      border-color: #38bdf8;
+      color: #bae6fd;
     }
 
-    .phase-badge {
-      display: inline-block;
-      font-size: 0.75rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: #38bdf8;
-      background: rgba(15, 23, 42, 0.7);
-      border: 1px solid rgba(56, 189, 248, 0.4);
-      padding: 0.42rem 1.15rem;
-      border-radius: 999px;
-      margin-bottom: 1rem;
-      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
-    }
-
-    .precharge-banner {
+    /* Hover Tooltip for 3D Buildings */
+    #hover-tag {
+      position: fixed;
+      z-index: 20;
+      pointer-events: none;
       display: none;
+      background: rgba(8, 13, 26, 0.92);
+      border: 1px solid #38bdf8;
+      border-radius: 10px;
+      padding: 0.45rem 0.8rem;
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      color: #34d399;
-      margin-bottom: 0.85rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      color: #ffffff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+      transform: translate(14px, -50%);
     }
 
-    .scene-title {
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: clamp(1.5rem, 4vw, 2.75rem);
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      line-height: 1.15;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #ffffff 15%, #bae6fd 50%, #38bdf8 80%, #818cf8 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      filter: drop-shadow(0 0 24px rgba(56, 189, 248, 0.35));
+    #hover-tag span {
+      display: block;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      color: #7dd3fc;
+      margin-top: 2px;
     }
 
-    .scanline {
-      width: min(320px, 65%);
-      height: 2px;
-      margin: 0 auto 1.5rem;
-      background: linear-gradient(90deg, transparent, #38bdf8, #818cf8, transparent);
-      box-shadow: 0 0 14px #38bdf8;
-      opacity: 0.85;
-    }
-
-    .dialogue-box {
-      min-height: 105px;
-      font-size: clamp(1rem, 1.8vw, 1.16rem);
-      line-height: 1.75;
-      color: #cbd5e1;
-      max-width: 640px;
-      margin: 0 auto;
-    }
-
-    .cursor-bar {
-      display: inline-block;
-      width: 3px;
-      height: 1.1em;
-      background: #38bdf8;
-      vertical-align: middle;
-      margin-left: 4px;
-      box-shadow: 0 0 8px #38bdf8;
-      animation: blink 0.8s infinite;
-    }
-
-    /* Bottom Navigation & Next Button */
-    .controls-bar {
-      width: 100%;
-      max-width: 780px;
+    /* Slide-in Facility Command Menu */
+    .facility-drawer {
+      position: fixed;
+      top: 5.1rem;
+      right: 1rem;
+      bottom: 5.4rem;
+      width: min(390px, calc(100vw - 2rem));
+      z-index: 15;
+      background: rgba(9, 14, 28, 0.88);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      border-radius: 20px;
+      padding: 1.35rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 1.15rem;
+      justify-content: space-between;
+      transform: translateX(115%);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-y: auto;
     }
 
-    .step-dots {
+    .facility-drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
       display: flex;
-      align-items: center;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(56, 189, 248, 0.22);
+      padding-bottom: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .drawer-tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: #38bdf8;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .drawer-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.15rem;
+      color: #ffffff;
+    }
+
+    .close-drawer {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #e2e8f0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .close-drawer:hover {
+      border-color: #38bdf8;
+      color: #38bdf8;
+    }
+
+    .drawer-desc {
+      font-size: 0.9rem;
+      line-height: 1.55;
+      color: #cbd5e1;
+      margin-bottom: 1rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .stat-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+    }
+
+    .stat-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+    }
+
+    .stat-val {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      color: #f8fafc;
+      margin-top: 0.2rem;
+    }
+
+    .action-list {
+      display: flex;
+      flex-direction: column;
       gap: 0.65rem;
     }
 
-    .dot {
-      width: 32px;
-      height: 4px;
-      border-radius: 999px;
-      background: rgba(148, 163, 184, 0.28);
-      transition: all 0.3s ease;
+    .action-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 12px;
+      padding: 0.75rem 0.95rem;
+      color: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .dot.active {
-      background: linear-gradient(90deg, #38bdf8, #818cf8);
-      box-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
-      width: 48px;
+    .action-btn:hover:not(:disabled) {
+      border-color: #38bdf8;
+      background: rgba(30, 41, 59, 0.95);
+      transform: translateY(-1px);
     }
 
-    .dot.completed {
-      background: rgba(56, 189, 248, 0.55);
+    .action-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
     }
 
-    .button-row {
+    .action-btn-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.78rem;
+      color: #bae6fd;
+      margin-bottom: 0.25rem;
+    }
+
+    .action-cost {
+      color: #fb923c;
+      font-size: 0.72rem;
+    }
+
+    .action-sub {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Bottom Controls & Event Ticker */
+    .bottom-hud {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      right: 1rem;
+      z-index: 10;
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
+      pointer-events: none;
     }
 
-    .next-btn {
-      display: inline-flex;
+    .event-log {
+      pointer-events: auto;
+      background: rgba(11, 17, 32, 0.84);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 0.65rem 1rem;
+      font-size: 0.84rem;
+      color: #e0f2fe;
+      max-width: 660px;
+      flex: 1;
+    }
+
+    .event-log span.tag {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.68rem;
+      color: #fb923c;
+      margin-right: 0.5rem;
+      letter-spacing: 0.1em;
+    }
+
+    .bottom-actions {
+      pointer-events: auto;
+      display: flex;
       align-items: center;
       gap: 0.65rem;
-      padding: 0.95rem 2.3rem;
-      border-radius: 999px;
-      border: none;
+    }
+
+    .next-sol-btn {
       font-family: 'Orbitron', sans-serif;
       font-weight: 700;
-      font-size: 0.92rem;
+      font-size: 0.82rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      text-decoration: none;
       color: #030712;
       background: linear-gradient(135deg, #38bdf8, #818cf8);
-      box-shadow: 0 0 28px rgba(56, 189, 248, 0.48);
+      border: none;
+      border-radius: 999px;
+      padding: 0.82rem 1.65rem;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.55);
       cursor: pointer;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .next-btn:hover {
+    .next-sol-btn:hover {
       transform: translateY(-2px) scale(1.03);
-      box-shadow: 0 0 42px rgba(56, 189, 248, 0.8);
+      box-shadow: 0 0 38px rgba(56, 189, 248, 0.85);
     }
 
-    .skip-btn {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.92rem 1.7rem;
-      border-radius: 999px;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 700;
-      font-size: 0.8rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      text-decoration: none;
-      color: #e0f2fe;
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid rgba(56, 189, 248, 0.4);
+    /* End-of-Mission Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(2, 4, 10, 0.85);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      cursor: pointer;
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
     }
 
-    .skip-btn:hover {
-      border-color: #38bdf8;
-      background: rgba(30, 41, 59, 0.85);
-      transform: translateY(-2px);
+    .modal-backdrop.active {
+      display: flex;
     }
 
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
+    .modal-card {
+      max-width: 520px;
+      width: 100%;
+      background: rgba(11, 17, 32, 0.95);
+      border: 1px solid #38bdf8;
+      border-radius: 22px;
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8);
+    }
+
+    .modal-card h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.6rem;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .modal-card p {
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
     }
   </style>
+
+  <!-- Three.js ES Module Import Map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
-  <div class="page-transition" id="page-transition"></div>
-  <canvas id="cutscene-canvas"></canvas>
-  <div class="hud-grid"></div>
+  <div id="viewport"></div>
+  <div id="hover-tag">HABITATION MODULE<span>Click to open control menu</span></div>
 
-  <main class="cutscene-stage">
-    <!-- Top Header -->
-    <div class="top-bar">
-      <div class="feed-status">
-        <span class="pulse-dot"></span>
-        <span>ASTRONUGGETS // TRANSMISSION</span>
-      </div>
-      <a href="index.html" class="home-link" id="home-link">&#8592; Home</a>
+  <!-- Top Resource & Navigation HUD -->
+  <header class="top-hud">
+    <div class="hud-group">
+      <a href="/" class="nav-btn">&#8592; Home</a>
+      <div class="hud-pill">SOL <strong id="hud-sol">1 / 20</strong></div>
+      <div class="hud-pill" id="pill-o2">O₂ <strong id="hud-o2">88%</strong></div>
+      <div class="hud-pill" id="pill-h2o">H₂O <strong id="hud-h2o">85%</strong></div>
+      <div class="hud-pill" id="pill-food">FOOD <strong id="hud-food">82%</strong></div>
+      <div class="hud-pill" id="pill-pwr">POWER <strong id="hud-pwr">14 kW</strong></div>
+      <div class="hud-pill good">SCIENCE <strong id="hud-sci">0 / 100</strong></div>
+      <div class="hud-pill">SCRAP <strong id="hud-scrap">4</strong></div>
     </div>
 
-    <!-- Center Cutscene Briefing Box -->
-    <section class="transmission-card" aria-live="polite">
-      <div class="phase-badge" id="phase-badge">TRANSMISSION 01 // ARRIVAL</div>
-      <div class="precharge-banner" id="precharge-banner"></div>
-      <h1 class="scene-title" id="scene-title">MARS INSERTION // JEZERO SECTOR</h1>
-      <div class="scanline"></div>
-      <p class="dialogue-box">
-        <span id="dialogue-text"></span><span class="cursor-bar"></span>
-      </p>
-    </section>
-
-    <!-- Bottom Progress & Next Button -->
-    <div class="controls-bar">
-      <div class="step-dots" id="step-dots">
-        <div class="dot active"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-      </div>
-
-      <div class="button-row">
-        <button type="button" class="next-btn" id="next-btn">
-          Next &#9654;
-        </button>
-        <a href="play.html" class="skip-btn" id="skip-link">
-          Skip Intro
-        </a>
-      </div>
+    <div class="hud-group">
+      <button type="button" class="nav-btn" id="reset-cam-btn">Reset View</button>
+      <label class="nav-btn cad-upload-btn" for="cad-file-input" title="Import .glb, .gltf, or .stl CAD model">
+        + Load CAD (.glb / .stl)
+      </label>
+      <input type="file" id="cad-file-input" accept=".glb,.gltf,.stl" style="display:none" />
     </div>
-  </main>
+  </header>
 
-  <script>
-    // ==================== GAME DESTINATION URL ====================
-    const GAME_DESTINATION_URL = 'play.html';
+  <!-- Interactive Slide-In Facility Menu (Opens when clicking any 3D building) -->
+  <aside class="facility-drawer" id="facility-drawer" aria-live="polite">
+    <div>
+      <div class="drawer-header">
+        <div>
+          <div class="drawer-tag" id="drawer-tag">SECTOR 01 // LIFE SUPPORT</div>
+          <h2 class="drawer-title" id="drawer-title">HABITATION MODULE</h2>
+        </div>
+        <button type="button" class="close-drawer" id="close-drawer" aria-label="Close Menu">&#10005;</button>
+      </div>
+      <p class="drawer-desc" id="drawer-desc"></p>
+      <div class="stat-grid" id="drawer-stats"></div>
+      <div class="action-list" id="drawer-actions"></div>
+    </div>
 
-    const transitionEl = document.getElementById('page-transition');
-    const homeLink = document.getElementById('home-link');
-    const canvas = document.getElementById('cutscene-canvas');
-    const ctx = canvas.getContext('2d');
+    <div style="margin-top: 1.2rem; font-size: 0.75rem; color: #64748b; text-align: center;">
+      Tip: Hold Right-Click or Left-Click &amp; Drag to orbit 360° &bull; Scroll to Zoom
+    </div>
+  </aside>
 
-    const phaseBadgeEl = document.getElementById('phase-badge');
-    const prechargeBannerEl = document.getElementById('precharge-banner');
-    const sceneTitleEl = document.getElementById('scene-title');
-    const dialogueTextEl = document.getElementById('dialogue-text');
-    const nextBtn = document.getElementById('next-btn');
-    const skipLink = document.getElementById('skip-link');
-    const dots = document.querySelectorAll('.dot');
+  <!-- Bottom Mission Log & Advance Sol Button -->
+  <footer class="bottom-hud">
+    <div class="event-log" id="event-log">
+      <span class="tag">COMMS //</span> Drag with Right-Click or Left-Click to inspect all sides of Jezero Base. Click any facility to manage systems!
+    </div>
+    <div class="bottom-actions">
+      <button type="button" class="next-sol-btn" id="next-sol-btn">
+        Advance to Sol 2 &#9654;
+      </button>
+    </div>
+  </footer>
 
-    skipLink.href = GAME_DESTINATION_URL;
+  <!-- End of Mission Debrief Modal -->
+  <div class="modal-backdrop" id="end-modal">
+    <div class="modal-card">
+      <div class="drawer-tag" id="modal-tag">MISSION DEBRIEF</div>
+      <h2 id="modal-title">MISSION COMPLETE</h2>
+      <p id="modal-body"></p>
+      <button type="button" class="next-sol-btn" onclick="window.location.reload()">
+        Run New Simulation &#8635;
+      </button>
+    </div>
+  </div>
 
-    // Check if player charged deflector energy on index.html
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+
+    // ==================== GAME SIMULATION STATE ====================
     const carriedEnergy = Number(sessionStorage.getItem('astronuggets_deflector_energy') || 0);
-    if (carriedEnergy > 0) {
-      prechargeBannerEl.style.display = 'block';
-      prechargeBannerEl.textContent = `DEFLECTOR CAPACITOR CARRIED OVER: ${carriedEnergy}% (+${carriedEnergy >= 50 ? '2' : '1'} BONUS SCRAP)`;
-    }
+    const bonusScrap = carriedEnergy >= 50 ? 2 : (carriedEnergy > 0 ? 1 : 0);
 
-    // Smooth fade-in on arrival
-    requestAnimationFrame(() => {
-      transitionEl.classList.add('loaded');
+    const state = {
+      sol: 1,
+      maxSols: 20,
+      o2: 88,
+      h2o: 85,
+      food: 82,
+      power: 14,
+      maxPower: 16,
+      science: 0,
+      scrap: 4 + bonusScrap,
+      panelsDeployed: true,
+      dustStormActive: false,
+      solarStormActive: false,
+      shieldCharged: false,
+      moxieBoosted: false,
+      eclssOptimized: false,
+      selectedFacility: null,
+      gameOver: false
+    };
+
+    // ==================== THREE.JS SCENE, CAMERA & ORBIT CONTROLS ====================
+    const container = document.getElementById('viewport');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x060914);
+    scene.fog = new THREE.FogExp2(0x2a1208, 0.011);
+
+    const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 300);
+    const DEFAULT_CAM_POS = new THREE.Vector3(-12, 13.5, 17.5);
+    const DEFAULT_TARGET = new THREE.Vector3(0, 1.2, 0);
+    camera.position.copy(DEFAULT_CAM_POS);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.15;
+    container.appendChild(renderer.domElement);
+
+    // OrbitControls: Hold Right-Click OR Left-Click & Drag to rotate around all sides!
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.copy(DEFAULT_TARGET);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.maxPolarAngle = Math.PI * 0.47; // Prevent camera from clipping under Mars ground
+    controls.minDistance = 6;
+    controls.maxDistance = 42;
+    controls.mouseButtons = {
+      LEFT: THREE.MOUSE.ROTATE,
+      MIDDLE: THREE.MOUSE.DOLLY,
+      RIGHT: THREE.MOUSE.ROTATE
+    };
+
+    // Prevent browser right-click context menu so right-click drag is seamless
+    renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    document.getElementById('reset-cam-btn').addEventListener('click', () => {
+      camera.position.copy(DEFAULT_CAM_POS);
+      controls.target.copy(DEFAULT_TARGET);
+      controls.update();
     });
 
-    function navigateWithFade(url) {
-      if (!url || url.startsWith('#')) {
-        window.location.href = url;
-        return;
-      }
-      transitionEl.classList.remove('loaded');
-      transitionEl.classList.add('leaving');
-      setTimeout(() => {
-        window.location.href = url;
-      }, 650);
+    // ==================== LIGHTING & MARTIAN SUN ====================
+    const ambientLight = new THREE.HemisphereLight(0x93c5fd, 0x7c2d12, 0.75);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xffedd5, 2.4);
+    sunLight.position.set(22, 24, -18);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 2;
+    sunLight.shadow.camera.far = 75;
+    const d = 18;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    // Glowing Martian Sun Sphere in the Sky
+    const sunMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(2.2, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0xfef08a })
+    );
+    sunMesh.position.set(48, 34, -55);
+    scene.add(sunMesh);
+
+    const sunHalo = new THREE.Mesh(
+      new THREE.SphereGeometry(4.2, 24, 24),
+      new THREE.MeshBasicMaterial({ color: 0xfb923c, transparent: true, opacity: 0.25 })
+    );
+    sunHalo.position.copy(sunMesh.position);
+    scene.add(sunHalo);
+
+    // Starfield
+    const starGeo = new THREE.BufferGeometry();
+    const starCount = 900;
+    const starPositions = new Float32Array(starCount * 3);
+    for (let i = 0; i < starCount; i++) {
+      const r = 95 + Math.random() * 50;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.random() * Math.PI * 0.45;
+      starPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+      starPositions[i * 3 + 1] = r * Math.cos(phi) + 8;
+      starPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
     }
+    starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starField = new THREE.Points(
+      starGeo,
+      new THREE.PointsMaterial({ color: 0xe0f2fe, size: 0.45, transparent: true, opacity: 0.85 })
+    );
+    scene.add(starField);
 
-    homeLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigateWithFade(homeLink.getAttribute('href'));
-    });
-
-    skipLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      navigateWithFade(GAME_DESTINATION_URL);
-    });
-
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) {
-        transitionEl.classList.remove('leaving');
-        transitionEl.classList.add('loaded');
+    // ==================== PROCEDURAL MARTIAN TERRAIN ====================
+    const terrainGeo = new THREE.PlaneGeometry(180, 180, 72, 72);
+    terrainGeo.rotateX(-Math.PI / 2);
+    const posAttr = terrainGeo.attributes.position;
+    for (let i = 0; i < posAttr.count; i++) {
+      const x = posAttr.getX(i);
+      const z = posAttr.getZ(i);
+      const distFromBase = Math.hypot(x, z);
+      // Keep flat under the baseplate (radius < 12), add rolling craters/dunes outside
+      if (distFromBase > 11.5) {
+        const hill = Math.sin(x * 0.14) * Math.cos(z * 0.14) * 1.1 + Math.sin(x * 0.35 + z * 0.25) * 0.35;
+        posAttr.setY(i, Math.max(-0.4, hill * Math.min(1, (distFromBase - 11.5) / 10)));
       }
-    });
-
-    let width, height;
-    function resize() {
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resize);
-    resize();
+    terrainGeo.computeVertexNormals();
 
-    const stars = Array.from({ length: 160 }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      r: Math.random() * 1.5 + 0.3,
-      alpha: Math.random() * 0.8 + 0.2,
-      twinkle: (Math.random() - 0.5) * 0.015,
-      speed: Math.random() * 0.4 + 0.1
-    }));
-
-    const scenes = [
-      {
-        badge: 'TRANSMISSION 01 // ORBITAL ARRIVAL',
-        title: 'MARS INSERTION // JEZERO SECTOR',
-        text: 'Welcome, Cadet. Your vessel has cleared the outer asteroid belt and entered orbit above Mars. One-way signal delay to Earth varies from 3 to 22 minutes—command authority now rests with you.',
-        planetRadiusFactor: 0.19
-      },
-      {
-        badge: 'TRANSMISSION 02 // REAL NASA TELEMETRY',
-        title: 'SOLAR STORMS & RESOURCE DRAIN',
-        text: 'Each Martian day—called a Sol—depletes O₂, H₂O, power, and rations. Incoming Solar Particle Events and dust storms will force tough kilowatt trade-offs across MOXIE, ECLSS water recycling, and magnetic shielding.',
-        planetRadiusFactor: 0.27
-      },
-      {
-        badge: 'TRANSMISSION 03 // READY FOR TOUCHDOWN',
-        title: 'JUNIOR ASTRONAUT MISSION TRAINER',
-        text: 'Step into the command console, dispatch your crew through pressurized tunnels and EVA airlocks, and survive 20 Sols on the Martian frontier.',
-        planetRadiusFactor: 0.35
-      }
-    ];
-
-    let currentScene = 0;
-    let charIndex = 0;
-    let isTyping = false;
-    let typeInterval = null;
-    let currentPlanetR = 80;
-    let targetPlanetR = 140;
-
-    function updateDots(index) {
-      dots.forEach((dot, i) => {
-        dot.classList.remove('active', 'completed');
-        if (i < index) dot.classList.add('completed');
-        if (i === index) dot.classList.add('active');
-      });
-    }
-
-    function loadScene(index) {
-      currentScene = index;
-      const scene = scenes[index];
-
-      phaseBadgeEl.textContent = scene.badge;
-      sceneTitleEl.textContent = scene.title;
-      dialogueTextEl.textContent = '';
-      targetPlanetR = Math.min(width, height) * scene.planetRadiusFactor;
-      updateDots(index);
-
-      if (index === scenes.length - 1) {
-        nextBtn.innerHTML = 'Launch Console &#9654;';
-      } else {
-        nextBtn.innerHTML = 'Next &#9654;';
-      }
-
-      clearInterval(typeInterval);
-      charIndex = 0;
-      isTyping = true;
-
-      typeInterval = setInterval(() => {
-        if (charIndex < scene.text.length) {
-          dialogueTextEl.textContent += scene.text[charIndex];
-          charIndex++;
-        } else {
-          clearInterval(typeInterval);
-          isTyping = false;
-        }
-      }, 22);
-    }
-
-    nextBtn.addEventListener('click', () => {
-      const scene = scenes[currentScene];
-
-      if (isTyping) {
-        clearInterval(typeInterval);
-        dialogueTextEl.textContent = scene.text;
-        isTyping = false;
-        return;
-      }
-
-      if (currentScene < scenes.length - 1) {
-        loadScene(currentScene + 1);
-      } else {
-        navigateWithFade(GAME_DESTINATION_URL);
-      }
+    const terrainMat = new THREE.MeshStandardMaterial({
+      color: 0x9a3412,
+      roughness: 0.92,
+      metalness: 0.05
     });
+    const terrain = new THREE.Mesh(terrainGeo, terrainMat);
+    terrain.receiveShadow = true;
+    scene.add(terrain);
 
-    function animate() {
-      ctx.clearRect(0, 0, width, height);
+    // ==================== MARS BASE 3D ARCHITECTURE (MATCHING YOUR CAD LAYOUT) ====================
+    const baseGroup = new THREE.Group();
+    scene.add(baseGroup);
 
-      for (const s of stars) {
-        s.x -= s.speed;
-        if (s.x < 0) s.x = width;
-        s.alpha += s.twinkle;
-        if (s.alpha <= 0.15 || s.alpha >= 1) s.twinkle *= -1;
+    // Base Foundation Deck (Matches grey CAD baseplate)
+    const deck = new THREE.Mesh(
+      new THREE.BoxGeometry(16.5, 0.25, 11.5),
+      new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7, metalness: 0.35 })
+    );
+    deck.position.y = 0.125;
+    deck.receiveShadow = true;
+    baseGroup.add(deck);
 
-        ctx.fillStyle = `rgba(224, 242, 254, ${s.alpha})`;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
+    // Cyan Perimeter Trim around Baseplate
+    const trim = new THREE.Mesh(
+      new THREE.BoxGeometry(16.62, 0.08, 11.62),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    );
+    trim.position.y = 0.05;
+    baseGroup.add(trim);
 
-      currentPlanetR += (targetPlanetR - currentPlanetR) * 0.03;
-      const cx = width / 2;
-      const cy = height + currentPlanetR * 0.62;
+    // Interactive Clickable Registry
+    const clickableZones = [];
+    const customCadContainer = new THREE.Group();
+    baseGroup.add(customCadContainer);
+    const defaultBuildingsGroup = new THREE.Group();
+    baseGroup.add(defaultBuildingsGroup);
 
-      // Martian Rust Atmospheric Glow
-      const glow = ctx.createRadialGradient(cx, cy, currentPlanetR * 0.75, cx, cy, currentPlanetR * 1.35);
-      glow.addColorStop(0, 'rgba(251, 146, 60, 0.26)');
-      glow.addColorStop(0.5, 'rgba(239, 68, 68, 0.1)');
-      glow.addColorStop(1, 'rgba(2, 3, 7, 0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(cx, cy, currentPlanetR * 1.35, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Mars Surface Sphere
-      const sphere = ctx.createRadialGradient(
-        cx - currentPlanetR * 0.25, cy - currentPlanetR * 0.6, currentPlanetR * 0.1,
-        cx, cy, currentPlanetR
+    function registerFacility(id, label, subtitle, hitSize, hitPos, visualGroup = null) {
+      const hitMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(hitSize[0], hitSize[1], hitSize[2]),
+        new THREE.MeshBasicMaterial({ visible: false })
       );
-      sphere.addColorStop(0, '#c2410c');
-      sphere.addColorStop(0.48, '#7c2d12');
-      sphere.addColorStop(1, '#1c0a06');
-      ctx.fillStyle = sphere;
-      ctx.beginPath();
-      ctx.arc(cx, cy, currentPlanetR, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = 'rgba(251, 146, 60, 0.42)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-
-      requestAnimationFrame(animate);
+      hitMesh.position.set(hitPos[0], hitPos[1], hitPos[2]);
+      hitMesh.userData = { facilityId: id, label, subtitle, visualGroup };
+      baseGroup.add(hitMesh);
+      clickableZones.push(hitMesh);
     }
 
+    // 1. HABITATION MODULE (Top-Left Large Blue Building in CAD)
+    const habGroup = new THREE.Group();
+    const habMain = new THREE.Mesh(
+      new THREE.BoxGeometry(9.6, 2.4, 3.6),
+      new THREE.MeshStandardMaterial({ color: 0x3b82f6, roughness: 0.45, metalness: 0.25 })
+    );
+    habMain.position.set(-2.2, 1.45, -2.9);
+    habMain.castShadow = true;
+    habMain.receiveShadow = true;
+    habGroup.add(habMain);
+
+    // Raised Left Skylight Bulkhead (from CAD)
+    const habBulkhead = new THREE.Mesh(
+      new THREE.BoxGeometry(2.3, 0.65, 3.1),
+      new THREE.MeshStandardMaterial({ color: 0x60a5fa, roughness: 0.4, metalness: 0.25 })
+    );
+    habBulkhead.position.set(-5.6, 2.95, -2.9);
+    habBulkhead.castShadow = true;
+    habGroup.add(habBulkhead);
+
+    // Twin Circular Roof ECLSS Vents (from CAD)
+    for (const vx of [-3.3, -1.6]) {
+      const vent = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.55, 0.68, 0.45, 24),
+        new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.35, metalness: 0.4 })
+      );
+      vent.position.set(vx, 2.85, -3.1);
+      vent.castShadow = true;
+      habGroup.add(vent);
+    }
+
+    // Glowing Habitation Windows & Cyan EVA Airlock Door
+    for (let w = 0; w < 3; w++) {
+      const win = new THREE.Mesh(
+        new THREE.BoxGeometry(0.95, 0.55, 0.1),
+        new THREE.MeshBasicMaterial({ color: 0xfef08a })
+      );
+      win.position.set(-1.5 + w * 1.65, 1.55, -1.08);
+      habGroup.add(win);
+    }
+    const airlockDoor = new THREE.Mesh(
+      new THREE.BoxGeometry(1.15, 1.65, 0.14),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    );
+    airlockDoor.position.set(-3.4, 1.1, -1.08);
+    habGroup.add(airlockDoor);
+
+    defaultBuildingsGroup.add(habGroup);
+    registerFacility('habitation', 'HABITATION MODULE', 'Click to manage O₂, H₂O & Crew', [9.8, 3.2, 3.8], [-2.2, 1.7, -2.9], habGroup);
+
+    // 2. SOLAR PANEL ARRAY (Center Dark-Blue Pad in CAD)
+    const solarGroup = new THREE.Group();
+    const solarPad = new THREE.Mesh(
+      new THREE.BoxGeometry(4.4, 0.18, 3.2),
+      new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.6, metalness: 0.5 })
+    );
+    solarPad.position.set(-0.3, 0.34, 1.6);
+    solarPad.receiveShadow = true;
+    solarGroup.add(solarPad);
+
+    const solarPanels = [];
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 3; c++) {
+        const panel = new THREE.Mesh(
+          new THREE.BoxGeometry(1.25, 0.08, 1.35),
+          new THREE.MeshStandardMaterial({
+            color: 0x1d4ed8,
+            emissive: 0x1e3a8a,
+            emissiveIntensity: 0.45,
+            roughness: 0.25,
+            metalness: 0.75
+          })
+        );
+        panel.position.set(-1.65 + c * 1.38, 0.58, 0.85 + r * 1.5);
+        panel.rotation.x = 0.26;
+        panel.castShadow = true;
+        solarGroup.add(panel);
+        solarPanels.push(panel);
+      }
+    }
+    defaultBuildingsGroup.add(solarGroup);
+    registerFacility('solar', 'SOLAR PANEL ARRAY', 'Click to route kW & protect from dust', [4.5, 1.2, 3.3], [-0.3, 0.7, 1.6], solarGroup);
+
+    // 3. YELLOW RESEARCH CENTER (Bottom-Left Yellow/Orange Block in CAD)
+    const researchGroup = new THREE.Group();
+    const labBody = new THREE.Mesh(
+      new THREE.BoxGeometry(2.1, 1.45, 3.1),
+      new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.42, metalness: 0.25 })
+    );
+    labBody.position.set(-4.1, 0.98, 2.0);
+    labBody.castShadow = true;
+    labBody.receiveShadow = true;
+    researchGroup.add(labBody);
+
+    const labSensor = new THREE.Mesh(
+      new THREE.BoxGeometry(1.1, 0.35, 1.1),
+      new THREE.MeshStandardMaterial({ color: 0xfef08a, emissive: 0xca8a04, emissiveIntensity: 0.35 })
+    );
+    labSensor.position.set(-4.1, 1.85, 1.4);
+    researchGroup.add(labSensor);
+
+    defaultBuildingsGroup.add(researchGroup);
+    registerFacility('research', 'RESEARCH CENTER', 'Click to run experiments & tech upgrades', [2.2, 2.1, 3.2], [-4.1, 1.1, 2.0], researchGroup);
+
+    // 4. FOOD STORAGE SILO & DEPOT (Right Building + Tall Cylinder in CAD)
+    const siloGroup = new THREE.Group();
+    const depot = new THREE.Mesh(
+      new THREE.BoxGeometry(3.8, 2.1, 4.8),
+      new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5, metalness: 0.35 })
+    );
+    depot.position.set(5.4, 1.3, 1.4);
+    depot.castShadow = true;
+    depot.receiveShadow = true;
+    siloGroup.add(depot);
+
+    // Blue Airlock Connector Cube + Tunnel (from CAD)
+    const connector = new THREE.Mesh(
+      new THREE.BoxGeometry(1.3, 1.2, 1.4),
+      new THREE.MeshStandardMaterial({ color: 0x2563eb, roughness: 0.4, metalness: 0.3 })
+    );
+    connector.position.set(2.55, 0.85, 1.2);
+    connector.castShadow = true;
+    siloGroup.add(connector);
+
+    const tunnel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.6, 0.65, 0.65),
+      new THREE.MeshStandardMaterial({ color: 0x64748b })
+    );
+    tunnel.position.set(3.35, 0.75, 1.2);
+    siloGroup.add(tunnel);
+
+    // Tall Vertical Food Silo sitting ON TOP of Depot Roof
+    const tallSilo = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.85, 0.85, 3.2, 28),
+      new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3, metalness: 0.65 })
+    );
+    tallSilo.position.set(5.8, 3.95, 1.8);
+    tallSilo.castShadow = true;
+    siloGroup.add(tallSilo);
+
+    const rearVent = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.45, 0.45, 1.1, 20),
+      new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.35, metalness: 0.5 })
+    );
+    rearVent.position.set(5.0, 2.9, 0.2);
+    rearVent.castShadow = true;
+    siloGroup.add(rearVent);
+
+    defaultBuildingsGroup.add(siloGroup);
+    registerFacility('silo', 'FOOD STORAGE SILO', 'Click to harvest hydroponic rations', [4.2, 5.6, 5.0], [5.3, 2.8, 1.4], siloGroup);
+
+    // 5. FOREGROUND COMMS DISH & CRYO TANKS (from CAD)
+    const commsGroup = new THREE.Group();
+    const dishBase = new THREE.Mesh(
+      new THREE.CylinderGeometry(1.15, 1.15, 0.65, 28),
+      new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5, metalness: 0.5 })
+    );
+    dishBase.position.set(0.7, 0.58, 4.1);
+    dishBase.castShadow = true;
+    commsGroup.add(dishBase);
+
+    const antenna = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.06, 0.06, 1.3, 12),
+      new THREE.MeshBasicMaterial({ color: 0x38bdf8 })
+    );
+    antenna.position.set(0.7, 1.4, 4.1);
+    commsGroup.add(antenna);
+
+    // 3 Vertical Cryo Tanks on front-left (Silver, Blue, Gold from CAD)
+    const tankSpecs = [
+      { x: -6.3, z: 1.5, h: 2.5, col: 0xcbd5e1 },
+      { x: -6.1, z: 2.3, h: 2.2, col: 0x3b82f6 },
+      { x: -5.9, z: 3.1, h: 1.9, col: 0xeab308 }
+    ];
+    for (const tk of tankSpecs) {
+      const mesh = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.32, 0.32, tk.h, 20),
+        new THREE.MeshStandardMaterial({ color: tk.col, roughness: 0.35, metalness: 0.55 })
+      );
+      mesh.position.set(tk.x, 0.25 + tk.h / 2, tk.z);
+      mesh.castShadow = true;
+      commsGroup.add(mesh);
+    }
+
+    defaultBuildingsGroup.add(commsGroup);
+    registerFacility('comms', 'DEEP-SPACE COMMS DISH', 'Click to transmit science & scan weather', [2.6, 2.2, 2.2], [0.7, 1.1, 4.1], commsGroup);
+
+    // ==================== LANDED SPACESHIP & PATROLLING ASTRONAUT ====================
+    const landerGroup = new THREE.Group();
+    landerGroup.position.set(-11.2, 0.1, 3.2);
+    scene.add(landerGroup);
+
+    const hull = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.65, 1.15, 2.8, 24),
+      new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.45 })
+    );
+    hull.position.y = 1.9;
+    hull.castShadow = true;
+    landerGroup.add(hull);
+
+    const nose = new THREE.Mesh(
+      new THREE.ConeGeometry(0.65, 0.9, 24),
+      new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.3, metalness: 0.6 })
+    );
+    nose.position.y = 3.75;
+    landerGroup.add(nose);
+
+    for (let l = 0; l < 4; l++) {
+      const ang = (l * Math.PI) / 2 + Math.PI / 4;
+      const leg = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.07, 0.07, 1.4, 8),
+        new THREE.MeshStandardMaterial({ color: 0x94a3b8 })
+      );
+      leg.position.set(Math.cos(ang) * 1.15, 0.65, Math.sin(ang) * 1.15);
+      leg.rotation.z = -Math.cos(ang) * 0.45;
+      leg.rotation.x = Math.sin(ang) * 0.45;
+      landerGroup.add(leg);
+    }
+
+    // Animated EVA Astronaut walking along the base perimeter
+    const astroGroup = new THREE.Group();
+    const astroBody = new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.22, 0.45, 8, 16),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 })
+    );
+    astroBody.position.y = 0.65;
+    astroBody.castShadow = true;
+    astroGroup.add(astroBody);
+
+    const astroHelmet = new THREE.Mesh(
+      new THREE.SphereGeometry(0.24, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xffffff })
+    );
+    astroHelmet.position.y = 1.15;
+    astroGroup.add(astroHelmet);
+
+    const visor = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 16, 16),
+      new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.9, roughness: 0.1 })
+    );
+    visor.position.set(0, 1.15, 0.14);
+    astroGroup.add(visor);
+    scene.add(astroGroup);
+
+    // ==================== CUSTOM CAD FILE IMPORTER (.GLB / .GLTF / .STL) ====================
+    const cadInput = document.getElementById('cad-file-input');
+    const gltfLoader = new GLTFLoader();
+    const stlLoader = new STLLoader();
+
+    cadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      const ext = file.name.split('.').pop().toLowerCase();
+
+      const mountImportedModel = (obj3d) => {
+        // Clear previous custom CAD model and hide default procedural buildings
+        while (customCadContainer.children.length > 0) {
+          customCadContainer.remove(customCadContainer.children[0]);
+        }
+        defaultBuildingsGroup.visible = false;
+
+        // Auto-center and auto-scale the CAD assembly onto the 16 x 11 Mars baseplate
+        const box = new THREE.Box3().setFromObject(obj3d);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);
+        box.getCenter(center);
+
+        const maxHoriz = Math.max(size.x, size.z, 0.001);
+        const targetSpan = 15.2;
+        const scaleFactor = targetSpan / maxHoriz;
+
+        obj3d.scale.setScalar(scaleFactor);
+        obj3d.position.set(
+          -center.x * scaleFactor,
+          0.26 - box.min.y * scaleFactor,
+          -center.z * scaleFactor
+        );
+
+        obj3d.traverse((child) => {
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        customCadContainer.add(obj3d);
+        logEvent(`CAD FILE MOUNTED: "${file.name}" scaled to Jezero Baseplate! Click any zone to operate.`);
+      };
+
+      if (ext === 'glb' || ext === 'gltf') {
+        gltfLoader.load(url, (gltf) => mountImportedModel(gltf.scene));
+      } else if (ext === 'stl') {
+        stlLoader.load(url, (geometry) => {
+          geometry.computeVertexNormals();
+          const mesh = new THREE.Mesh(
+            geometry,
+            new THREE.MeshStandardMaterial({ color: 0x93c5fd, roughness: 0.4, metalness: 0.45 })
+          );
+          // STL exports from Z-up CAD tools often need -90 deg X rotation
+          mesh.rotation.x = -Math.PI / 2;
+          const wrapper = new THREE.Group();
+          wrapper.add(mesh);
+          mountImportedModel(wrapper);
+        });
+      }
+    });
+
+    // ==================== RAYCASTING: HOVER & CLICK ON 3D BUILDINGS ====================
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    const hoverTag = document.getElementById('hover-tag');
+    let pointerDownPos = { x: 0, y: 0 };
+
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+    });
+
+    renderer.domElement.addEventListener('pointermove', (e) => {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(clickableZones, false);
+
+      if (hits.length > 0) {
+        const data = hits[0].object.userData;
+        hoverTag.style.display = 'block';
+        hoverTag.style.left = `${e.clientX}px`;
+        hoverTag.style.top = `${e.clientY}px`;
+        hoverTag.innerHTML = `${data.label}<span>${data.subtitle}</span>`;
+        container.style.cursor = 'pointer';
+      } else {
+        hoverTag.style.display = 'none';
+        container.style.cursor = 'grab';
+      }
+    });
+
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      const moveDist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+      // Only trigger click menu if user did NOT drag/orbit the camera
+      if (moveDist > 6 || state.gameOver) return;
+
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+
+      const hits = raycaster.intersectObjects(clickableZones, false);
+      if (hits.length > 0) {
+        openFacilityMenu(hits[0].object.userData.facilityId);
+      }
+    });
+
+    // ==================== INTERACTIVE FACILITY MENUS & GAME LOGIC ====================
+    const drawer = document.getElementById('facility-drawer');
+    const drawerTag = document.getElementById('drawer-tag');
+    const drawerTitle = document.getElementById('drawer-title');
+    const drawerDesc = document.getElementById('drawer-desc');
+    const drawerStats = document.getElementById('drawer-stats');
+    const drawerActions = document.getElementById('drawer-actions');
+    const eventLog = document.getElementById('event-log');
+
+    document.getElementById('close-drawer').addEventListener('click', () => {
+      drawer.classList.remove('open');
+      state.selectedFacility = null;
+    });
+
+    function logEvent(msg) {
+      eventLog.innerHTML = `<span class="tag">SOL ${state.sol} //</span> ${msg}`;
+    }
+
+    function updateTopHUD() {
+      document.getElementById('hud-sol').textContent = `${state.sol} / ${state.maxSols}`;
+      document.getElementById('hud-o2').textContent = `${Math.round(state.o2)}%`;
+      document.getElementById('hud-h2o').textContent = `${Math.round(state.h2o)}%`;
+      document.getElementById('hud-food').textContent = `${Math.round(state.food)}%`;
+      document.getElementById('hud-pwr').textContent = `${state.power} kW`;
+      document.getElementById('hud-sci').textContent = `${state.science} / 100`;
+      document.getElementById('hud-scrap').textContent = `${state.scrap}`;
+
+      const setStatus = (id, val) => {
+        const el = document.getElementById(id);
+        el.classList.remove('warn', 'danger');
+        if (val <= 25) el.classList.add('danger');
+        else if (val <= 50) el.classList.add('warn');
+      };
+      setStatus('pill-o2', state.o2);
+      setStatus('pill-h2o', state.h2o);
+      setStatus('pill-food', state.food);
+    }
+
+    function openFacilityMenu(id) {
+      state.selectedFacility = id;
+      drawer.classList.add('open');
+      renderFacilityContent(id);
+    }
+
+    function renderFacilityContent(id) {
+      drawerActions.innerHTML = '';
+      drawerStats.innerHTML = '';
+
+      const addStat = (label, val) => {
+        drawerStats.innerHTML += `<div class="stat-box"><div class="stat-label">${label}</div><div class="stat-val">${val}</div></div>`;
+      };
+
+      const addAction = (title, costText, subText, disabled, onClick) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'action-btn';
+        btn.disabled = disabled;
+        btn.innerHTML = `
+          <div class="action-btn-top"><span>${title}</span><span class="action-cost">${costText}</span></div>
+          <div class="action-sub">${subText}</div>
+        `;
+        btn.addEventListener('click', () => {
+          onClick();
+          updateTopHUD();
+          renderFacilityContent(id);
+        });
+        drawerActions.appendChild(btn);
+      };
+
+      if (id === 'habitation') {
+        drawerTag.textContent = 'SECTOR 01 // LIFE SUPPORT';
+        drawerTitle.textContent = 'HABITATION MODULE';
+        drawerDesc.textContent = 'Pressurized crew quarters housing MOXIE CO₂-to-O₂ electrolysis and closed-loop ECLSS water recovery.';
+        addStat('O₂ Reserves', `${Math.round(state.o2)}%`);
+        addStat('H₂O Reserves', `${Math.round(state.h2o)}%`);
+
+        addAction('Run MOXIE O₂ Cycle', '-3 kW', 'Splits Martian CO₂ into breathable oxygen (+18% O₂)', state.power < 3, () => {
+          state.power -= 3;
+          state.o2 = Math.min(100, state.o2 + 18);
+          logEvent('MOXIE electrolyzer produced +18% breathable O₂.');
+        });
+
+        addAction('Purify ECLSS Water Loop', '-3 kW', 'Reclaims cabin humidity & wastewater (+18% H₂O)', state.power < 3, () => {
+          state.power -= 3;
+          state.h2o = Math.min(100, state.h2o + 18);
+          logEvent('ECLSS water processor recovered +18% H₂O reserves.');
+        });
+
+        addAction('Energize Magnetic Shield', '-4 kW', 'Protects crew from incoming Solar Particle Events', state.power < 4 || state.shieldCharged, () => {
+          state.power -= 4;
+          state.shieldCharged = true;
+          logEvent('Magnetic radiation deflector online for this Sol.');
+        });
+      }
+
+      if (id === 'solar') {
+        drawerTag.textContent = 'SECTOR 02 // POWER GRID';
+        drawerTitle.textContent = 'SOLAR PANEL ARRAY';
+        drawerDesc.textContent = 'Six monocrystalline photovoltaic arrays plus baseline RTG nuclear power. Stow panels during dust storms to prevent abrasion.';
+        addStat('Available Grid', `${state.power} kW`);
+        addStat('Array State', state.panelsDeployed ? 'DEPLOYED' : 'STOWED');
+
+        addAction(
+          state.panelsDeployed ? 'Stow Solar Panels' : 'Deploy Solar Panels',
+          '0 kW',
+          state.panelsDeployed ? 'Protects arrays during Martian dust storms' : 'Restores full solar kW generation next Sol',
+          false,
+          () => {
+            state.panelsDeployed = !state.panelsDeployed;
+            solarPanels.forEach((p) => { p.rotation.x = state.panelsDeployed ? 0.26 : 0.02; });
+            logEvent(state.panelsDeployed ? 'Solar arrays angled toward the Martian sun.' : 'Solar arrays locked flat in dust-storm safe mode.');
+          }
+        );
+
+        addAction('Brush Martian Regolith Dust', '-1 Scrap', 'Restores +4 kW immediate battery boost', state.scrap < 1, () => {
+          state.scrap -= 1;
+          state.power += 4;
+          logEvent('EVA dust cleaning restored +4 kW to the habitat bus.');
+        });
+      }
+
+      if (id === 'research') {
+        drawerTag.textContent = 'SECTOR 03 // SCIENCE LAB';
+        drawerTitle.textContent = 'YELLOW RESEARCH CENTER';
+        drawerDesc.textContent = 'Analyze Jezero crater core samples and upgrade life-support efficiency toward your 100-point mission target.';
+        addStat('Mission Science', `${state.science} / 100`);
+        addStat('Spare Scrap', `${state.scrap} Units`);
+
+        addAction('Run Spectrometer Analysis', '-4 kW', 'Processes Martian soil & ice samples (+18 Science)', state.power < 4, () => {
+          state.power -= 4;
+          state.science = Math.min(100, state.science + 18);
+          logEvent('Research Center completed sample assay (+18 Science).');
+        });
+
+        addAction('Upgrade MOXIE Catalysts', '-2 Scrap', 'Permanently reduces daily O₂ drain by 35%', state.scrap < 2 || state.moxieBoosted, () => {
+          state.scrap -= 2;
+          state.moxieBoosted = true;
+          logEvent('MOXIE solid-oxide stacks upgraded! Daily O₂ consumption reduced.');
+        });
+      }
+
+      if (id === 'silo') {
+        drawerTag.textContent = 'SECTOR 04 // HYDROPONICS';
+        drawerTitle.textContent = 'FOOD STORAGE SILO';
+        drawerDesc.textContent = 'Pressurized vertical grain silo and LED aeroponic grow depot sustaining crew nutrition.';
+        addStat('Ration Reserves', `${Math.round(state.food)}%`);
+        addStat('Silo Pressure', '101.3 kPa');
+
+        addAction('Harvest Aeroponic Crops', '-3 kW', 'Grows nutrient-dense algae & potatoes (+20% Food)', state.power < 3, () => {
+          state.power -= 3;
+          state.food = Math.min(100, state.food + 20);
+          logEvent('Hydroponic bay harvested +20% crew food rations.');
+        });
+
+        addAction('Salvage Supply Crate', '-2 kW', 'Extracts spare aluminum & electronics (+2 Scrap)', state.power < 2, () => {
+          state.power -= 2;
+          state.scrap += 2;
+          logEvent('Supply depot fabricator recycled +2 Scrap parts.');
+        });
+      }
+
+      if (id === 'comms') {
+        drawerTag.textContent = 'SECTOR 05 // TELEMETRY';
+        drawerTitle.textContent = 'DEEP-SPACE COMMS DISH';
+        drawerDesc.textContent = 'High-gain X-band dish linking Jezero Base to Earth DSN (3–22 min light-speed delay) and orbital weather satellites.';
+        addStat('Signal Delay', `${4 + (state.sol % 15)} min`);
+        addStat('Weather Forecast', state.dustStormActive ? 'DUST STORM' : (state.solarStormActive ? 'SOLAR FLARE' : 'NOMINAL'));
+
+        addAction('Transmit Science Packet to Earth', '-3 kW', 'Downlinks telemetry for +14 Science & +1 Scrap', state.power < 3, () => {
+          state.power -= 3;
+          state.science = Math.min(100, state.science + 14);
+          state.scrap += 1;
+          logEvent('DSN packet confirmed (+14 Science, +1 Scrap grant).');
+        });
+      }
+    }
+
+    // ==================== ADVANCE SOL TURN LOOP ====================
+    const nextSolBtn = document.getElementById('next-sol-btn');
+    nextSolBtn.addEventListener('click', () => {
+      if (state.gameOver) return;
+
+      // Apply hazard penalties from the ending Sol
+      let alertMsg = '';
+      if (state.solarStormActive && !state.shieldCharged) {
+        state.o2 -= 12;
+        state.science = Math.max(0, state.science - 8);
+        alertMsg = 'Unshielded Solar Flare damaged electronics (-12% O₂, -8 Science)! ';
+      } else if (state.solarStormActive && state.shieldCharged) {
+        alertMsg = 'Magnetic Shield deflected the Solar Flare! ';
+      }
+
+      if (state.dustStormActive && state.panelsDeployed) {
+        state.maxPower = Math.max(8, state.maxPower - 2);
+        alertMsg += 'Dust storm abraded deployed panels (-2 kW max grid)! ';
+      }
+
+      // Advance Sol
+      state.sol += 1;
+      state.shieldCharged = false;
+
+      // Daily crew attrition
+      const o2Loss = state.moxieBoosted ? 6 : 10;
+      state.o2 = Math.max(0, state.o2 - o2Loss);
+      state.h2o = Math.max(0, state.h2o - 9);
+      state.food = Math.max(0, state.food - 8);
+
+      // Roll new space weather
+      const roll = Math.random();
+      state.dustStormActive = roll < 0.25;
+      state.solarStormActive = roll >= 0.25 && roll < 0.45;
+
+      // Recharge daily kW
+      const solarOutput = state.panelsDeployed ? (state.dustStormActive ? 5 : state.maxPower) : 6;
+      state.power = solarOutput;
+
+      if (state.dustStormActive) {
+        alertMsg += 'WARNING: Martian Dust Storm detected—stow Solar Panels!';
+      } else if (state.solarStormActive) {
+        alertMsg += 'WARNING: Solar Particle Event inbound—charge Magnetic Shield!';
+      } else if (!alertMsg) {
+        alertMsg = `Sol ${state.sol} nominal. ${state.power} kW generated across outpost grid.`;
+      }
+
+      updateTopHUD();
+      if (state.selectedFacility) renderFacilityContent(state.selectedFacility);
+      logEvent(alertMsg);
+
+      // Check Win / Loss Conditions
+      if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) {
+        endGame(false, `Critical life-support failure on Sol ${state.sol}. Keep O₂, H₂O, and Food above 0% to sustain the crew.`);
+      } else if (state.science >= 100 || state.sol >= state.maxSols) {
+        const won = state.science >= 100;
+        endGame(
+          won,
+          won
+            ? `Outstanding command! You reached ${state.science} Science Points by Sol ${state.sol} while keeping your crew alive on Mars.`
+            : `You survived all 20 Sols with ${state.science}/100 Science Points! Run again to hit the 100-point science milestone.`
+        );
+      } else {
+        nextSolBtn.innerHTML = `Advance to Sol ${state.sol + 1} &#9654;`;
+      }
+    });
+
+    function endGame(victory, message) {
+      state.gameOver = true;
+      document.getElementById('modal-tag').textContent = victory ? 'MISSION ACCOMPLISHED' : 'MISSION TERMINATED';
+      document.getElementById('modal-title').textContent = victory ? 'JEZERO BASE THRIVING' : 'LIFE SUPPORT DEPLETED';
+      document.getElementById('modal-body').textContent = message;
+      document.getElementById('end-modal').classList.add('active');
+    }
+
+    // ==================== RENDER & ANIMATION LOOP ====================
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // Patrol astronaut along the base walkway between Habitation, Research & Solar Panels
+      const walkAngle = t * 0.45;
+      astroGroup.position.x = -1.5 + Math.cos(walkAngle) * 3.2;
+      astroGroup.position.z = -0.35 + Math.sin(walkAngle) * 0.45;
+      astroGroup.position.y = 0.25 + Math.abs(Math.sin(t * 6)) * 0.06;
+      astroGroup.rotation.y = Math.atan2(-Math.sin(walkAngle) * 3.2, Math.cos(walkAngle) * 0.45);
+
+      // Slowly rotate comms dish antenna
+      antenna.rotation.y = t * 0.8;
+
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    updateTopHUD();
+    if (bonusScrap > 0) {
+      logEvent(`Deflector Energy carried over from launch (+${bonusScrap} Bonus Scrap)! Right-click or left-click drag to orbit.`);
+    }
     animate();
-    loadScene(0);
   </script>
 </body>
 </html>
