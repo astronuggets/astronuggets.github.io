@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASTRONUGGETS // Mission Terminal (/game)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      background: #03050c;
+      color: #f8fafc;
+      font-family: 'Space Grotesk', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ==================== CUTSCENE OVERLAY ==================== */
+    #cutscene {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #020308;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 2rem;
+      transition: opacity 1.1s ease, visibility 1.1s ease;
+    }
+
+    #cutscene.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    canvas#cutscene-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    /* Cinematic Letterbox Bars */
+    .letterbox {
+      position: absolute;
+      left: 0;
+      width: 100%;
+      height: 54px;
+      background: #000000;
+      z-index: 4;
+      border-color: rgba(56, 189, 248, 0.25);
+    }
+    .letterbox.top { top: 0; border-bottom: 1px solid rgba(56, 189, 248, 0.2); }
+    .letterbox.bottom { bottom: 0; border-top: 1px solid rgba(56, 189, 248, 0.2); }
+
+    .cutscene-top-bar {
+      position: relative;
+      z-index: 5;
+      margin-top: 46px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      letter-spacing: 0.14em;
+    }
+
+    .rec-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      margin-right: 8px;
+      box-shadow: 0 0 10px #ef4444;
+      animation: blink 1s infinite;
+    }
+
+    .skip-btn {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #e0f2fe;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.15rem;
+      border-radius: 999px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+
+    .skip-btn:hover {
+      background: #38bdf8;
+      color: #030712;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+    }
+
+    /* Center Transmission Box */
+    .transmission-box {
+      position: relative;
+      z-index: 5;
+      max-width: 720px;
+      margin: auto;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .phase-label {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.32em;
+      color: #fb923c;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      min-height: 1.2rem;
+    }
+
+    .cutscene-headline {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.6rem, 4.5vw, 3.2rem);
+      letter-spacing: 0.1em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      background: linear-gradient(135deg, #ffffff, #bae6fd, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.35));
+    }
+
+    .typewriter-log {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.9rem, 1.5vw, 1.05rem);
+      line-height: 1.7;
+      color: #cbd5e1;
+      background: rgba(6, 11, 25, 0.72);
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      border-radius: 14px;
+      padding: 1.35rem 1.6rem;
+      min-height: 118px;
+      backdrop-filter: blur(10px);
+      text-align: left;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65);
+    }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 8px;
+      height: 1.05em;
+      background: #38bdf8;
+      vertical-align: middle;
+      margin-left: 4px;
+      animation: blink 0.8s infinite;
+    }
+
+    /* Progress & Start Controls at Bottom of Cutscene */
+    .cutscene-footer {
+      position: relative;
+      z-index: 5;
+      margin-bottom: 46px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .progress-track {
+      width: min(520px, 85vw);
+      height: 4px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #38bdf8, #fb923c);
+      box-shadow: 0 0 14px #38bdf8;
+      transition: width 0.25s linear;
+    }
+
+    #enter-command-btn {
+      display: none;
+      padding: 0.95rem 2.4rem;
+      border-radius: 999px;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #030712;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      box-shadow: 0 0 32px rgba(56, 189, 248, 0.65);
+      cursor: pointer;
+      animation: pulseBtn 1.6s infinite alternate;
+    }
+
+    #enter-command-btn:hover {
+      transform: scale(1.04);
+    }
+
+    /* ==================== MAIN GAME INTERFACE ==================== */
+    #game-app {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+
+    #game-app.visible {
+      opacity: 1;
+    }
+
+    .top-nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: rgba(11, 17, 32, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
+    }
+
+    .top-nav h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.1em;
+      color: #38bdf8;
+    }
+
+    .sol-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      padding: 0.45rem 1.1rem;
+      border-radius: 999px;
+      color: #e0f2fe;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .mini-btn {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #cbd5e1;
+      padding: 0.45rem 0.95rem;
+      border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.85rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .mini-btn:hover {
+      border-color: #38bdf8;
+      color: #ffffff;
+    }
+
+    /* Core Stats Bar */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: rgba(11, 17, 32, 0.82);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
+    }
+
+    .stat-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-val {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #0f172a;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* Station Map & Trade-off Console */
+    .station-layout {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 860px) {
+      .station-layout { grid-template-columns: 1fr; }
+    }
+
+    .panel-box {
+      background: rgba(11, 17, 32, 0.82);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .panel-box h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.9rem;
+    }
+
+    .module-btn {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: left;
+      color: #f8fafc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .module-btn:hover, .module-btn.active {
+      border-color: #38bdf8;
+      background: rgba(30, 41, 59, 0.9);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.2);
+    }
+
+    .module-btn h3 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.85rem;
+      color: #e0f2fe;
+      margin-bottom: 0.3rem;
+    }
+
+    .module-btn p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+
+    .decision-card {
+      background: rgba(15, 23, 42, 0.75);
+      border-left: 3px solid #fb923c;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .decision-card h4 {
+      font-size: 0.95rem;
+      color: #fed7aa;
+      margin-bottom: 0.35rem;
+    }
+
+    .decision-card p {
+      font-size: 0.84rem;
+      color: #cbd5e1;
+      margin-bottom: 0.75rem;
+      line-height: 1.45;
+    }
+
+    .action-btn {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      color: #030712;
+      border: none;
+      padding: 0.55rem 1rem;
+      border-radius: 8px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+    }
+
+    .action-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .next-sol-btn {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 0.95rem;
+      border-radius: 12px;
+      border: none;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #030712;
+      background: linear-gradient(135deg, #34d399, #38bdf8);
+      cursor: pointer;
+    }
+
+    .log-feed {
+      margin-top: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      background: rgba(2, 6, 23, 0.75);
+      border-radius: 10px;
+      padding: 0.85rem;
+      max-height: 140px;
+      overflow-y: auto;
+      line-height: 1.55;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    @keyframes pulseBtn {
+      from { box-shadow: 0 0 22px rgba(56, 189, 248, 0.55); }
+      to { box-shadow: 0 0 42px rgba(129, 140, 248, 0.9); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== CINEMATIC CUTSCENE INTRO ==================== -->
+  <section id="cutscene" aria-label="Mission Intro Cutscene">
+    <div class="letterbox top"></div>
+    <canvas id="cutscene-canvas"></canvas>
+
+    <div class="cutscene-top-bar">
+      <div><span class="rec-dot"></span>ARES-IV ORBITAL FEED // SOL 00</div>
+      <button class="skip-btn" id="skip-cutscene-btn">Skip Intro &#9654;&#9654;</button>
+    </div>
+
+    <div class="transmission-box">
+      <div class="phase-label" id="phase-label">PHASE 01 // ORBITAL INSERTION</div>
+      <h2 class="cutscene-headline" id="cutscene-headline">APPROACHING OUTPOST HORIZON</h2>
+      <div class="typewriter-log">
+        <span id="typewriter-text"></span><span class="cursor-blink"></span>
+      </div>
+    </div>
+
+    <div class="cutscene-footer">
+      <div class="progress-track">
+        <div class="progress-fill" id="cutscene-progress"></div>
+      </div>
+      <button id="enter-command-btn">Initialize Command Console &#9654;</button>
+    </div>
+
+    <div class="letterbox bottom"></div>
+  </section>
+
+  <!-- ==================== PLAYABLE OUTPOST TERMINAL ==================== -->
+  <div id="game-app">
+    <header class="top-nav">
+      <h1>ASTRONUGGETS // OUTPOST COMMAND</h1>
+      <div class="sol-badge" id="sol-display">SOL 1 / 15 &bull; SCIENCE: 0 / 100</div>
+      <div class="nav-links">
+        <button class="mini-btn" id="replay-cutscene-btn">Replay Intro</button>
+        <a href="/" class="mini-btn">&#8592; Home</a>
+      </div>
+    </header>
+
+    <!-- 4 Core Stats -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-top"><span>Life Support (O₂ &amp; H₂O)</span><span class="stat-val" id="val-life">100%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-life" style="width:100%; background:#38bdf8;"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span>Shielding Integrity</span><span class="stat-val" id="val-shield">85%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-shield" style="width:85%; background:#818cf8;"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span>Energy Grid (kW)</span><span class="stat-val" id="val-energy">80%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-energy" style="width:80%; background:#facc15;"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-top"><span>Supplies (Meals &amp; Parts)</span><span class="stat-val" id="val-supplies">90%</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="bar-supplies" style="width:90%; background:#34d399;"></div></div>
+      </div>
+    </section>
+
+    <!-- Space Station Map + Trade-offs -->
+    <section class="station-layout">
+      <div class="panel-box">
+        <h2>Space Station Map (6 Outpost Modules)</h2>
+        <div class="modules-grid">
+          <button class="module-btn active" onclick="selectModule('hab')">
+            <h3>1. Habitation Module</h3>
+            <p>Controls O₂/H₂O life support levels &amp; crew health.</p>
+          </button>
+          <button class="module-btn" onclick="selectModule('power')">
+            <h3>2. Power Grid Hub</h3>
+            <p>Routes Solar Array &amp; RTG kilowatts across systems.</p>
+          </button>
+          <button class="module-btn" onclick="selectModule('shield')">
+            <h3>3. Shielding &amp; Ops Bay</h3>
+            <p>Active magnetic radiation deflectors &amp; storm shutters.</p>
+          </button>
+          <button class="module-btn" onclick="selectModule('research')">
+            <h3>4. Research Lab</h3>
+            <p>Runs experiments using spare power for mission points.</p>
+          </button>
+          <button class="module-btn" onclick="selectModule('comms')">
+            <h3>5. Comms Array</h3>
+            <p>Deep-space telemetry (3–22 min light-speed delay).</p>
+          </button>
+          <button class="module-btn" onclick="selectModule('storage')">
+            <h3>6. Hydroponics &amp; Storage</h3>
+            <p>Reclaims water, stores spare parts &amp; RTG battery cells.</p>
+          </button>
+        </div>
+
+        <div class="log-feed" id="mission-log">
+          &gt; [SOL 1] Outpost systems online. Every turn drains Life Support &amp; Supplies. Choose your trade-offs carefully.
+        </div>
+      </div>
+
+      <div class="panel-box">
+        <h2>Daily Sol Trade-Off Decisions</h2>
+
+        <div class="decision-card">
+          <h4>Power Re-Routing (Shield Boost)</h4>
+          <p>Divert 20% Energy from Research to Magnetic Deflectors (+20% Shielding, stalls Science this Sol).</p>
+          <button class="action-btn" id="btn-reroute" onclick="doTradeoff('reroute')">Execute Re-Route</button>
+        </div>
+
+        <div class="decision-card">
+          <h4>100% Water Recovery System</h4>
+          <p>Maximize H₂O/O₂ recycling (+18% Life Support) at the cost of heavy battery draw (-22% Energy).</p>
+          <button class="action-btn" id="btn-recycle" onclick="doTradeoff('recycle')">Run Full Recycling</button>
+        </div>
+
+        <div class="decision-card">
+          <h4>Research &amp; Telemetry Burst</h4>
+          <p>Route spare kilowatts (-25% Energy) to Research Lab &amp; Comms Array (+18 Mission Science Points).</p>
+          <button class="action-btn" id="btn-science" onclick="doTradeoff('science')">Run Experiment</button>
+        </div>
+
+        <button class="next-sol-btn" id="next-sol-btn" onclick="advanceSol()">End Sol &amp; Advance Day &#9654;</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    /* ==================== CUTSCENE ENGINE ==================== */
+    const cutsceneEl = document.getElementById('cutscene');
+    const gameAppEl = document.getElementById('game-app');
+    const cCanvas = document.getElementById('cutscene-canvas');
+    const cCtx = cCanvas.getContext('2d');
+    const phaseLabelEl = document.getElementById('phase-label');
+    const headlineEl = document.getElementById('cutscene-headline');
+    const typewriterEl = document.getElementById('typewriter-text');
+    const progressEl = document.getElementById('cutscene-progress');
+    const enterBtn = document.getElementById('enter-command-btn');
+
+    let cw, ch;
+    function resizeCutscene() {
+      cw = cCanvas.width = window.innerWidth;
+      ch = cCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCutscene);
+    resizeCutscene();
+
+    // Warp stars & approaching planet state
+    const warpStars = Array.from({ length: 180 }, () => ({
+      x: (Math.random() - 0.5) * 2000,
+      y: (Math.random() - 0.5) * 2000,
+      z: Math.random() * 1500 + 200
+    }));
+
+    const scenes = [
+      {
+        phase: "PHASE 01 // DEEP SPACE TRANSIT",
+        headline: "APPROACHING OUTPOST HORIZON",
+        text: "Cadet, you have arrived at Sector 04. Communications lag between Earth and this outpost ranges from 3 to 22 minutes—you are on your own.",
+        planetScale: 0.45
+      },
+      {
+        phase: "PHASE 02 // ENVIRONMENTAL ALERT",
+        headline: "SOLAR STORMS & DUST FRONTS DETECTED",
+        text: "Radiation spikes and incoming dust storms threaten solar generation. Your RTG nuclear backup batteries can only sustain critical modules.",
+        planetScale: 0.75
+      },
+      {
+        phase: "PHASE 03 // COMMAND HANDOFF",
+        headline: "EVERY SOL IS A ZERO-SUM TRADE-OFF",
+        text: "Oxygen, water, energy, and supplies deplete every single Martian day. Reach 100 Science Points before Life Support hits 0%. Good luck, Junior Astronaut.",
+        planetScale: 1.05
+      }
+    ];
+
+    let sceneIndex = 0;
+    let charIndex = 0;
+    let cutsceneActive = true;
+    let cutsceneTimer = null;
+    let typeTimer = null;
+    let currentPlanetRadius = 60;
+    let targetPlanetRadius = 110;
+
+    function playScene(idx) {
+      if (!cutsceneActive) return;
+      if (idx >= scenes.length) {
+        progressEl.style.width = '100%';
+        enterBtn.style.display = 'inline-block';
+        return;
+      }
+
+      const s = scenes[idx];
+      phaseLabelEl.textContent = s.phase;
+      headlineEl.textContent = s.headline;
+      typewriterEl.textContent = '';
+      charIndex = 0;
+      targetPlanetRadius = Math.min(cw, ch) * 0.24 * s.planetScale;
+      progressEl.style.width = `${((idx + 0.2) / scenes.length) * 100}%`;
+
+      clearInterval(typeTimer);
+      typeTimer = setInterval(() => {
+        if (!cutsceneActive) return clearInterval(typeTimer);
+        if (charIndex < s.text.length) {
+          typewriterEl.textContent += s.text[charIndex];
+          charIndex++;
+        } else {
+          clearInterval(typeTimer);
+          progressEl.style.width = `${((idx + 1) / scenes.length) * 100}%`;
+          cutsceneTimer = setTimeout(() => playScene(idx + 1), 2200);
+        }
+      }, 26);
+    }
+
+    function renderCutsceneCanvas() {
+      if (!cutsceneActive) return;
+      cCtx.fillStyle = 'rgba(2, 3, 8, 0.35)';
+      cCtx.fillRect(0, 0, cw, ch);
+
+      const cx = cw / 2;
+      const cy = ch / 2;
+
+      // Starfield streaks
+      for (const st of warpStars) {
+        st.z -= 7;
+        if (st.z <= 1) st.z = 1500;
+        const sx = cx + (st.x / st.z) * 450;
+        const sy = cy + (st.y / st.z) * 450;
+        const size = Math.max(0.6, (1 - st.z / 1500) * 2.8);
+        cCtx.fillStyle = `rgba(186, 230, 253, ${1 - st.z / 1500})`;
+        cCtx.beginPath();
+        cCtx.arc(sx, sy, size, 0, Math.PI * 2);
+        cCtx.fill();
+      }
+
+      // Smoothly zoom planet silhouette during approach
+      currentPlanetRadius += (targetPlanetRadius - currentPlanetRadius) * 0.025;
+      const py = cy + currentPlanetRadius * 0.85;
+
+      const atmGrad = cCtx.createRadialGradient(cx, py, currentPlanetRadius * 0.7, cx, py, currentPlanetRadius * 1.35);
+      atmGrad.addColorStop(0, 'rgba(251, 146, 60, 0.35)');
+      atmGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.14)');
+      atmGrad.addColorStop(1, 'rgba(2, 3, 8, 0)');
+      cCtx.fillStyle = atmGrad;
+      cCtx.beginPath();
+      cCtx.arc(cx, py, currentPlanetRadius * 1.35, 0, Math.PI * 2);
+      cCtx.fill();
+
+      const planetGrad = cCtx.createRadialGradient(
+        cx - currentPlanetRadius * 0.3, py - currentPlanetRadius * 0.4, currentPlanetRadius * 0.1,
+        cx, py, currentPlanetRadius
+      );
+      planetGrad.addColorStop(0, '#c2410c');
+      planetGrad.addColorStop(0.55, '#7c2d12');
+      planetGrad.addColorStop(1, '#090d16');
+      cCtx.fillStyle = planetGrad;
+      cCtx.beginPath();
+      cCtx.arc(cx, py, currentPlanetRadius, 0, Math.PI * 2);
+      cCtx.fill();
+
+      requestAnimationFrame(renderCutsceneCanvas);
+    }
+
+    function finishCutscene() {
+      cutsceneActive = false;
+      clearInterval(typeTimer);
+      clearTimeout(cutsceneTimer);
+      cutsceneEl.classList.add('fade-out');
+      gameAppEl.classList.add('visible');
+    }
+
+    document.getElementById('skip-cutscene-btn').addEventListener('click', finishCutscene);
+    enterBtn.addEventListener('click', finishCutscene);
+
+    document.getElementById('replay-cutscene-btn').addEventListener('click', () => {
+      cutsceneActive = true;
+      enterBtn.style.display = 'none';
+      currentPlanetRadius = 60;
+      cutsceneEl.classList.remove('fade-out');
+      renderCutsceneCanvas();
+      playScene(0);
+    });
+
+    // Launch cutscene immediately on page load
+    renderCutsceneCanvas();
+    playScene(0);
+
+    /* ==================== SPACE HABITAT GAME LOGIC ==================== */
+    const state = {
+      sol: 1,
+      maxSol: 15,
+      life: 100,
+      shield: 85,
+      energy: 80,
+      supplies: 90,
+      science: 0,
+      usedActionThisSol: false,
+      gameOver: false
+    };
+
+    function logMsg(msg) {
+      const log = document.getElementById('mission-log');
+      log.innerHTML = `&gt; [SOL ${state.sol}] ${msg}<br>` + log.innerHTML;
+    }
+
+    function updateUI() {
+      document.getElementById('sol-display').textContent =
+        `SOL ${state.sol} / ${state.maxSol} • SCIENCE: ${state.science} / 100`;
+
+      const stats = ['life', 'shield', 'energy', 'supplies'];
+      for (const s of stats) {
+        const val = Math.max(0, Math.min(100, Math.round(state[s])));
+        state[s] = val;
+        document.getElementById(`val-${s}`).textContent = `${val}%`;
+        document.getElementById(`bar-${s}`).style.width = `${val}%`;
+      }
+
+      const disableActions = state.usedActionThisSol || state.gameOver;
+      document.getElementById('btn-reroute').disabled = disableActions;
+      document.getElementById('btn-recycle').disabled = disableActions;
+      document.getElementById('btn-science').disabled = disableActions;
+      document.getElementById('next-sol-btn').disabled = state.gameOver;
+    }
+
+    function selectModule(mod) {
+      document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      const notes = {
+        hab: "Habitation Module: O₂ & H₂O scrubbers nominal. Crew consumes ~10% Life Support per Sol.",
+        power: "Power Grid Hub: Solar Arrays + RTG backup generating +15% Energy each morning.",
+        shield: "Shielding & Ops Bay: Magnetic deflectors prevent radiation damage during solar flares.",
+        research: "Research Lab: Convert surplus Energy into Mission Science Points (100 pts to win).",
+        comms: "Comms Array: Current Earth-Mars light-speed signal delay: 14 minutes 20 seconds.",
+        storage: "Hydroponics & Storage: Converts Supplies into emergency habitat repairs."
+      };
+      logMsg(notes[mod]);
+    }
+
+    function doTradeoff(type) {
+      if (state.usedActionThisSol || state.gameOver) return;
+
+      if (type === 'reroute') {
+        if (state.energy < 20) return logMsg("Insufficient Energy for deflector boost!");
+        state.energy -= 20;
+        state.shield += 20;
+        logMsg("Diverted 20% Energy to Magnetic Deflectors (+20% Shielding). Research paused.");
+      } else if (type === 'recycle') {
+        if (state.energy < 22) return logMsg("Insufficient Energy to run Water Recovery at 100%!");
+        state.energy -= 22;
+        state.life += 18;
+        logMsg("Water Recovery System ran at 100% capacity (+18% Life Support, -22% Energy).");
+      } else if (type === 'science') {
+        if (state.energy < 25) return logMsg("Insufficient Energy to power Research Lab!");
+        state.energy -= 25;
+        state.science += 18;
+        logMsg("Research & Comms burst complete (+18 Mission Science Points, -25% Energy).");
+      }
+
+      state.usedActionThisSol = true;
+      updateUI();
+      checkWinLoss();
+    }
+
+    function advanceSol() {
+      if (state.gameOver) return;
+
+      state.sol += 1;
+      state.usedActionThisSol = false;
+
+      // Daily baseline resource drain + solar recharge
+      state.life -= 11;
+      state.supplies -= 9;
+      state.energy += 16;
+
+      // Random environmental event
+      const roll = Math.random();
+      if (roll < 0.35) {
+        state.shield -= 18;
+        logMsg("ALERT: Solar Particle Event! Shielding absorbed radiation (-18% Shielding).");
+      } else if (roll < 0.65) {
+        state.energy -= 10;
+        logMsg("ALERT: Martian Dust Storm reduced solar array output (-10% Energy; relying on RTG).");
+      } else {
+        logMsg("Clear orbital skies. Solar arrays & RTGs recharged (+16% Energy).");
+      }
+
+      updateUI();
+      checkWinLoss();
+    }
+
+    function checkWinLoss() {
+      if (state.life <= 0) {
+        state.gameOver = true;
+        logMsg("MISSION FAILURE: Life Support reached 0%. Refresh or Replay Intro to try again.");
+      } else if (state.science >= 100) {
+        state.gameOver = true;
+        logMsg("MISSION ACCOMPLISHED: 100 Science Points achieved! Outpost certified.");
+      } else if (state.sol > state.maxSol) {
+        state.gameOver = true;
+        logMsg("MISSION ENDED: 15 Sols elapsed before reaching 100 Science Points.");
+      }
+      updateUI();
+    }
+  </script>
+</body>
+</html>
