@@ -451,7 +451,7 @@
     <div class="scanline"></div>
 
     <div class="hero-actions">
-      <a href="/game" class="launch-btn" id="play-game-btn">
+      <a href="game.html" class="launch-btn" id="play-game-btn">
         Play Game &#9654;
       </a>
       <a href="#mission-briefing" class="secondary-btn">
@@ -512,7 +512,7 @@
   </footer>
 
   <script>
-    // ==================== SMOOTH PAGE TRANSITION ====================
+    // ==================== SMOOTH PAGE TRANSITION & ENERGY CARRYOVER ====================
     const transitionEl = document.getElementById('page-transition');
     const playGameBtn = document.getElementById('play-game-btn');
 
@@ -523,6 +523,7 @@
     if (playGameBtn) {
       playGameBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        sessionStorage.setItem('astronuggets_deflector_energy', Math.round(energy));
         const destination = playGameBtn.getAttribute('href');
         transitionEl.classList.remove('loaded');
         transitionEl.classList.add('leaving');
@@ -581,7 +582,6 @@
       isTouch: false
     };
 
-    // Scale asteroid count & star count proportionally to screen area so mobile isn't crowded
     function getTargetAsteroidCount() {
       const area = window.innerWidth * window.innerHeight;
       return Math.max(6, Math.min(22, Math.round(area / 72000)));
@@ -720,7 +720,7 @@
       if (e.target.closest('a, button')) return;
       if (e.touches.length > 0) {
         const t = e.touches[0];
-        pointer.active = false; // Reset prev position so velocity doesn't spike between taps
+        pointer.active = false;
         updatePointerPosition(t.clientX, t.clientY, true);
         isCharging = true;
       }
@@ -768,7 +768,6 @@
 
     // ==================== ASTEROID GENERATOR ====================
     function createAsteroid(spawnOffscreen = false) {
-      // Slightly smaller asteroids on mobile screens so they don't dominate the viewport
       const sizeScale = width < 600 ? 0.72 : 1.0;
       const radius = (Math.random() * 24 + 10) * sizeScale;
       const vertices = Math.floor(Math.random() * 6) + 9;
@@ -841,7 +840,6 @@
       };
     }
 
-    // Initialize viewport dimensions and entities
     resize();
 
     function fireBullet() {
@@ -1138,7 +1136,6 @@
           const dx = a.x - pointer.x;
           const dy = a.y - pointer.y;
           const dist = Math.hypot(dx, dy);
-          // Slightly more forgiving touch hitbox on fingers so swiping feels responsive
           const baseCursorRadius = pointer.isTouch ? 14 : 5;
           const cursorRadius = baseCursorRadius + (energy / 100) * 6;
           const hitRadius = a.radius + cursorRadius;
