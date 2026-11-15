@@ -710,6 +710,8 @@
       hist: [],
       wings: 0,
       acted: false,
+      wasActed: true,
+      idle: 0,
       crisisPending: false,
       rover: { drive: 0, armor: 0, drill: 0, lvl: 0 },
       samples: 0,
@@ -2547,7 +2549,7 @@
       { const why = advanceReason(); if (why) { SFX.alarm(); toast(why); return; } }
       nextSolBtn.blur();
       SFX.click();
-      state.acted = false;
+      state.wasActed = state.acted; state.acted = false;
       startDayAnim(state.sol);
 
       const ev = state.forecast;
@@ -2589,7 +2591,7 @@
       logEvent(msg + forecastText(state.forecast), WHY[ev.type]);
 
       if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) {
-        endGame(false, `Life support failed on Sol ${state.sol}. Every system uses power, so power is the real budget.`);
+        endGame(false, `Life support failed on Sol ${state.sol}. ${state.idle >= 3 ? 'The base was left unattended, so its systems wore down and nothing was maintained or upgraded.' : 'Every system uses power, so power is the real budget.'}`);
       } else if (state.dose >= 100) {
         endGame(false, `The crew hit the radiation limit on Sol ${state.sol} and had to head home.`);
       } else if (state.science >= state.scienceGoal) {
@@ -3421,6 +3423,13 @@
       const n = spawnScrapGroup();
       if (n) m += `🔩 ${n} piece${n > 1 ? 's' : ''} of scrap appeared on the map. `;
       m += mcNewSol();
+      if (state.wasActed) state.idle = 0;
+      else {
+        state.idle++;
+        const pen = Math.min(12, state.idle * 2);
+        state.o2 = Math.max(0, state.o2 - pen); state.h2o = Math.max(0, state.h2o - pen); state.food = Math.max(0, state.food - pen);
+        m += `⚠️ Nobody tended the base. Unmaintained systems wear down (-${pen}% O₂, H₂O and food extra, and it gets worse every idle sol). `;
+      }
       recordHist();
       return m;
     }
@@ -4013,7 +4022,6 @@
       if (state.mode !== 'game' || state.gameOver) return '';
       if (dayAnim) return 'Wait for the day to finish passing...';
       if (state.crisisPending || crisisEl.classList.contains('active')) return 'Deal with the surprise event first.';
-      if (!state.acted) return 'Do at least one action first: press a wall button inside a module, grab scrap or send the rover.';
       return '';
     }
     function refreshAdvance() {
