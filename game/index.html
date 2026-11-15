@@ -295,6 +295,7 @@
     .stats-note { color: #94a3b8; font-size: 0.78rem; line-height: 1.5; margin: 0.4rem 0 0.2rem; }
     @media (max-width: 700px) { .set-row { flex-direction: column; align-items: flex-start; } }
   
+    #next-sol-btn.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.7); }
     .rv-card, .mc-card { display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; padding: 0.6rem 0.75rem; margin-bottom: 0.4rem; background: rgba(15,23,42,0.85); border: 1px solid #1e3a5f; border-radius: 10px; }
     .rv-card b, .mc-card b { color: #fff; font-size: 0.9rem; display: block; } .rv-card small, .mc-card small { display: block; color: #94a3b8; font-size: 0.76rem; line-height: 1.4; margin-top: 2px; }
     .rv-status { padding: 0.55rem 0.75rem; border: 1px solid #22d3ee; border-radius: 10px; background: rgba(8,47,73,0.5); color: #e0f2fe; font-size: 0.85rem; margin-bottom: 0.5rem; }
@@ -312,9 +313,18 @@
     .cr-ch-msg { margin-top: 0.4rem; color: #cbd5e1; font-size: 0.8rem; line-height: 1.4; } .cr-ch-lock { margin-top: 0.35rem; color: #fca5a5; font-size: 0.78rem; }
     .cr-note { padding: 0.5rem 0.7rem; border: 1px solid #f59e0b; background: rgba(120,53,15,0.35); color: #fde68a; border-radius: 10px; font-size: 0.82rem; margin-bottom: 0.5rem; text-align: left; }
     .cr-result { text-align: left; padding: 0.4rem 0; }
-    #day-banner { position: fixed; top: 4.6rem; left: 50%; transform: translate(-50%, -14px); z-index: 55; background: rgba(8,13,26,0.92); border: 1px solid #fbbf24; color: #fef3c7; padding: 0.5rem 1.1rem 0.7rem; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; min-width: 200px; }
+    #day-banner { position: fixed; top: 24%; left: 50%; transform: translate(-50%, -14px); z-index: 55; background: rgba(8,13,26,0.92); border: 1px solid #fbbf24; color: #fef3c7; padding: 0.5rem 1.1rem 0.7rem; border-radius: 14px; opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s; text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.85rem; min-width: 200px; }
+    #day-banner { display: none !important; }
     #day-banner.on { opacity: 1; transform: translate(-50%, 0); } #db-icon { font-size: 1.4rem; margin-right: 0.5rem; vertical-align: middle; }
     .db-bar { height: 4px; background: #334155; border-radius: 4px; margin-top: 0.45rem; overflow: hidden; } .db-bar i { display: block; height: 100%; width: 0; background: #fbbf24; }
+    .fps-controls-bar { top: 50% !important; left: 1rem !important; transform: translateY(-50%); max-width: 178px; line-height: 1.6; font-size: 0.7rem !important; }
+    .fps-controls-bar strong { display: block; font-family: 'Orbitron', sans-serif; color: #6ee7b7; margin-bottom: 0.2rem; letter-spacing: 0.08em; }
+    .cr-choice { display: flex !important; align-items: center; gap: 0.8rem; text-align: left !important; padding: 0.7rem 0.9rem !important; border-left: 4px solid #38bdf8 !important; background: linear-gradient(90deg, rgba(14,40,70,0.92), rgba(15,23,42,0.92)) !important; }
+    .cr-choice:hover:not(:disabled) { border-left-color: #4ade80 !important; box-shadow: 0 0 18px rgba(56,189,248,0.25); }
+    .cr-choice:disabled { border-left-color: #475569 !important; }
+    .cr-key { flex-shrink: 0; width: 2rem; height: 2rem; border-radius: 8px; background: #0c4a6e; color: #e0f2fe; display: grid; place-items: center; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.9rem; border: 1px solid #38bdf8; }
+    .cr-ch-title { font-family: 'Orbitron', sans-serif; font-size: 0.82rem; color: #fff; letter-spacing: 0.03em; margin-bottom: 0.25rem; }
+    .cr-ch-cost { font-size: 0.86rem; color: #fcd34d; font-weight: 600; } .cr-lock { color: #fca5a5; }
   </style>
 
   <script type="importmap">
@@ -366,8 +376,6 @@
     <div class="hud-group">
       <button type="button" class="nav-btn exit-btn game-only" id="exit-building-btn">&#8592; Exit Building [Q]</button>
       <button type="button" class="nav-btn game-only" id="toggle-fps-btn">First-Person EVA [V]</button>
-      <button type="button" class="nav-btn game-only" id="rover-btn">&#128665; Rover</button>
-      <button type="button" class="nav-btn game-only" id="mc-btn">&#9993;&#65039; Earth</button>
       <button type="button" class="nav-btn" id="help-btn">How To Play</button>
       <button type="button" class="nav-btn" id="sound-btn">Sound: On</button>
       <button type="button" class="nav-btn" id="settings-btn">&#9881; Settings</button>
@@ -588,9 +596,9 @@
     function saveSettings() { try { localStorage.setItem(SET_KEY, JSON.stringify(SET)); } catch (_) {} }
     // drain = life-support use per sol, ev = chance of a surprise event, goal = science needed, dose = radiation multiplier
     const DIFFS = {
-      easy:   { drain: 0.7,  ev: 0.5,  goal: 60,  dose: 0.6, pw: 3, flares: 4, name: 'Easy',   blurb: '+3 kW power capacity, gentle drain, fewer surprises, 60 science to win.' },
-      normal: { drain: 0.85, ev: 0.65, goal: 80,  dose: 0.8, pw: 0, flares: 6, name: 'Normal', blurb: 'Standard power capacity. 80 science to win.' },
-      hard:   { drain: 1,    ev: 0.75, goal: 100, dose: 1,   pw: -1, flares: 7, name: 'Hard',   blurb: '-1 kW power capacity, full drain, many surprises, 100 science to win.' }
+      easy:   { drain: 0.7,  ev: 0.9,  goal: 60,  dose: 0.6, pw: 3, flares: 4, name: 'Easy',   blurb: '+3 kW power capacity, gentle drain, 60 science to win.' },
+      normal: { drain: 0.85, ev: 0.9, goal: 80,  dose: 0.8, pw: 0, flares: 6, name: 'Normal', blurb: 'Standard power capacity. 80 science to win. (All levels: a surprise event hits 90% of sols.)' },
+      hard:   { drain: 1,    ev: 0.9, goal: 100, dose: 1,   pw: -1, flares: 7, name: 'Hard',   blurb: '-1 kW power capacity, full drain, 100 science to win.' }
     };
     if (!DIFFS[SET.diff]) SET.diff = 'normal';
     function DF() { return DIFFS[state.diff] || DIFFS.normal; }
@@ -701,7 +709,9 @@
       on: { habitation: true, solar: true, research: true, silo: true, comms: true },
       hist: [],
       wings: 0,
-      rover: { drive: 0, armor: 0, drill: 0 },
+      acted: false,
+      crisisPending: false,
+      rover: { drive: 0, armor: 0, drill: 0, lvl: 0 },
       samples: 0,
       mc: { list: [], answered: 0, missed: 0 },
       expedition: null,
@@ -2160,6 +2170,7 @@
       else if (data.kind === 'exit-door') exitBuilding(false);
       else if (data.kind === 'scrap') claimScrap(data.ref);
       else if (data.kind === 'poi') openSite(data.site);
+      else if (data.kind === 'rover') openRover();
     }
 
     renderer.domElement.addEventListener('pointerdown', (e) => {
@@ -2261,6 +2272,7 @@
       ...[1, 2, 3].map(() => ({ type: 'dust', label: 'Mars dust storm', date: 'Mars mission archive', sev: 0 })),
       ...Array.from({ length: 17 - DIFFS[SET.diff].flares }, () => ({ type: 'quiet', label: 'Quiet Sun', date: '', sev: 0 }))
     ]);
+    { const qi = state.schedule.findIndex((e) => e.type === 'quiet'); if (qi > 0) { const t = state.schedule[0]; state.schedule[0] = state.schedule[qi]; state.schedule[qi] = t; } }
     state.forecast = state.schedule[0];
 
     function forecastText(ev) {
@@ -2532,8 +2544,10 @@
     const nextSolBtn = document.getElementById('next-sol-btn');
     nextSolBtn.addEventListener('click', () => {
       if (state.gameOver) return;
+      { const why = advanceReason(); if (why) { SFX.alarm(); toast(why); return; } }
       nextSolBtn.blur();
       SFX.click();
+      state.acted = false;
       startDayAnim(state.sol);
 
       const ev = state.forecast;
@@ -2583,7 +2597,7 @@
       } else if (missionOver) {
         endGame(false, `You survived all ${state.maxSols} sols with ${state.science}/${state.scienceGoal} science. Try balancing power differently!`);
       } else {
-        if (state.sol < state.maxSols && Math.random() < DF().ev) setTimeout(triggerCrisis, 2600);
+        if (state.sol < state.maxSols && Math.random() < DF().ev) { state.crisisPending = true; setTimeout(() => { state.crisisPending = false; triggerCrisis(); }, 2600); }
         nextSolBtn.innerHTML = state.sol === state.maxSols ? 'Finish Mission &#9654;' : `Advance to Sol ${state.sol + 1} &#9654;`;
       }
     });
@@ -3134,7 +3148,7 @@
     function claimScrap(g) {
       const i = scrapPickups.indexOf(g);
       if (i < 0) return;
-      scrapPickups.splice(i, 1); scene.remove(g); mcEvent('scrap');
+      scrapPickups.splice(i, 1); scene.remove(g); mcEvent('scrap'); state.acted = true;
       const hi = clickableZones.indexOf(g.userData.hit); if (hi >= 0) clickableZones.splice(hi, 1);
       if (hoveredGroup === g) hoveredGroup = null;
       state.fpsTargetedObject = null; hoverTag.style.opacity = '0';
@@ -3211,7 +3225,7 @@
           state.footDone[s.id] = state.sol;
           state.science = Math.min(state.scienceGoal, state.science + 2);
           state.dose += 2 * DF().dose;
-          state.stats.footSurveys++;
+          state.stats.footSurveys++; state.acted = true;
           logEvent(`You hiked to the ${s.name} and collected samples by hand (+2 science, small dose).`, s.fact);
           toast('🥾 Survey done: +2 science'); updateTopHUD(); recordHist(); openSite(s);
         });
@@ -3219,6 +3233,7 @@
       $('site-modal').classList.add('active');
     }
     function launchRover(s) {
+      state.acted = true;
       state.power -= 2;
       state.expedition = { site: s, returnSol: state.sol + tripDays(s), phase: 'out', leg: 'orbit', due: false, damaged: false, partial: 1 };
       SFX.rover();
@@ -3379,7 +3394,7 @@
     }
     function afterAction(fid, unit, opts) {
       if (opts.isSwitch) return;
-      state.stats.actions++;
+      state.stats.actions++; state.acted = true;
       { const EV = { 'TRANSMIT SCIENCE TO EARTH': 'transmit', 'RUN LASER SPECTROMETER': 'spectro', 'HARVEST HYDROPONIC CROPS': 'harvest' }; if (opts.label && EV[opts.label]) mcEvent(EV[opts.label]); }
       if (FAC_IDS.includes(fid)) { sendCrewExterior(fid); sendCrewInterior(unit); toast(`👩‍🚀 Crew heading to the ${MODNAME[fid]}`); }
     }
@@ -3448,7 +3463,7 @@
           onPress: () => { use('cells'); state.scrap -= 2; state.batteryCap += 2; state.battery = Math.min(state.batteryCap, state.battery + 2); done(`Battery bank upgraded to ${state.batteryCap} kW capacity.`); } });
       }
       if (id === 'research') {
-        B({ x: -6.55, z: 4.7, rotY: Math.PI / 2, label: 'ANALYZE ROVER SAMPLES', labelFn: () => `ANALYZE ROVER SAMPLES (${state.samples})`, costText: '-1 kW',
+        B({ x: -6.55, z: 1.4, rotY: Math.PI / 2, label: 'ANALYZE ROVER SAMPLES', labelFn: () => `ANALYZE ROVER SAMPLES (${state.samples})`, costText: '-1 kW',
           subText: '', subFn: () => state.samples ? `Turn ${state.samples} science of rover samples into real results.` : 'No samples yet. Send the rover to a site and bring it home.',
           getStatus: () => ({ disabled: state.samples <= 0 || state.power < 1 || state.sheltered, done: false }),
           onPress: () => { state.power -= 1; const g = sciGain(state.samples); state.science = Math.min(state.scienceGoal, state.science + g); state.stats.roverSci += g; state.samples = 0; done(`Rover samples analysed: +${g} science.`); } });
@@ -3468,7 +3483,10 @@
           onPress: () => { use('soil'); state.scrap -= 1; state.bs.crop = 100; done('Soil washed. Crop health 100%.'); } });
       }
       if (id === 'comms') {
-        B({ x: -6.55, z: 4.7, rotY: Math.PI / 2, label: 'SEND REPORT TO EARTH', labelFn: () => `SEND REPORT TO EARTH (${mcReady()} ready)`, costText: '-1 kW',
+        B({ x: -6.55, z: 1.4, rotY: Math.PI / 2, isSwitch: true, capHex: () => 0x60a5fa, accentHex: 0x60a5fa, label: 'MISSION CONTROL SCREEN', labelFn: () => { const r = mcReady(); return r ? `✉️ EARTH MESSAGES (${r} READY!)` : '✉️ EARTH MESSAGES'; }, costText: 'Click to read', subText: '',
+          subFn: () => { const a = state.mc.list.filter((c) => c.status === 'active').length; return a ? `${a} request${a > 1 ? 's' : ''} from Earth waiting for you.` : 'Check the screen for new requests from Mission Control.'; },
+          getStatus: () => ({ disabled: false, done: false }), onPress: () => { openMC(); } });
+        B({ x: -6.55, z: -0.6, rotY: Math.PI / 2, label: 'SEND REPORT TO EARTH', labelFn: () => `SEND REPORT TO EARTH (${mcReady()} ready)`, costText: '-1 kW',
           subText: '', subFn: () => `Reports ready: ${mcReady()}. Earth replies ${state.levels.comms >= 2 ? '1 sol' : '2 sols'} after you send.`,
           getStatus: () => ({ disabled: mcReady() === 0 || state.power < 1 || state.labsOff, done: false }),
           onPress: () => { state.power -= 1; const n = mcSend(); done(`Report${n > 1 ? 's' : ''} sent to Earth! Mission Control will reply in ${state.levels.comms >= 2 ? 1 : 2} sol(s).`); updateMCBadge(); } });
@@ -3743,7 +3761,7 @@
       for (const id of FAC_IDS) labelSprites[id].s.visible = lv;
       updateCrew(dt, t);
       updateDetails(t);
-      updateLabelScale(); updateDayCycle(dt);
+      updateLabelScale(); updateDayCycle(dt); refreshAdvance();
     }
     const TIPS = { 'pill-o2': 'Oxygen. Drops each sol. 0% = mission over.', 'pill-h2o': 'Water. Drops each sol. 0% = mission over.', 'pill-food': 'Food. Drops each sol. 0% = mission over.', 'pill-dose': 'Radiation absorbed by the crew. Only goes up. 100% = mission over.', 'pill-pwr': 'Power available today (kW). Every action spends it.', 'pill-batt': 'Stored power you can save for later.', 'pill-next': 'Estimated power tomorrow after standby costs.' };
     for (const k in TIPS) { const e = $(k); if (e) e.title = TIPS[k]; }
@@ -3751,14 +3769,32 @@
     applySettings(true);
 
     // ==================== v10.5: ROVER COMMANDS, MISSION CONTROL, SAFE CRISES, DAY/NIGHT ====================
+    // ---------------- third option for every decision ----------------
+    const THIRD_CHOICE = {
+      "Spacewalk: brush the panels": { label: "Rig automatic brush arms", tradeoff: "-2 Scrap · +2 kW", msg: "Scrap brushes sweep the panels clean for you.", fx: {"scrap": -2, "power": 2} },
+      "Keep working through it": { label: "Shelter in the storm cellar", tradeoff: "-3 science · -2% dose", msg: "The crew waited it out in the shielded cellar.", fx: {"science": -3, "dose": -2} },
+      "Melt it into the water tanks": { label: "Share it between water and crops", tradeoff: "-1 kW · +8% H₂O · +6% food", msg: "The ice was split between the tanks and the trays.", fx: {"power": -1, "h2o": 8, "food": 6} },
+      "Patch it with spare parts": { label: "Seal the hatch and live without that room", tradeoff: "-5% O₂ · -5 morale", msg: "The airlock is closed off, but the crew feels cramped.", fx: {"o2": -5, "morale": -5} },
+      "Use the backup antenna anyway": { label: "Ask the orbiter to relay a message", tradeoff: "-1 kW · +2 science", msg: "A passing orbiter carried a short message home.", fx: {"power": -1, "science": 2} },
+      "Rinse the soil with water": { label: "Mix in clean soil from outside", tradeoff: "-1 Scrap · +10% food", msg: "Fresh sand diluted the toxic salts.", fx: {"scrap": -1, "food": 10} },
+      "Repair it with spare parts": { label: "Patch it quickly with tape", tradeoff: "-1 kW · +2 science", msg: "The rover limps along on a rough patch.", fx: {"power": -1, "science": 2} },
+      "Take an exercise break": { label: "Do a short stretch break", tradeoff: "-1 kW · +3 morale", msg: "A quick stretch lifted everyone's mood.", fx: {"power": -1, "morale": 3} },
+      "Fix the wiring with spare parts": { label: "Run on half power until it cools", tradeoff: "-2 kW · -1 science", msg: "The lab ran slowly while the battery cooled.", fx: {"power": -2, "science": -1} },
+      "Patch the hole with spare parts": { label: "Foam-seal it for now", tradeoff: "-1 Scrap · -4% O₂", msg: "Sealing foam stopped most of the leak.", fx: {"scrap": -1, "o2": -4} },
+      "Leave the panels open to get cleaned": { label: "Tilt the panels to shake off dust", tradeoff: "+20 panel cleanliness · -1 kW today", msg: "Tilting shook off some of the dust.", fx: {"clean": 20, "power": -1} },
+      "Stop and inspect every seal": { label: "Check only the key systems", tradeoff: "-1 kW · +2 science · -10 calibration", msg: "A quick check caught the big problems only.", fx: {"power": -1, "science": 2, "calib": -10} },
+      "Rig a repair from spare parts": { label: "Open a vent for a moment", tradeoff: "-6% O₂ · +1 kW", msg: "Venting cleared the scrubber but wasted some air.", fx: {"o2": -6, "power": 1} },
+      "Trim and dispose of the moldy plants": { label: "Spray with antifungal from the lab", tradeoff: "-1 Scrap · +10 crop health · -3% food", msg: "The spray beat back the mold, and some plants were lost.", fx: {"scrap": -1, "crop": 10, "food": -3} },
+      "Wait for Earth to send a fix": { label: "Ask Earth for a quick patch", tradeoff: "-1 kW · -2 science", msg: "A quick patch arrived, and the rover is back on its wheels.", fx: {"power": -1, "science": -2} },
+      "Run all the heaters": { label: "Heat only the sleeping area", tradeoff: "-2 kW · -6 morale", msg: "Only the bunks stayed warm.", fx: {"power": -2, "morale": -6} },
+      "Launch the scout": { label: "Do a short test hop", tradeoff: "-1 kW · +4 science", msg: "The scout made a short, safe hop.", fx: {"power": -1, "science": 4} },
+      "Drill a rock core sample": { label: "Send the rover for close-up photos", tradeoff: "-2 kW · +5 science", msg: "The rover brought back sharp close-ups.", fx: {"power": -2, "science": 5} },
+      "Send a big data package": { label: "Send a medium data package", tradeoff: "-2 kW · +4 science", msg: "A medium package fit the relay window.", fx: {"power": -2, "science": 4} },
+    };
+    CRISES.forEach((c) => { const t = THIRD_CHOICE[c.choices[0].label]; if (t && c.choices.length < 3) c.choices.push(t); });
     const tripDays = (s) => Math.max(1, s.days - state.rover.drive);
     const RISK = [0.6, 0.3, 0];
     const roverReward = (s) => Math.round((!state.surveyed[s.id] ? s.sci : Math.ceil(s.sci * 0.4)) * (1 + 0.25 * state.rover.drill));
-    const RUP = [
-      { k: 'drive', name: 'Drive motors', emoji: '⚙️', desc: 'Each level makes trips 1 sol shorter (never under 1 sol).', cost: [2, 3] },
-      { k: 'armor', name: 'Armor & shielding', emoji: '🛡️', desc: 'Chance a storm or flare damages the rover while away: 60% → 30% → 0%.', cost: [2, 3] },
-      { k: 'drill', name: 'Sample drill', emoji: '⛏️', desc: 'Each level brings back 25% more science from every trip.', cost: [2, 3] }
-    ];
     function recallRover() {
       const ex = state.expedition; if (!ex || ex.phase === 'back') return;
       ex.partial = ex.phase === 'there' ? 0.6 : 0; ex.phase = 'back';
@@ -3774,40 +3810,36 @@
       if (ex.phase === 'there') return `🔭 Exploring the ${ex.site.name}. Due back on Sol ${ex.returnSol}.${dmg}`;
       return `↩️ Driving home with samples.${dmg}`;
     }
+    const ROVER_UP = [
+      { cost: 3, text: 'Faster motors + armor plating: trips get 1 sol shorter and storms are less likely to hurt it.' },
+      { cost: 3, text: 'Full shielding + better drill: storms can no longer hurt it and it brings back 25% more science.' }
+    ];
     function renderRover() {
-      const ex = state.expedition, busy = !!ex, noPow = state.power < 2;
-      const risk = Math.round(RISK[state.rover.armor] * 100);
-      const sites = SITES.map((s, i) => {
-        const why = busy ? 'Rover is busy' : (noPow ? 'Needs 2 kW today' : '');
-        return `<div class="rv-card"><div><b>${s.emoji} ${s.name}</b><small>${tripDays(s)} sol trip · about +${roverReward(s)} science${!state.surveyed[s.id] && s.scrap ? ` + ${s.scrap} scrap` : ''}${state.surveyed[s.id] ? ' (visited before: smaller reward)' : ' (first visit bonus)'}</small></div>
-          <button type="button" class="chip ${why ? '' : 'on'}" data-send="${i}" ${why ? 'disabled' : ''}>${why || 'Send · −2 kW'}</button></div>`;
-      }).join('');
-      const ups = RUP.map((u) => {
-        const lv = state.rover[u.k], max = lv >= 2, cost = u.cost[lv], can = !max && state.scrap >= cost;
-        return `<div class="rv-card"><div><b>${u.emoji} ${u.name} <span class="rv-lv">Lv ${lv}/2</span></b><small>${u.desc}</small></div>
-          <button type="button" class="chip ${can ? 'on' : ''}" data-up="${u.k}" ${can ? '' : 'disabled'}>${max ? 'Maxed' : (can ? `Upgrade · −${cost} scrap` : `Need ${cost} scrap`)}</button></div>`;
-      }).join('');
+      const ex = state.expedition, lvl = state.rover.lvl, max = lvl >= 2;
+      const can = !max && state.scrap >= ROVER_UP[Math.min(lvl, 1)].cost;
+      const canRecall = !!ex && ex.phase !== 'back';
       $('rover-body').innerHTML =
         `<div class="rv-status">${roverStatusText()}</div>
-         <div class="rv-status" style="border-color:#c084fc">🧪 Samples waiting to be analyzed: <b>${state.samples}</b> science. Press <i>ANALYZE ROVER SAMPLES</i> in the Research Lab.</div>
-         <h3 class="rv-h">Send it somewhere</h3>${sites}
-         <small class="rv-note">If a dust storm or solar flare passes while the rover is away it can be damaged (your risk right now: <b>${risk}%</b>).</small>
-         <h3 class="rv-h">Orders</h3>
-         <div class="rv-card"><div><b>↩️ Recall the rover</b><small>Bring it home right now. Recalled before arriving = nothing; recalled while exploring = 60% of the samples.</small></div>
-           <button type="button" class="chip ${busy && ex.phase !== 'back' ? 'on' : ''}" data-recall="1" ${busy && ex.phase !== 'back' ? '' : 'disabled'}>Recall</button></div>
-         <h3 class="rv-h">Upgrades (cost scrap · you have ${state.scrap})</h3>${ups}`;
+         <div class="rv-card"><div><b>🧪 Samples waiting: ${state.samples} science</b><small>Analyze them with the button in the Research Lab.</small></div></div>
+         <div class="rv-card"><div><b>↩️ Call it home</b><small>${canRecall ? 'Brings the rover back now. Recalled while exploring = 60% of the samples.' : 'Only works while the rover is out on a trip.'}</small></div>
+           <button type="button" class="chip ${canRecall ? 'on' : ''}" data-recall="1" ${canRecall ? '' : 'disabled'}>Recall</button></div>
+         <div class="rv-card"><div><b>⚙️ Rover upgrade <span class="rv-lv">Lv ${lvl}/2</span></b><small>${max ? 'Fully upgraded!' : ROVER_UP[lvl].text}</small></div>
+           <button type="button" class="chip ${can ? 'on' : ''}" data-up="1" ${can ? '' : 'disabled'}>${max ? 'Maxed' : (can ? `Upgrade · −${ROVER_UP[lvl].cost} scrap` : `Need ${ROVER_UP[lvl].cost} scrap`)}</button></div>
+         <small class="rv-note">To send the rover somewhere, click one of the glowing beacons out on the map.</small>`;
     }
-    function openRover() { if (state.mode !== 'game') return; releasePointerLock(); renderRover(); $('rover-modal').classList.add('active'); }
-    $('rover-btn').addEventListener('click', () => { SFX.click(); openRover(); });
+    function openRover() { if (state.mode !== 'game' || isAnyModalOpen()) return; releasePointerLock(); renderRover(); $('rover-modal').classList.add('active'); }
     $('rover-close').addEventListener('click', () => { SFX.click(); $('rover-modal').classList.remove('active'); requestFpsPointerLock(); });
     $('rover-body').addEventListener('click', (e) => {
       const b = e.target.closest('button'); if (!b || b.disabled) return;
       SFX.click();
-      if (b.dataset.send !== undefined) { launchRover(SITES[+b.dataset.send]); }
-      else if (b.dataset.recall) recallRover();
-      else if (b.dataset.up) {
-        const u = RUP.find((r) => r.k === b.dataset.up), lv = state.rover[u.k], cost = u.cost[lv];
-        if (lv < 2 && state.scrap >= cost) { state.scrap -= cost; state.rover[u.k]++; SFX.upgrade(); toast(`${u.emoji} ${u.name} upgraded to level ${state.rover[u.k]}`); updateTopHUD(); }
+      if (b.dataset.recall) recallRover();
+      else if (b.dataset.up !== undefined) {
+        const lv = state.rover.lvl, cost = ROVER_UP[Math.min(lv, 1)].cost;
+        if (lv < 2 && state.scrap >= cost) {
+          state.scrap -= cost; state.rover.lvl++;
+          if (state.rover.lvl === 1) { state.rover.drive = 1; state.rover.armor = 1; } else { state.rover.armor = 2; state.rover.drill = 1; }
+          SFX.upgrade(); toast(`🚙 Rover upgraded to level ${state.rover.lvl}`); updateTopHUD();
+        }
       }
       if ($('rover-modal').classList.contains('active')) renderRover();
     });
@@ -3859,12 +3891,7 @@
       for (const c of state.mc.list) if (c.status === 'ready') { c.status = 'sent'; c.replySol = state.sol + delay; n++; }
       return n;
     }
-    function updateMCBadge() {
-      const b = $('mc-btn'); if (!b || !state.mc) return;
-      const ready = mcReady(), act = state.mc.list.filter((c) => c.status === 'active').length, sent = state.mc.list.filter((c) => c.status === 'sent').length;
-      b.textContent = `✉️ Earth${ready ? ` (${ready} ready!)` : (act + sent ? ` (${act + sent})` : '')}`;
-      b.classList.toggle('pulse', ready > 0);
-    }
+    function updateMCBadge() { if (state.insideBuilding) updateInteriorWallScreens(); }
     function renderMC() {
       const chip = (c) => {
         if (c.status === 'incoming') return `<span class="mc-chip gray">📡 Arrives Sol ${c.arrive}</span>`;
@@ -3881,8 +3908,7 @@
         (visible.length ? visible.map((c) => `<div class="mc-card ${c.status}"><div><b>${c.title}</b><small>${c.desc}</small><small>Reward: ${rewardText(c.reward)}</small></div>${chip(c)}</div>`).join('') : '<div class="mc-card"><div><b>No messages yet</b><small>The first message from Earth arrives on Sol 2.</small></div></div>') +
         (incoming ? `<small class="rv-note">📡 Next message is on its way and arrives on Sol ${incoming.arrive}.</small>` : '');
     }
-    function openMC() { if (state.mode !== 'game') return; releasePointerLock(); renderMC(); $('mc-modal').classList.add('active'); }
-    $('mc-btn').addEventListener('click', () => { SFX.click(); openMC(); });
+    function openMC() { if (state.mode !== 'game' || isAnyModalOpen()) return; releasePointerLock(); renderMC(); $('mc-modal').classList.add('active'); }
     $('mc-close').addEventListener('click', () => { SFX.click(); $('mc-modal').classList.remove('active'); requestFpsPointerLock(); });
 
     // ---------------- challenges (surprise events): always answerable, clear results ----------------
@@ -3908,6 +3934,7 @@
     function triggerCrisis() {
       if (state.gameOver || state.mode !== 'game') return;
       if (crisisEl.classList.contains('active')) return;
+      ['rover-modal', 'mc-modal', 'site-modal', 'settings-modal', 'stats-modal'].forEach((id) => $(id).classList.remove('active'));
       releasePointerLock();
       if (!state.crisisDeck.length) state.crisisDeck = shuffle([...CRISES]);
       const c = state.crisisDeck.pop();
@@ -3916,36 +3943,26 @@
       $('cr-title').textContent = c.title; $('cr-desc').textContent = c.desc; $('cr-fact').textContent = 'Real science: ' + c.fact;
       const box = $('cr-choices'); box.innerHTML = '';
       const choices = c.choices.slice();
-      const stuck = !choices.some((ch) => canPay(ch.fx));
-      if (stuck) {
-        const note = document.createElement('div'); note.className = 'cr-note';
-        note.textContent = '⚠️ You do not have enough power or scrap for either fix, so you can only ride it out. (Tip: keep a little power and scrap in reserve for surprises.)';
-        box.appendChild(note);
-        choices.push({ label: 'Ride it out (costs nothing)', msg: 'With no power or scrap left to respond, the crew simply had to endure it.', fx: { o2: -6, h2o: -4, dose: 2 } });
-      }
-      choices.forEach((ch) => {
+      if (!choices.some((ch) => canPay(ch.fx))) choices.push({ label: 'Ride it out', tradeoff: '-6% O₂ · -4% H₂O · +2% radiation', msg: 'With no power or scrap left to respond, the crew simply had to endure it.', fx: { o2: -6, h2o: -4, dose: 2 } });
+      choices.forEach((ch, i) => {
         const ok = canPay(ch.fx);
         const b = document.createElement('button'); b.type = 'button'; b.className = 'action-btn cr-choice'; b.disabled = !ok;
-        b.innerHTML = `<div class="cr-ch-title">${ch.label}</div>${fxChipsHTML(ch.fx)}<div class="cr-ch-msg">What happens: ${ch.msg}</div>${ok ? '' : `<div class="cr-ch-lock">🔒 Not available: ${shortText(ch.fx)}</div>`}`;
+        b.innerHTML = `<div class="cr-key">${String.fromCharCode(65 + i)}</div><div class="cr-txt"><div class="cr-ch-title">${ch.label}</div><div class="cr-ch-cost">${ch.tradeoff}${ok ? '' : ' · <span class="cr-lock">not enough!</span>'}</div></div>`;
         b.addEventListener('click', () => {
           SFX.click();
           applyFx(ch.fx);
           state.crisesHandled++;
           if (c.vfx === 'dust') { state.dustUntil = state.sol + 1; state.bs.clean = Math.max(0, state.bs.clean - 25); }
           if (c.vfx === 'shake') { state.shake = 0.6; state.bs.morale = Math.max(0, state.bs.morale - 10); }
-          state.lastWallMessage = `${ch.msg} (${ch.label})`;
+          crisisEl.classList.remove('active');
+          state.lastWallMessage = `${ch.msg} (${ch.tradeoff})`;
           updateTopHUD();
           if (state.insideBuilding) updateInteriorWallScreens();
-          logEvent(ch.msg, c.fact);
-          if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) { crisisEl.classList.remove('active'); endGame(false, 'A crisis drained your life support on Sol ' + state.sol + '.'); return; }
-          if (state.dose >= 100) { crisisEl.classList.remove('active'); endGame(false, 'A crisis pushed the crew past the radiation limit.'); return; }
-          $('cr-badge').textContent = 'RESULT';
-          $('cr-title').textContent = '✅ You chose: ' + ch.label;
-          $('cr-desc').textContent = ch.msg;
-          box.innerHTML = `<div class="cr-result">${fxChipsHTML(ch.fx)}</div>`;
-          const go = document.createElement('button'); go.type = 'button'; go.className = 'primary-cta'; go.style.marginTop = '0.8rem'; go.textContent = 'Continue ▶';
-          go.addEventListener('click', () => { SFX.click(); crisisEl.classList.remove('active'); requestFpsPointerLock(); });
-          box.appendChild(go);
+          logEvent(ch.msg + ' (' + ch.tradeoff + ')', c.fact);
+          toast(`${ch.label}: ${ch.tradeoff}`);
+          if (state.o2 <= 0 || state.h2o <= 0 || state.food <= 0) endGame(false, 'A crisis drained your life support on Sol ' + state.sol + '.');
+          else if (state.dose >= 100) endGame(false, 'A crisis pushed the crew past the radiation limit.');
+          else requestFpsPointerLock();
         });
         box.appendChild(b);
       });
@@ -3991,6 +4008,19 @@
       });
     }
 
+    // ---------------- the Advance button is locked until you have acted and nothing is in progress ----------------
+    function advanceReason() {
+      if (state.mode !== 'game' || state.gameOver) return '';
+      if (dayAnim) return 'Wait for the day to finish passing...';
+      if (state.crisisPending || crisisEl.classList.contains('active')) return 'Deal with the surprise event first.';
+      if (!state.acted) return 'Do at least one action first: press a wall button inside a module, grab scrap or send the rover.';
+      return '';
+    }
+    function refreshAdvance() {
+      const b = $('next-sol-btn'), r = advanceReason();
+      b.classList.toggle('locked', !!r); b.title = r;
+    }
+
     // ==================== v10.6: DOORS FOR EVERY MODULE, SOLID OBJECTS ====================
     (function huts() {
       function hut(id, label, cx, cz, w, d, h, col) {
@@ -4024,6 +4054,13 @@
       const pad = EXTERIOR_PLATFORMS.find((b) => b.topY === 0.65);
       if (pad) { pad.minX = PAD_POS.x - 1.2; pad.maxX = PAD_POS.x + 1.2; pad.minZ = PAD_POS.z - 1.2; pad.maxZ = PAD_POS.z + 1.2; pad.topY = 6.0; }
       EXTERIOR_PLATFORMS.push({ minX: 0.38, maxX: 1.02, minZ: 3.78, maxZ: 4.42, bottomY: 0.9, topY: 4.2 });
+    })();
+
+    (function roverHit() {
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.5, 1.6), new THREE.MeshBasicMaterial({ visible: false }));
+      hit.position.set(0, 0.75, 0);
+      hit.userData = { kind: 'rover', label: '🚙 ROVER', subtitle: 'Click to see rover status', visualGroup: null };
+      rover.add(hit); clickableZones.push(hit);
     })();
 
     // ==================== MAIN 3D ANIMATION LOOP ====================
