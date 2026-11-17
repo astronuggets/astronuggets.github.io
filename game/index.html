@@ -1644,11 +1644,11 @@ body:not(.kids) #kids{display:none!important}
           }
         });
         createPhysicalWallButton({
-          x: 4.2, y: 0, z: -5.55, label: 'CREW MOVIE NIGHT', costText: '-1 kW',
-          subText: 'Boosts Crew Morale by +20%', accentHex: 0xa78bfa,
-          getStatus: () => ({ disabled: state.power < 1, done: !!state.used.movie }),
+          x: 4.2, y: 0, z: -5.55, label: 'CREW MOVIE NIGHT', costText: '-1 kW, -3 food',
+          subText: 'Boosts Crew Morale by +20%. Movie snacks use up 3% of the food.', accentHex: 0xa78bfa,
+          getStatus: () => ({ disabled: state.power < 1 || state.food < 10, done: !!state.used.movie }),
           onPress: () => {
-            state.used.movie = true; state.power -= 1; state.bs.morale = Math.min(100, state.bs.morale + 20);
+            state.used.movie = true; state.power -= 1; state.food = Math.max(0, state.food - 3); state.bs.morale = Math.min(100, state.bs.morale + 20);
             state.lastWallMessage = 'CREW MOVIE NIGHT: Crew Morale jumped +20%! High morale keeps science output at 100%.';
             logEvent('Movie night! The crew is happier.');
           }
@@ -1692,13 +1692,13 @@ body:not(.kids) #kids{display:none!important}
           }
         });
         createPhysicalWallButton({
-          x: -1.5, y: 0, z: -5.55, label: 'BRUSH DUST OFF PANELS', costText: '-1 Scrap',
-          subText: 'Restores 100% cleanliness & +2 kW' + noOutside(), accentHex: 0x34d399,
-          getStatus: () => ({ disabled: state.scrap < 1 || state.sheltered, done: !!state.used.brush }),
+          x: -1.5, y: 0, z: -5.55, label: 'BRUSH DUST OFF PANELS', costText: '-1 Scrap, -1 kW',
+          subText: 'Restores 100% cleanliness (a full reset, worth several kW over the next sols)' + noOutside(), accentHex: 0x34d399,
+          getStatus: () => ({ disabled: state.scrap < 1 || state.power < 1 || state.sheltered, done: !!state.used.brush }),
           onPress: () => {
-            state.used.brush = true; state.scrap -= 1; state.power += 2; state.bs.clean = 100;
-            state.lastWallMessage = 'SOLAR ARRAY BRUSHED CLEAN: Panel cleanliness at 100% and +2 kW added now.';
-            logEvent('Dust brushed off: +2 kW.');
+            state.used.brush = true; state.scrap -= 1; state.power -= 1; state.bs.clean = 100;
+            state.lastWallMessage = 'SOLAR ARRAY BRUSHED CLEAN: Panel cleanliness at 100%. Clean panels make more power every sol.';
+            logEvent('Dust brushed off: panels back to 100% clean.');
           }
         });
         createPhysicalWallButton({
@@ -1833,11 +1833,11 @@ body:not(.kids) #kids{display:none!important}
         });
         createPhysicalWallButton({
           x: -1.4, y: 0, z: -5.55, label: 'TEND & MIST CROPS', costText: '-1 kW',
-          subText: 'Waters & prunes plants (+30% Crop Health, +25% Water)', accentHex: 0x22d3ee,
+          subText: 'Waters & prunes plants (+30% Crop Health, +10% Water)', accentHex: 0x22d3ee,
           getStatus: () => ({ disabled: state.power < 1, done: !!state.used.tend }),
           onPress: () => {
             state.used.tend = true; state.power -= 1;
-            state.bs.crop = Math.min(100, state.bs.crop + 30); state.bs.water = Math.min(100, state.bs.water + 25);
+            state.bs.crop = Math.min(100, state.bs.crop + 30); state.bs.water = Math.min(100, state.bs.water + 10);
             state.lastWallMessage = `CROPS TENDED: Crop Health boosted to ${Math.round(state.bs.crop)}%.`;
             logEvent('Crops tended and healthy.');
           }
@@ -1878,15 +1878,14 @@ body:not(.kids) #kids{display:none!important}
 
         createPhysicalWallButton({
           x: -3.2, y: 0, z: -5.55, label: 'TRANSMIT SCIENCE TO EARTH', costText: '-3 kW',
-          subText: '', subFn: () => `Beams telemetry to DSN (+${sciGain(6, 'align') + sciGain(COM_B[state.levels.comms - 1], 'align')} Science, +1 Scrap)${statNote('align')}` + noOutside(), accentHex: 0x38bdf8,
+          subText: '', subFn: () => `Beams telemetry to DSN (+${sciGain(7, 'align') + sciGain(COM_B[state.levels.comms - 1], 'align')} Science)${statNote('align')}` + noOutside(), accentHex: 0x38bdf8,
           getStatus: () => ({ disabled: state.power < 3 || state.sheltered || state.labsOff, done: !!state.used.comms }),
           onPress: () => {
             state.used.comms = true; state.power -= 3;
-            const gained = sciGain(6, 'align');
+            const gained = sciGain(7, 'align');
             state.science = Math.min(sciCap(), state.science + gained);
-            state.scrap += 1;
             applyLevelBonus('comms');
-            state.lastWallMessage = `DSN PACKET TRANSMITTED: +${gained} Science & +1 Scrap confirmed (3–22 min Earth light-delay).`;
+            state.lastWallMessage = `DSN PACKET TRANSMITTED: +${gained} Science confirmed (3–22 min Earth light-delay).`;
             logEvent('Packet sent. Earth replies in minutes, not seconds!');
           }
         });
@@ -2530,8 +2529,11 @@ body:not(.kids) #kids{display:none!important}
       const dx = fpsState.pos.x - d.hit.position.x, dz = fpsState.pos.z - d.hit.position.z, dir = d.dir || [0, 1];
       return (dx * dir[0] + dz * dir[1]) > 0.05 && Math.hypot(dx, dz) < 2.6;
     }
+    const REACH_BTN = 3.0, REACH_EXIT = 3.6;
+    function reachOf(d, far) { return state.insideBuilding ? (d && d.kind === 'exit-door' ? REACH_EXIT : REACH_BTN) : far; }
     function triggerTargetedObject(data) {
       if (!data) return;
+      if (state.insideBuilding && data.kind !== 'exit-door' && performance.now() < (window.__doorLock || 0)) return;   // the click that opened the door must not press the button behind it
       if ((data.kind === 'door' || data.kind === 'exit-door') && performance.now() < (window.__doorLock || 0)) return;   // no instant re-entry after leaving
       if (data.kind === 'door' && !doorOk(data)) { toast('🚪 Walk up to the front of the door'); return; }
       { const now = performance.now(); if (window.__ltd === data && now - (window.__lt || 0) < 300) return; window.__ltd = data; window.__lt = now; }
@@ -2556,7 +2558,7 @@ body:not(.kids) #kids{display:none!important}
         pointer.x = (e.clientX / window.innerWidth) * 2 - 1; pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
         raycaster.setFromCamera(pointer, camera);
         const dh = raycaster.intersectObjects(state.insideBuilding ? interiorInteractables : clickableZones, false);
-        if (dh.length > 0 && dh[0].distance <= 10.5) downTarget = dh[0].object.userData;
+        if (dh.length > 0 && dh[0].distance <= reachOf(dh[0].object.userData, 10.5)) downTarget = dh[0].object.userData;
       }
       const isWalkingMode = state.viewMode === 'fps' || !!state.insideBuilding;
       if (state.mode === 'game' && isWalkingMode && !isAnyModalOpen()) {
@@ -2581,7 +2583,7 @@ body:not(.kids) #kids{display:none!important}
 
       if (hoveredGroup) { setGroupHighlight(hoveredGroup, false); hoveredGroup = null; }
 
-      if (hits.length > 0 && (!state.insideBuilding || hits[0].distance <= 9.5)) {
+      if (hits.length > 0 && (!state.insideBuilding || hits[0].distance <= reachOf(hits[0].object.userData, 9.5))) {
         const data = hits[0].object.userData;
         hoveredGroup = data.visualGroup;
         setGroupHighlight(hoveredGroup, true);
@@ -2603,7 +2605,7 @@ body:not(.kids) #kids{display:none!important}
       pointer.x = (e.clientX / window.innerWidth) * 2 - 1; pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
       const hh = raycaster.intersectObjects(state.insideBuilding ? interiorInteractables : clickableZones, false);
-      if (hh.length > 0 && hh[0].distance <= 10.5) triggerTargetedObject(hh[0].object.userData);
+      if (hh.length > 0 && hh[0].distance <= reachOf(hh[0].object.userData, 10.5)) triggerTargetedObject(hh[0].object.userData);
       else if (state.fpsTargetedObject) triggerTargetedObject(state.fpsTargetedObject);
     });
     renderer.domElement.addEventListener('pointerup', (e) => {
@@ -2623,7 +2625,7 @@ body:not(.kids) #kids{display:none!important}
       raycaster.setFromCamera(pointer, camera);
       const targets = state.insideBuilding ? interiorInteractables : worldTargets();
       const hits = raycaster.intersectObjects(targets, false);
-      if (hits.length > 0 && (!state.insideBuilding || hits[0].distance <= 10.5)) {
+      if (hits.length > 0 && (!state.insideBuilding || hits[0].distance <= reachOf(hits[0].object.userData, 10.5))) {
         triggerTargetedObject(hits[0].object.userData);
       }
     });
@@ -2732,11 +2734,56 @@ body:not(.kids) #kids{display:none!important}
       return state.sol === state.maxSols ? 'Final Sol: Decide &amp; Finish &#9654;' : `End Sol ${state.sol} &amp; Decide &#9654;`;
     }
     function wxLabel() { if (stormActive()) return '🌪 GREAT DUST STORM'; const w = state.forecast && state.forecast.type; return w === 'flare' ? '☀ SOLAR FLARE DAY' : w === 'dust' ? '🌪 DUST STORM DAY' : ''; }
+    (function wxUI() { try {
+      const st = document.createElement('style');
+      st.textContent = `#wx-banner{position:fixed;left:50%;top:92px;transform:translateX(-50%);z-index:60;max-width:min(560px,92vw);padding:10px 16px;border-radius:12px;font:600 14px/1.35 'Space Grotesk',system-ui,sans-serif;color:#fff;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5);pointer-events:none;display:none;border:2px solid}
+#wx-banner b{display:block;font:800 16px 'Orbitron',system-ui,sans-serif;letter-spacing:.06em;margin-bottom:2px}
+#wx-banner.flare{background:rgba(120,30,10,.92);border-color:#fb923c}#wx-banner.dust{background:rgba(110,60,20,.92);border-color:#f59e0b}#wx-banner.storm{background:rgba(90,20,20,.92);border-color:#f87171}
+#wx-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:80;width:min(520px,92vw);max-height:80vh;overflow:auto;background:rgba(10,16,32,.97);border:2px solid #f59e0b;border-radius:16px;padding:18px 20px;color:#e2e8f0;font:500 15px/1.5 'Space Grotesk',system-ui,sans-serif;box-shadow:0 12px 48px rgba(0,0,0,.7);display:none}
+#wx-card h3{margin:0 0 8px;font:800 18px 'Orbitron',system-ui,sans-serif;color:#fbbf24;letter-spacing:.05em}
+#wx-card h4{margin:12px 0 4px;font:700 13px 'Orbitron',system-ui,sans-serif;color:#38bdf8;letter-spacing:.08em}
+#wx-card p{margin:0}#wx-card button{margin-top:14px;width:100%;padding:10px;border:0;border-radius:10px;background:#f59e0b;color:#111;font:800 14px 'Orbitron',system-ui,sans-serif;cursor:pointer}`;
+      document.head.appendChild(st);
+      const ban = document.createElement('div'); ban.id = 'wx-banner'; document.body.appendChild(ban);
+      const card = document.createElement('div'); card.id = 'wx-card'; document.body.appendChild(card);
+      let shown = '';
+      window.__wxBanner = () => {
+        let k = '', head = '', body = '';
+        if (state.mode === 'game' && !state.gameOver) {
+          if (stormActive()) { k = 'storm'; head = '🌪 GREAT DUST STORM'; body = 'Solar power is crushed and surprise crises pop up while you work. Keep the crew calm and the air flowing.'; }
+          else { const w = state.forecast && state.forecast.type;
+            if (w === 'flare') { k = 'flare'; head = '☀ SOLAR FLARE DAY'; body = state.sheltered ? 'Lockdown is on. The crew is sheltered, so the dose stays small. Outside work is locked.' : 'Press STORM SHELTER in the Habitat before you end the sol, or the crew takes a big radiation dose and electronics can glitch.'; }
+            else if (w === 'dust') { k = 'dust'; head = '🌪 DUST STORM DAY'; body = 'Dust blocks the Sun: power is low today. Panels left out get scratched, and rovers and gear left outside take damage.'; } }
+        }
+        const key = k + '|' + body;
+        try { const hd = document.querySelector('.top-hud'); if (hd && k) ban.style.top = Math.round(hd.getBoundingClientRect().bottom + 10) + 'px'; } catch (_) {}
+        if (key === shown) return; shown = key;
+        try { const hd = document.querySelector('.top-hud'); if (hd) ban.style.top = Math.round(hd.getBoundingClientRect().bottom + 10) + 'px'; } catch (_) {}
+        ban.style.display = k ? 'block' : 'none'; ban.className = k; ban.innerHTML = k ? `<b>${head}</b>${body}` : '';
+      };
+      card.addEventListener('click', (e) => { if (e.target && e.target.tagName === 'BUTTON') card.style.display = 'none'; });
+      window.__wxCards = (ev, endMsg, startMsg) => {
+        if (state.gameOver) return;
+        const clean = (m) => (m || '').replace(/\s+/g, ' ').trim();
+        let h = '';
+        if (ev && (ev.type === 'flare' || ev.type === 'dust') && clean(endMsg).length > 30) {
+          h += `<h3>${ev.type === 'flare' ? '☀ SOLAR FLARE DAY: RESULTS' : '🌪 DUST STORM DAY: RESULTS'}</h3><p>${clean(endMsg)}</p>`;
+        }
+        const nt = state.forecast && state.forecast.type;
+        if ((nt === 'flare' || nt === 'dust') && !stormActive() && clean(startMsg)) {
+          h += `<h4>${nt === 'flare' ? '☀ TODAY IS A FLARE DAY' : '🌪 TODAY IS A DUST STORM DAY'}</h4><p>${clean(startMsg)}</p>`;
+        }
+        if (!h) return;
+        card.innerHTML = h + '<button>GOT IT</button>'; card.style.display = 'block';
+        try { if (document.pointerLockElement) document.exitPointerLock(); } catch (_) {}
+      };
+    } catch (_) { window.__wxBanner = null; window.__wxCards = null; } })();
     function updateTopHUD() {
       try {
         const e1 = document.getElementById('hud-raw'); if (e1) e1.textContent = `${state.raw || 0}`;
         const e2 = document.getElementById('hud-samp'); if (e2) e2.textContent = `${state.samples || 0}`;
         const wx = document.getElementById('hud-wx'); if (wx) { const k = state.mode === 'game' ? wxLabel() : ''; wx.style.display = k ? '' : 'none'; wx.textContent = k; }
+        if (window.__wxBanner) window.__wxBanner();
         if (state.mode === 'game' && !state.gameOver && !state.decOpen && !crisisEl.classList.contains('active')) { const tx = solBtnText(); if (nextSolBtn.__t !== tx) { nextSolBtn.innerHTML = tx; nextSolBtn.__t = tx; } }
         if (window.__story) storyGoalsTick();
       } catch (_) {}
@@ -2903,6 +2950,7 @@ body:not(.kids) #kids{display:none!important}
       }
       if (ev.type === 'flare' || ev.type === 'dust') state.prep = null;
 
+      const __endMsg = msg;
       state.sol += 1;
       state.sheltered = false; state.earlyShelter = false;
       { const nev = stormFC(state.schedule[state.sol - 1] || { type: 'quiet' });   // the new day: is it a weather day?
@@ -2913,6 +2961,7 @@ body:not(.kids) #kids{display:none!important}
           else msg += '🌪 DUST STORM DAY: the panels were safe. ';
           msg += weatherDamage('dust', state.sol); }
         state.shelterEarly = false; }
+      const __startMsg = msg.slice(__endMsg.length);
       state.used = {};
       state.labsOff = false;
       state.dose += Math.round(0.5 + (100 - state.shield) / 50);
@@ -2939,6 +2988,7 @@ body:not(.kids) #kids{display:none!important}
 
       state.lastWallMessage = msg + forecastText(state.forecast);
       updateTopHUD();
+      try { if (window.__wxCards) window.__wxCards(ev, __endMsg, __startMsg); } catch (_) {}
       if (state.insideBuilding) updateInteriorWallScreens();
       logEvent(msg + forecastText(state.forecast), WHY[ev.type]);
 
@@ -3877,12 +3927,12 @@ body:not(.kids) #kids{display:none!important}
       }
       const B = (o) => createPhysicalWallButton(Object.assign({ y: 0, rotY: Math.PI, z: 5.55, accentHex: 0xfbbf24 }, o));
       // ---- v13: new actions that spend each building's own stat, plus multi-condition "power" actions ----
-      if (id === 'habitation') B({ label: 'EXTRA WORK SHIFT', costText: '-12 morale', subText: 'The crew works overtime: +3 kW today, but crew morale drops 12. Needs morale of 45 or more.', accentHex: 0xa78bfa,
-        getStatus: () => ({ disabled: state.bs.morale < 45, done: !!state.used.shift }),
-        onPress: () => { use('shift'); state.bs.morale = Math.max(0, state.bs.morale - 12); state.power += 3; done('EXTRA SHIFT: +3 kW today, morale -12%.', 'The crew worked an extra shift (+3 kW, morale -12).'); } });
-      if (id === 'solar') B({ label: 'OVERCLOCK INVERTERS', costText: '-1 kW, -15 clean', subText: 'Push the inverters hard: +4 kW right now, but the panels get 15% dirtier. Needs deployed panels that are at least 60% clean.', accentHex: 0xfacc15,
-        getStatus: () => ({ disabled: !state.panelsDeployed || state.bs.clean < 60 || state.power < 1, done: !!state.used.oc }),
-        onPress: () => { use('oc'); state.power += 3; state.bs.clean = Math.max(0, state.bs.clean - 15); done('INVERTERS OVERCLOCKED: +4 kW now (net +3), panels -15% clean.', 'Overclocked the inverters for a power burst.'); } });
+      if (id === 'habitation') B({ label: 'EXTRA WORK SHIFT', costText: '-25 morale', subText: 'The crew works overtime: +3 kW today, but crew morale drops 25. Needs morale of 55 or more.', accentHex: 0xa78bfa,
+        getStatus: () => ({ disabled: state.bs.morale < 55, done: !!state.used.shift }),
+        onPress: () => { use('shift'); state.bs.morale = Math.max(0, state.bs.morale - 25); state.power += 3; done('EXTRA SHIFT: +3 kW today, morale -25%.', 'The crew worked an extra shift (+3 kW, morale -25).'); } });
+      if (id === 'solar') B({ label: 'OVERCLOCK INVERTERS', costText: '-2 kW, -25 clean', subText: 'Push the inverters hard: +4 kW right now (net +2), but the panels get 25% dirtier, which costs power every sol until cleaned. Needs deployed panels that are at least 70% clean.', accentHex: 0xfacc15,
+        getStatus: () => ({ disabled: !state.panelsDeployed || state.bs.clean < 70 || state.power < 2, done: !!state.used.oc }),
+        onPress: () => { use('oc'); state.power += 2; state.bs.clean = Math.max(0, state.bs.clean - 25); done('INVERTERS OVERCLOCKED: +4 kW now (net +2), panels -25% clean.', 'Overclocked the inverters for a power burst.'); } });
       if (id === 'research') {
         B({ label: 'CORE DRILL SAMPLE', costText: '-2 kW, -8 calib', subText: 'Drill a fresh rock core: +' + '2 rock samples (+1 at Lab Lv 3+). Wears the instruments by 8%. Needs calibration of 40+.' + noOutside(), accentHex: 0xfb923c,
           getStatus: () => ({ disabled: state.power < 2 || state.bs.calib < 40 || state.sheltered || state.labsOff, done: !!state.used.core }),
@@ -3892,9 +3942,9 @@ body:not(.kids) #kids{display:none!important}
           onPress: () => { use('deep'); state.power -= 3; state.scrap -= 1; state.samples -= 6; const g = sciGain(15, 'calib'); state.science = Math.min(sciCap(), state.science + g); state.stats.roverSci += g; done(`DEEP ANALYSIS COMPLETE: +${g} science from 6 rock samples.`, 'Deep rock analysis: +' + g + ' science.'); } });
       }
       if (id === 'silo') {
-        B({ label: 'HARVEST FEAST', costText: '-2 kW, -12 crop, -8 water', subText: '', subFn: () => `Pick everything that is ripe: +${Math.round(14 * foodMul())}% food and +8 morale. Uses up 12 crop health and 8 water. Needs crop 50+ and water 30+.`, accentHex: 0x34d399,
+        B({ label: 'HARVEST FEAST', costText: '-2 kW, -15 crop, -10 water', subText: '', subFn: () => `Pick everything that is ripe: +${Math.round(11 * foodMul())}% food and +6 morale. Uses up 15 crop health and 10 water. Needs crop 50+ and water 30+.`, accentHex: 0x34d399,
           getStatus: () => ({ disabled: state.power < 2 || state.bs.crop < 50 || state.bs.water < 30, done: !!state.used.feast }),
-          onPress: () => { use('feast'); state.power -= 2; state.bs.crop = Math.max(0, state.bs.crop - 12); state.bs.water = Math.max(0, state.bs.water - 8); const f = Math.round(14 * foodMul()); state.food = Math.min(100, state.food + f); state.bs.morale = Math.min(100, state.bs.morale + 8); done(`FEAST: +${f}% food, +8 morale.`, 'Held a harvest feast.'); } });
+          onPress: () => { use('feast'); state.power -= 2; state.bs.crop = Math.max(0, state.bs.crop - 15); state.bs.water = Math.max(0, state.bs.water - 10); const f = Math.round(11 * foodMul()); state.food = Math.min(100, state.food + f); state.bs.morale = Math.min(100, state.bs.morale + 6); done(`FEAST: +${f}% food, +6 morale.`, 'Held a harvest feast.'); } });
         B({ label: 'PROCESS RAW SCRAP', costText: '-1 kW', subText: '', subFn: () => `Smelt up to 3 raw scrap into usable scrap. You have ${state.raw || 0} raw. Raw scrap cannot be used for upgrades.`, accentHex: 0xfb923c,
           getStatus: () => ({ disabled: (state.raw || 0) < 1 || state.power < 1, done: false }),
           onPress: () => { const n = Math.min(3, state.raw || 0); state.power -= 1; state.raw -= n; state.scrap += n; done(`SCRAP PROCESSED: ${n} raw -> ${n} usable scrap (${state.scrap} scrap, ${state.raw} raw left).`, 'Processed ' + n + ' raw scrap.'); } });
@@ -3928,9 +3978,9 @@ body:not(.kids) #kids{display:none!important}
       if (id === 'solar') B({ label: 'SHAKE PANELS CLEAN', costText: '-1 kW', subText: 'A quick vibration pass knocks loose dust: Panel Cleanliness +25%. Cleaner panels make more power every sol (free, but not as good as brushing).', accentHex: 0x34d399,
         getStatus: () => ({ disabled: state.power < 1 || state.sheltered, done: !!state.used.shake }),
         onPress: () => { use('shake'); state.power -= 1; state.bs.clean = Math.min(100, state.bs.clean + 25); done('PANELS SHAKEN: Cleanliness +25%.', 'Shook dust off the panels: cleanliness +25%.'); } });
-      if (id === 'silo') B({ label: 'MELT ICE FOR WATER', costText: '-2 kW', subText: 'Melt ice from the regolith: Water Supply +35%. Dry beds give small harvests and thirsty crews lose air and morale.', accentHex: 0x22d3ee,
+      if (id === 'silo') B({ label: 'MELT ICE FOR WATER', costText: '-2 kW', subText: 'Melt ice from the regolith: Water Supply +40%. Dry beds give small harvests and thirsty crews lose air and morale.', accentHex: 0x22d3ee,
         getStatus: () => ({ disabled: state.power < 2, done: !!state.used.ice }),
-        onPress: () => { use('ice'); state.power -= 2; state.bs.water = Math.min(100, state.bs.water + 35); done('ICE MELTED: Water Supply +35%.', 'Melted ice: water +35%.'); } });
+        onPress: () => { use('ice'); state.power -= 2; state.bs.water = Math.min(100, state.bs.water + 40); done('ICE MELTED: Water Supply +40%.', 'Melted ice: water +40%.'); } });
       if (id === 'solar') {
         B({ x: -3.6, label: 'BUILD EXTRA PANEL WING', labelFn: () => `EXTRA PANEL WING (${state.wings}/3)`, costText: '-3 Scrap', subText: 'Bolt scrap-built panels onto the array: +1 kW maximum power forever (up to 3 wings).',
           getStatus: () => ({ disabled: state.scrap < 3 || state.wings >= 3, done: !!state.used.wing }),
@@ -4287,7 +4337,7 @@ body:not(.kids) #kids{display:none!important}
       const covered = !!(state.guard && state.guard.rover === state.sol);
       let h = sec('🔧 ROVER JOBS (while it is at base)');
       h += card('🛡 Cover the rover', covered ? 'Covered: it is protected from tomorrow\'s flare or dust storm.' : 'STORM PREP: tarp it and park it. Do this the day before a flare or dust storm. An uncovered rover can break in any storm.', 'data-cover="1"', covered ? 'Covered' : 'Cover · −1 kW', !covered && !ex && state.power >= 1);
-      h += card('🔩 Fetch scrap', `The rover brings back up to 2 pieces of raw scrap from the map (${scrapPickups.length} out there).`, 'data-fetch="1"', state.used.rvfetch ? 'Done today' : 'Fetch · −1 kW', home && !state.used.rvfetch && !state.sheltered && state.power >= 1 && scrapPickups.length > 0);
+      h += card('🔩 Fetch scrap', `The rover brings back up to 2 pieces of raw scrap from the map (${scrapPickups.length} out there).`, 'data-fetch="1"', state.used.rvfetch ? 'Done today' : 'Fetch · −2 kW', home && !state.used.rvfetch && !state.sheltered && state.power >= 2 && scrapPickups.length > 0);
       h += card('🧹 Sweep the panels', 'The rover brushes the solar array: +25% panel cleanliness.', 'data-brush="1"', state.used.rvbrush ? 'Done today' : 'Sweep · −1 kW', home && !state.used.rvbrush && !state.sheltered && state.power >= 1);
       h += sec('🧰 ROVER MODULES');
       const mod = (key, t, s, cost) => card(t, s, `data-mod="${key}"`, r[key] ? 'Installed' : (state.scrap >= cost ? `Install · −${cost} scrap` : `Need ${cost} scrap`), !r[key] && state.scrap >= cost);
@@ -4300,8 +4350,8 @@ body:not(.kids) #kids{display:none!important}
       const ex = state.expedition, r = state.rover;
       if (b.dataset.cover) { if (!ex && state.power >= 1) { state.power -= 1; guardNow('rover'); state.acted = true; toast('🛡 Rover covered for tomorrow'); logEvent('Covered the rover against storms.'); updateTopHUD(); } return true; }
       if (b.dataset.fetch) {
-        if (!ex && !r.broken && !state.used.rvfetch && !state.sheltered && state.power >= 1 && scrapPickups.length) {
-          state.power -= 1; state.used.rvfetch = true;
+        if (!ex && !r.broken && !state.used.rvfetch && !state.sheltered && state.power >= 2 && scrapPickups.length) {
+          state.power -= 2; state.used.rvfetch = true;
           const pick = scrapPickups.slice().sort((a, c) => Math.hypot(a.position.x - rv.x, a.position.z - rv.z) - Math.hypot(c.position.x - rv.x, c.position.z - rv.z)).slice(0, 2);
           pick.forEach((g) => claimScrap(g)); toast(`🚙 Rover fetched ${pick.length} raw scrap`); logEvent(`The rover fetched ${pick.length} raw scrap.`); updateTopHUD();
         } return true;
@@ -6164,6 +6214,118 @@ body:not(.kids) #kids{display:none!important}
         d.choices.push(o);
       }
     })();
+    // ---- v13: balance pass. Every plan now trades a DIFFERENT resource, nothing is free, and costs are big enough to feel ----
+    (function rebalance() {
+      // 'id/style': [fx, gamble?, plan?]   gamble = [p, goodFx, badFx] | null (remove) | undefined (keep)
+      const OV = {
+        'flarePrep/safe': [{ power: -3, science: -2 }], 'flarePrep/balanced': [{ scrap: -3, shield: 9 }],
+        'flarePrep/bold': [{ science: 4 }, [0.4, {}, { shield: -10, dose: 4 }]], 'flarePrep/clever': [{ power: -2, science: 3 }],
+        'dustPrep/safe': [{ power: -3, battery: 3 }], 'dustPrep/balanced': [{ power: -1 }, [0.55, {}, { clean: -18 }]],
+        'dustPrep/bold': [{ power: 3, science: 3, calib: -10 }, undefined, 'Grab +3 kW and finish experiments, but dust will scratch the array: max power drops by 1 kW for good.'],
+        'dustPrep/clever': [{ power: -2, clean: -8 }],
+        'flareWork/safe': [{ power: -2, align: -10 }], 'flareWork/balanced': [{ align: 20, dose: 5 }],
+        'flareWork/bold': [{ align: 40, science: 3, dose: 12 }], 'flareWork/clever': [{ align: 15, power: -3 }],
+        'dustLab/safe': [{ power: -2, calib: 20, align: 15, clean: 8 }], 'dustLab/balanced': [{ science: 3, calib: -8 }],
+        'dustLab/bold': [{ science: 6, calib: -18, clean: -15 }], 'dustLab/clever': [{ science: 3, morale: 5, power: -2 }],
+        'airAlarm/safe': [{ power: -4, o2: 14 }], 'airAlarm/balanced': [{ scrap: -2, o2: 10 }],
+        'airAlarm/bold': [{ o2: 6, morale: -10 }, [0.5, { o2: 8 }, { science: -5 }]], 'airAlarm/clever': [{ scrap: -1, o2: 9, morale: -8 }],
+        'foodLow/safe': [{ food: 12, morale: -10 }], 'foodLow/balanced': [{ power: -2, food: 10, crop: -12 }],
+        'foodLow/bold': [{}, [0.4, { food: 20, crop: 10 }, { food: -8, crop: -18 }]], 'foodLow/clever': [{ food: 8, power: -2, morale: -6 }],
+        'shieldLow/safe': [{ scrap: -3, shield: 15 }], 'shieldLow/balanced': [{ power: -2, shield: 9, dose: -3 }],
+        'shieldLow/bold': [{ science: 5, shield: -8 }, [0.5, {}, { o2: -8, dose: 4 }]], 'shieldLow/clever': [{ shield: 10, scrap: -1, morale: -6 }],
+        'powerShort/safe': [{ science: -3, morale: -4 }], 'powerShort/balanced': [{ scrap: -1, dose: 2 }],
+        'powerShort/bold': [{ power: 3 }, [0.5, {}, { battery: -8, calib: -10 }]], 'powerShort/clever': [{ morale: -12 }],
+        'roverTrouble/safe': [{ science: -4 }], 'roverTrouble/balanced': [{ science: 1, power: -2 }],
+        'roverTrouble/bold': [{}, [0.4, { samples: 3, science: 2 }, { scrap: -2, science: -3 }]], 'roverTrouble/clever': [{ power: -2 }, [0.6, { samples: 2, science: 1 }, { science: -3 }]],
+        'lowMorale/safe': [{ morale: 22, science: -4, food: -4 }], 'lowMorale/balanced': [{ morale: 14, food: -6 }],
+        'lowMorale/bold': [{ science: 3 }, [0.35, { morale: 12 }, { morale: -25 }]], 'lowMorale/clever': [{ power: -2, morale: 14 }],
+        'strangeRock/safe': [{ power: -1, science: 2 }], 'strangeRock/balanced': [{ science: 5, dose: 4 }],
+        'strangeRock/bold': [{ power: -3 }, [0.4, { science: 11 }, { science: 2, calib: -18 }]], 'strangeRock/clever': [{ power: -2, science: 2, samples: 1 }],
+        'meteoroid/safe': [{ scrap: -3 }], 'meteoroid/balanced': [{ power: -2, o2: -6 }],
+        'meteoroid/bold': [{ science: 3 }, [0.4, {}, { o2: -24, morale: -8 }]], 'meteoroid/clever': [{ scrap: -1, o2: -4, power: -1 }],
+        'earthRequest/safe': [{ science: -4 }], 'earthRequest/balanced': [{ power: -2, science: 3 }],
+        'earthRequest/bold': [{ power: -3, science: 8, morale: -12, calib: -10 }, [0.5, { science: 3 }, { science: -4, calib: -8 }]], 'earthRequest/clever': [{ science: 2, power: -1 }],
+        'maintenance/safe': [{ power: -3, calib: 30, align: 25, clean: 15 }], 'maintenance/balanced': [{ power: -2, calib: 20, align: 12 }],
+        'maintenance/bold': [{ science: 3, calib: -15, align: -15 }, [0.5, {}, { power: -2, o2: -6 }]], 'maintenance/clever': [{ calib: 8, align: 6, clean: 5, science: 2, power: -1 }],
+        'dustDevil/safe': [{ morale: 6, science: -2, calib: -6 }], 'dustDevil/balanced': [{ power: -2, science: 4 }],
+        'dustDevil/bold': [{ science: 7, dose: 5, morale: 6 }, [0.5, {}, { dose: 4, calib: -12 }]], 'dustDevil/clever': [{ science: 1 }, [0.5, { clean: 25 }, { clean: -12, power: -2 }]],
+        'iceFind/safe': [{ power: -2, shield: 12 }], 'iceFind/balanced': [{ food: 6, crop: 8, dose: 3 }],
+        'iceFind/bold': [{ power: -3 }, [0.4, { science: 9 }, { science: 1, scrap: -3 }]], 'iceFind/clever': [{ power: -2, shield: 5, food: 4 }],
+        'protonBurst/safe': [{ science: -2, dose: 1 }], 'protonBurst/balanced': [{ science: 3, dose: 6 }],
+        'protonBurst/bold': [{ science: 6, dose: 14 }, [0.5, {}, { dose: 8, calib: -10 }]], 'protonBurst/clever': [{ science: 1, dose: 3, power: -1 }],
+        'scrapField/safe': [{ power: -2, scrap: 2 }], 'scrapField/balanced': [{ scrap: 3, dose: 4 }],
+        'scrapField/bold': [{ scrap: 5, dose: 9, o2: -10 }, [0.5, { scrap: 2 }, { dose: 6, o2: -8 }]], 'scrapField/clever': [{ power: -1, scrap: 1, samples: 1 }],
+        'filterClog/safe': [{ scrap: -2, o2: 8 }], 'filterClog/balanced': [{ o2: 5, morale: -8 }],
+        'filterClog/bold': [{ science: 4 }, [0.4, {}, { o2: -22, clean: -15 }]], 'filterClog/clever': [{ o2: 6, crop: -8 }],
+        'panelGrime/safe': [{ clean: 35, dose: 4, power: -2 }], 'panelGrime/balanced': [{ clean: 22, battery: -5 }],
+        'panelGrime/bold': [{ science: 3, power: 1 }, [0.35, { clean: 30 }, { clean: -18 }]], 'panelGrime/clever': [{ clean: 14, power: -1 }],
+        'sleepShift/safe': [{ morale: 22, science: -4 }], 'sleepShift/balanced': [{ morale: 10, power: -2 }],
+        'sleepShift/bold': [{ science: 6, morale: -20 }, [0.4, {}, { calib: -25, dose: 4 }]], 'sleepShift/clever': [{ morale: 11, food: -4 }],
+        'cropBlight/safe': [{ food: -10, crop: 12 }], 'cropBlight/balanced': [{ power: -2, food: 3, crop: 5 }],
+        'cropBlight/bold': [{ food: 12 }, [0.4, {}, { morale: -22, science: -5 }]], 'cropBlight/clever': [{ scrap: -2, crop: 14, food: -2 }],
+        'sampleFridge/safe': [{ power: -2, science: 2 }], 'sampleFridge/balanced': [{ science: 5, samples: -1 }],
+        'sampleFridge/bold': [{ science: 7, scrap: -1 }, [0.4, {}, { science: -8 }]], 'sampleFridge/clever': [{ science: 3 }, [0.55, {}, { science: -6 }]],
+        'toolBreak/safe': [{ power: -3, scrap: -1 }], 'toolBreak/balanced': [{ scrap: -1, calib: -8 }],
+        'toolBreak/bold': [{ science: 3 }, [0.4, {}, { scrap: -3, dose: 4 }]], 'toolBreak/clever': [{ power: -2, calib: -6 }],
+        'sciDebate/safe': [{ science: 2, morale: -8 }], 'sciDebate/balanced': [{ science: 4, power: -2 }],
+        'sciDebate/bold': [{ power: -2 }, [0.4, { science: 10 }, { science: 1, morale: -14 }]], 'sciDebate/clever': [{ power: -1 }, [0.5, { science: 5 }, { science: 2, morale: -6 }]],
+        'coldNight/safe': [{ power: -3, battery: 3 }], 'coldNight/balanced': [{ power: -1, morale: -8, battery: 2 }],
+        'coldNight/bold': [{ power: 1 }, [0.4, { science: 3 }, { battery: -18, calib: -22 }]], 'coldNight/clever': [{ power: -1, battery: 1, science: -3 }],
+        'medicalNick/safe': [{ science: -4, power: -1, morale: 6 }], 'medicalNick/balanced': [{ science: 1, morale: -6 }],
+        'medicalNick/bold': [{ science: 5 }, [0.4, {}, { morale: -18, dose: 5, science: -7 }]], 'medicalNick/clever': [{ power: -2, morale: 4, science: -1 }],
+        'greenhouseLights/safe': [{ food: 4, science: -2 }], 'greenhouseLights/balanced': [{ power: -2, food: 7 }],
+        'greenhouseLights/bold': [{ power: -3, food: 13, morale: -6 }, [0.5, {}, { crop: -20, power: -2 }]], 'greenhouseLights/clever': [{ power: -1, food: 5, crop: -6 }],
+        'dishWobble/safe': [{ power: -3, align: 28 }], 'dishWobble/balanced': [{ align: 35, dose: 4 }],
+        'dishWobble/bold': [{ science: 3 }, [0.4, {}, { science: -7, align: -15 }]], 'dishWobble/clever': [{ align: 18, morale: -6 }],
+        'freezerFail/safe': [{ power: -3, scrap: -1 }], 'freezerFail/balanced': [{ food: 5, morale: -6 }],
+        'freezerFail/bold': [{ science: 3 }, [0.4, { food: 5 }, { food: -26 }]], 'freezerFail/clever': [{ power: -1 }, [0.55, { food: 2 }, { food: -14 }]],
+        'deltaTrek/safe': [{ science: 2, power: -1 }], 'deltaTrek/balanced': [{ science: 6, dose: 4, o2: -5 }],
+        'deltaTrek/bold': [{ science: 10, dose: 9, o2: -12, power: -2 }, [0.5, { science: 3 }, { dose: 6, morale: -8 }]], 'deltaTrek/clever': [{ science: 4, power: -3 }],
+        'airlockSeal/safe': [{ scrap: -2, o2: 5 }], 'airlockSeal/balanced': [{ o2: -6 }],
+        'airlockSeal/bold': [{ science: 3 }, [0.4, {}, { o2: -26 }]], 'airlockSeal/clever': [{ scrap: -1, morale: -6 }],
+        'extraRations/safe': [{ morale: 6, science: -2 }], 'extraRations/balanced': [{ food: -5, morale: 12 }],
+        'extraRations/bold': [{ food: -14, morale: 24 }, [0.5, {}, { morale: -10, food: -6 }]], 'extraRations/clever': [{ morale: 9, food: -2, power: -1 }],
+        'crewQuarrel/safe': [{ science: -3, morale: 14 }], 'crewQuarrel/balanced': [{ morale: 8, power: -2 }],
+        'crewQuarrel/bold': [{ science: 3 }, [0.4, { morale: 6 }, { morale: -28, calib: -14 }]], 'crewQuarrel/clever': [{ morale: 10, calib: -8 }],
+        'beaconTest/safe': [{ science: -3, power: -2 }], 'beaconTest/balanced': [{ power: -1, morale: 2, science: -1 }],
+        'beaconTest/bold': [{ science: 5 }, [0.5, {}, { dose: 5, morale: -8 }]], 'beaconTest/clever': [{ power: -1, science: 1 }],
+        'stormPower/safe': [{ science: -4, morale: -8, battery: 4 }], 'stormPower/balanced': [{ battery: -6, science: 2 }],
+        'stormPower/bold': [{ battery: -12, science: 7 }], 'stormPower/clever': [{ battery: 3, morale: -6, science: -1 }],
+        'stormAir/safe': [{ scrap: -2, power: -2, o2: 8 }], 'stormAir/balanced': [{ o2: -4, clean: 10 }],
+        'stormAir/bold': [{ o2: 12, calib: -14, power: -2 }], 'stormAir/clever': [{ scrap: -1, o2: 5, calib: -6 }],
+        'stormComms/safe': [{ power: -2, align: 10 }], 'stormComms/balanced': [{ science: 1, align: -4 }],
+        'stormComms/bold': [{ science: 6, align: -14 }], 'stormComms/clever': [{ power: -1, align: 4 }],
+        'stormFood/safe': [{ power: -3, food: 9 }, undefined, 'Costs 3 kW, saves the harvest.'], 'stormFood/balanced': [{ food: 6, crop: -18 }],
+        'stormFood/bold': [{ science: 3 }, [0.4, { food: 3 }, { food: -14 }]], 'stormFood/clever': [{ food: 4, crop: -8, power: -1 }],
+        'stormCabin/safe': [{ power: -2, morale: 16 }, undefined, 'Costs 2 kW and lifts spirits.'], 'stormCabin/balanced': [{ morale: 9, science: -2 }],
+        'stormCabin/bold': [{ science: 6, morale: -16 }], 'stormCabin/clever': [{ morale: 10, power: -1 }],
+        'stormEVA/safe': [{ power: -2 }], 'stormEVA/balanced': [{ dose: 6 }],
+        'stormEVA/bold': [{ science: 4 }, [0.4, {}, { scrap: -3, power: -2 }]], 'stormEVA/clever': [{ power: -1, scrap: -2 }],
+        'stormRover/safe': [{ battery: -3, power: -2 }], 'stormRover/balanced': [{ scrap: -2 }],
+        'stormRover/bold': [{}, [0.45, { science: 7 }, { scrap: -3, science: -4 }]], 'stormRover/clever': [{ battery: -2, science: 1, power: -1 }],
+        'stormBreach/safe': [{ power: -3, science: -3, o2: -3 }], 'stormBreach/balanced': [{ scrap: -2, o2: -6 }],
+        'stormBreach/bold': [{ science: 4 }, [0.45, {}, { o2: -20 }]], 'stormBreach/clever': [{ power: -1, o2: -4, scrap: -1 }],
+        'stormSamples/safe': [{ power: -2, science: 3 }], 'stormSamples/balanced': [{ science: 6, samples: -1 }],
+        'stormSamples/bold': [{ science: 9, calib: -14 }], 'stormSamples/clever': [{ power: -1, science: 4, calib: -5 }],
+        'stormNight/safe': [{ science: -3, morale: 10, power: -1 }], 'stormNight/balanced': [{ science: 3, morale: -4 }],
+        'stormNight/bold': [{ science: 8, morale: -14, dose: 2 }], 'stormNight/clever': [{ morale: 10, food: -3 }]
+      };
+      let hit = 0;
+      for (const d of DECISIONS.concat(STORM)) for (const c of d.choices) {
+        const o = OV[d.id + '/' + c.s]; if (!o) continue; hit++;
+        c.fx = o[0];
+        if (o[1] !== undefined) {
+          const og = c.g;
+          if (o[1] === null) delete c.g;
+          else {
+            const keep = (m, dflt) => (m && !/shortcut backfired/.test(m)) ? m : dflt;
+            c.g = { p: o[1][0], good: { fx: o[1][1], msg: keep(og && og.good.msg, 'It paid off.') }, bad: { fx: o[1][2], msg: keep(og && og.bad.msg, 'It backfired.') } };
+          }
+        }
+        if (o[2]) c.plan = o[2];
+      }
+      window.__DEC_REBAL = hit;
+    })();
     const CRISES = DECISIONS; // kept for older tests / tools
 
     // ---------- helpers ----------
@@ -6689,7 +6851,7 @@ body:not(.kids) #kids{display:none!important}
 
           if (document.pointerLockElement === renderer.domElement) {
             if (hoveredGroup) { setGroupHighlight(hoveredGroup, false); hoveredGroup = null; }
-            if (!isAnyModalOpen() && hits.length > 0 && hits[0].distance <= (hits[0].object.userData.kind === 'door' ? 3.2 : 9.5) && doorOk(hits[0].object.userData)) {
+            if (!isAnyModalOpen() && hits.length > 0 && hits[0].distance <= (hits[0].object.userData.kind === 'door' ? 3.2 : reachOf(hits[0].object.userData, 9.5)) && doorOk(hits[0].object.userData)) {
               const data = hits[0].object.userData;
               state.fpsTargetedObject = data;
               hoveredGroup = data.visualGroup;
@@ -6700,10 +6862,12 @@ body:not(.kids) #kids{display:none!important}
             } else {
               state.fpsTargetedObject = null;
               fpsReticleEl.classList.remove('locked-target');
-              fpsPromptEl.classList.remove('visible');
+              if (state.insideBuilding && !isAnyModalOpen() && hits.length > 0 && hits[0].distance <= 9.5 && hits[0].object.userData.kind === 'wall-button') {
+                const tx = `WALK CLOSER // ${hits[0].object.userData.label}`; if (fpsPromptEl.textContent !== tx) fpsPromptEl.textContent = tx; fpsPromptEl.classList.add('visible');
+              } else fpsPromptEl.classList.remove('visible');
             }
           } else {
-            state.fpsTargetedObject = (!isAnyModalOpen() && hits.length > 0 && hits[0].distance <= (hits[0].object.userData.kind === 'door' ? 3.2 : 9.5) && doorOk(hits[0].object.userData)) ? hits[0].object.userData : null;
+            state.fpsTargetedObject = (!isAnyModalOpen() && hits.length > 0 && hits[0].distance <= (hits[0].object.userData.kind === 'door' ? 3.2 : reachOf(hits[0].object.userData, 9.5)) && doorOk(hits[0].object.userData)) ? hits[0].object.userData : null;
             fpsReticleEl.classList.toggle('locked-target', !!state.fpsTargetedObject);
             if (state.fpsTargetedObject) {
               { const tx = `[E] OR CLICK // ${state.fpsTargetedObject.label}`; if (fpsPromptEl.textContent !== tx) fpsPromptEl.textContent = tx; }
